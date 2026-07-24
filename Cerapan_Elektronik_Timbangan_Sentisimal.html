@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cerapan Elektronik - Pengujian Timbangan Sentisimal</title>
+<style>
+  :root{
+    --navy:#1e3a5f;
+    --navy-dark:#122841;
+    --paper:#ffffff;
+    --bg:#eef1f5;
+    --line:#c7cfda;
+    --line-strong:#8fa0b8;
+    --sah:#1a7a3c;
+    --sah-bg:#e6f6ec;
+    --batal:#b3261e;
+    --batal-bg:#fdecea;
+    --amber:#8a6100;
+    --amber-bg:#fff6e0;
+    --mono: "Courier New", monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background:var(--bg);
+    color:#1c2733;
+    font-size:13px;
+    line-height:1.4;
+  }
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:var(--navy-dark);
+    color:#fff;
+    padding:10px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:8px;
+  }
+  .topbar h1{font-size:15px; margin:0; font-weight:600; letter-spacing:.3px;}
+  .topbar .sub{font-size:11px; opacity:.75;}
+  .btns{display:flex; gap:8px; flex-wrap:wrap;}
+  button{
+    cursor:pointer; border:none; border-radius:5px; padding:8px 14px;
+    font-size:12px; font-weight:600; letter-spacing:.2px;
+  }
+  .btn-primary{background:#2f6fed; color:#fff;}
+  .btn-primary:hover{background:#255dcb;}
+  .btn-ghost{background:#2c4a6b; color:#fff;}
+  .btn-ghost:hover{background:#375d86;}
+  .btn-danger{background:#b3261e; color:#fff;}
+  .btn-danger:hover{background:#8f1e18;}
+  .status-chip{font-size:11px; background:#274a2c; color:#bdf5c6; padding:4px 10px; border-radius:12px; display:none;}
+  .status-chip.show{display:inline-block;}
+
+  .wrap{max-width:1180px; margin:18px auto 60px; padding:0 14px;}
+  .sheet{
+    background:var(--paper);
+    border:1px solid var(--line-strong);
+    border-radius:6px;
+    padding:22px 26px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(20,30,50,.08);
+  }
+  .doc-title{text-align:center; margin-bottom:18px;}
+  .doc-title h2{margin:4px 0 2px; font-size:19px; color:var(--navy-dark); letter-spacing:.4px;}
+  .doc-title .sub2{font-size:12px; color:#5a6b80;}
+
+  .kop-surat{
+    display:flex; align-items:center; gap:14px;
+    padding-bottom:8px; margin-bottom:2px;
+    border-bottom:3px solid var(--navy-dark);
+  }
+  .kop-surat img.kop-logo{width:64px; height:auto; flex-shrink:0;}
+  .kop-surat .kop-text{flex:1; text-align:center;}
+  .kop-surat .kop-text .l1{font-size:15px; font-weight:800; color:var(--navy-dark); letter-spacing:.3px;}
+  .kop-surat .kop-text .l2{font-size:14px; font-weight:800; color:var(--navy-dark); letter-spacing:.3px;}
+  .kop-surat .kop-text .l3{font-size:13px; font-weight:700; color:var(--navy-dark);}
+  .kop-surat .kop-text .l4{font-size:10.5px; color:#4a5a6d; margin-top:2px;}
+  .form-code{
+    font-size:10px; color:#5a6b80; text-align:right; margin:4px 0 14px;
+    letter-spacing:.3px;
+  }
+  .form-code b{color:var(--navy-dark);}
+
+  .section-head{
+    background:var(--navy);
+    color:#fff;
+    font-weight:700;
+    font-size:12.5px;
+    letter-spacing:.6px;
+    padding:8px 12px;
+    margin:22px 0 0;
+    border-radius:4px 4px 0 0;
+  }
+  .section-body{
+    border:1px solid var(--line-strong); border-top:none;
+    border-radius:0 0 4px 4px;
+    padding:14px;
+  }
+  .sub-head{
+    font-weight:700; font-size:12.5px; color:var(--navy-dark);
+    margin:16px 0 6px; padding:6px 10px; background:#eaf0f8; border-left:4px solid var(--navy);
+    border-radius:3px;
+  }
+  .sub-head .idx{opacity:.7; font-weight:600;}
+  .note{font-size:11px; color:#68788c; font-style:italic; margin:2px 0 8px;}
+  .langkah-box{
+    background:#f6f8fb; border:1px dashed var(--line-strong); border-radius:5px;
+    padding:8px 10px; font-size:11.5px; color:#33465c; margin-bottom:8px;
+  }
+  .langkah-box b{color:var(--navy-dark);}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:0 24px;}
+  .field-row{display:grid; grid-template-columns:190px 14px 1fr; gap:2px; align-items:center; margin-bottom:7px;}
+  .field-row label{font-size:12px; color:#33465c; font-weight:600;}
+  .field-row .colon{text-align:center; color:#8090a3;}
+  input[type=text], input[type=date], input[type=number], textarea, select{
+    width:100%; padding:5px 7px; border:1px solid var(--line-strong); border-radius:4px;
+    font-size:12.5px; font-family:inherit; background:#fbfcfe;
+  }
+  input:focus, textarea:focus, select:focus{outline:2px solid #2f6fed55; border-color:#2f6fed;}
+  textarea{resize:vertical; min-height:30px;}
+
+  .radio-group{display:flex; gap:14px; align-items:center; flex-wrap:wrap;}
+  .radio-group label{font-weight:500; font-size:12.5px; display:flex; align-items:center; gap:5px; color:#33465c;}
+
+  table.datatable{width:100%; border-collapse:collapse; margin-top:4px; font-size:11.3px;}
+  table.datatable th, table.datatable td{
+    border:1px solid var(--line-strong); padding:5px 6px; text-align:center; vertical-align:middle;
+  }
+  table.datatable th{background:#eaf0f8; color:var(--navy-dark); font-weight:700; font-size:10.8px;}
+  table.datatable td.label-cell{text-align:left; font-weight:600; background:#f6f8fb;}
+  table.datatable td.txt-cell{text-align:left; font-size:11px;}
+  .result-cell{font-weight:800; font-size:11.5px; border-radius:3px; padding:4px !important;}
+  .result-sah{background:var(--sah-bg); color:var(--sah);}
+  .result-batal{background:var(--batal-bg); color:var(--batal);}
+  .result-pending{background:#f1f3f6; color:#98a3b3;}
+  .pilih-radio{transform:scale(1.15);}
+
+  .petugas-block{border:1px dashed var(--line-strong); border-radius:5px; padding:10px; margin-bottom:8px; background:#fbfcfe;}
+  .petugas-block .ptitle{font-size:11.5px; font-weight:700; color:var(--navy); margin-bottom:6px;}
+
+  .checklist-row{display:grid; grid-template-columns:1fr auto auto 1fr; gap:8px; align-items:center; padding:6px 4px; border-bottom:1px solid var(--line);}
+  .checklist-row:last-child{border-bottom:none;}
+  .checklist-row .qtext{font-size:12px;}
+  .checklist-row .yn{display:flex; gap:10px; align-items:center; font-size:12px;}
+
+  .hasil-indicator{
+    display:flex; align-items:center; gap:10px; margin-top:8px; padding:8px 10px;
+    background:#f6f8fb; border-radius:5px; border:1px solid var(--line); font-size:12px;
+  }
+  .hasil-indicator b{font-size:14px;}
+  .hasil-indicator .val-sah{color:var(--sah);}
+  .hasil-indicator .val-batal{color:var(--batal);}
+  .hasil-indicator .val-pending{color:#98a3b3;}
+
+  .summary-box{
+    display:flex; gap:14px; flex-wrap:wrap; margin-top:8px; padding:10px; background:#f6f8fb; border-radius:5px; border:1px solid var(--line);
+  }
+  .summary-box .item{font-size:12px;}
+  .summary-box .item b{display:block; font-size:15px;}
+
+  .ttd-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:10px;}
+  .ttd-card{border:1px solid var(--line-strong); border-radius:6px; padding:12px; background:#fbfcfe;}
+  .ttd-card h4{margin:0 0 8px; font-size:12.5px; color:var(--navy-dark);}
+  canvas.sigpad{
+    border:1.5px dashed var(--line-strong); border-radius:5px; width:100%; height:110px; background:#fff; touch-action:none; cursor:crosshair;
+  }
+  .sig-actions{display:flex; justify-content:space-between; margin-top:6px;}
+  .sig-actions button{padding:4px 10px; font-size:11px;}
+  .sig-status{font-size:10.5px; color:#8a6100; margin-top:4px;}
+  .sig-status.ok{color:var(--sah);}
+  .final-hasil{
+    margin-top:16px; padding:14px; border-radius:6px; text-align:center; font-size:15px; font-weight:800;
+    border:2px solid var(--line-strong); background:#f6f8fb; color:#4a5568;
+  }
+  .final-hasil.sah{border-color:var(--sah); background:var(--sah-bg); color:var(--sah);}
+  .final-hasil.batal{border-color:var(--batal); background:var(--batal-bg); color:var(--batal);}
+
+  .tera-only{border-left:4px solid var(--amber); background:#fffdf6;}
+  .tera-only-tag{display:inline-block; font-size:10px; font-weight:700; color:var(--amber); background:var(--amber-bg); padding:2px 8px; border-radius:10px; margin-left:8px;}
+  .hidden{display:none !important;}
+
+  @media (max-width:820px){
+    .grid2{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:140px 10px 1fr;}
+    .ttd-grid{grid-template-columns:1fr;}
+  }
+
+  @media print{
+    .topbar, .btns, .no-print{display:none !important;}
+    body{background:#fff; font-size:11px;}
+    .sheet{box-shadow:none; border:none; padding:0; page-break-after:always;}
+    .wrap{max-width:100%; margin:0; padding:0;}
+    input, textarea, select{border:1px solid #999; background:#fff !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>CERAPAN ELEKTRONIK — PENGUJIAN TIMBANGAN SENTISIMAL</h1>
+    <div class="sub">Formulir digital tera / tera ulang timbangan sentisimal (neraca bobot ingsut / gandar)</div>
+  </div>
+  <div class="btns">
+    <span class="status-chip" id="statusChip">Tersimpan</span>
+    <button class="btn-ghost" onclick="saveForm()">💾 Simpan</button>
+    <button class="btn-ghost" onclick="loadForm()">📂 Muat Data</button>
+    <button class="btn-danger" onclick="clearForm()">🗑 Reset</button>
+    <button class="btn-primary" onclick="window.print()">🖨 Cetak / Simpan PDF</button>
+  </div>
+</div>
+
+<div class="wrap">
+<form id="cerapanForm" onsubmit="return false;">
+
+  <!-- ===================== HALAMAN 1: DATA & IDENTITAS ===================== -->
+  <div class="sheet">
+    <div class="kop-surat">
+      <div class="kop-text">
+        <div class="l1">PEMERINTAH KOTA KUPANG</div>
+        <div class="l2">DINAS PERINDUSTRIAN DAN PERDAGANGAN</div>
+        <div class="l3">BIDANG KEMETROLOGIAN</div>
+        <div class="l4">Jalan Perintis Kemerdekaan III Kelapa Lima - Kupang, Kode Pos 85228, email: bidmetkupangkota@gmail.com</div>
+      </div>
+    </div>
+    <div class="form-code">Kode Formulir: <input type="text" name="kode_formulir" style="width:160px; text-align:right; display:inline-block; padding:2px 6px; font-size:10px;" placeholder="isi kode formulir"></div>
+
+    <div class="doc-title">
+      <h2>CERAPAN PENGUJIAN TIMBANGAN SENTISIMAL</h2>
+      <div class="sub2">Pengujian dilakukan dalam rangka:
+        <label style="margin-left:10px;"><input type="radio" name="rangka" value="TERA" checked onchange="toggleTeraSections()"> TERA</label>
+        <label style="margin-left:10px;"><input type="radio" name="rangka" value="TERA ULANG" onchange="toggleTeraSections()"> TERA ULANG</label>
+      </div>
+    </div>
+
+    <div class="section-head">DATA PENGUJIAN</div>
+    <div class="section-body">
+      <div class="grid2">
+        <div>
+          <div class="field-row"><label>Pemilik UTTP</label><span class="colon">:</span><input type="text" name="nama_pemilik"></div>
+          <div class="field-row"><label>Alamat Pemilik</label><span class="colon">:</span><input type="text" name="alamat_pemilik"></div>
+          <div class="field-row"><label>Tanggal Pengujian</label><span class="colon">:</span><input type="date" name="tanggal_pengujian"></div>
+          <div class="field-row"><label>Metode Pengujian</label><span class="colon">:</span><input type="text" name="metode_pengujian" placeholder="mis. Langsung / Substitusi"></div>
+          <div class="field-row"><label>Lokasi Pengujian</label><span class="colon">:</span><input type="text" name="lokasi_pengujian"></div>
+        </div>
+        <div>
+          <div class="ptitle" style="font-weight:700; font-size:12px; color:var(--navy-dark); margin-bottom:6px;">Petugas Penguji</div>
+          <div class="petugas-block">
+            <div class="field-row"><label>1. Nama</label><span class="colon">:</span><input type="text" name="petugas1_nama" onkeyup="syncPetugasName(1)"></div>
+            <div class="field-row"><label>NIP</label><span class="colon">:</span><input type="text" name="petugas1_nip" onkeyup="syncPetugasNip(1)"></div>
+          </div>
+          <div class="petugas-block">
+            <div class="field-row"><label>2. Nama</label><span class="colon">:</span><input type="text" name="petugas2_nama" onkeyup="syncPetugasName(2)"></div>
+            <div class="field-row"><label>NIP</label><span class="colon">:</span><input type="text" name="petugas2_nip" onkeyup="syncPetugasNip(2)"></div>
+          </div>
+          <div class="petugas-block">
+            <div class="field-row"><label>3. Nama</label><span class="colon">:</span><input type="text" name="petugas3_nama" onkeyup="syncPetugasName(3)"></div>
+            <div class="field-row"><label>NIP</label><span class="colon">:</span><input type="text" name="petugas3_nip" onkeyup="syncPetugasNip(3)"></div>
+          </div>
+          <div class="petugas-block">
+            <div class="field-row"><label>4. Nama</label><span class="colon">:</span><input type="text" name="petugas4_nama" onkeyup="syncPetugasName(4)"></div>
+            <div class="field-row"><label>NIP</label><span class="colon">:</span><input type="text" name="petugas4_nip" onkeyup="syncPetugasNip(4)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">IDENTITAS UTTP</div>
+    <div class="section-body">
+      <div class="grid2">
+        <div>
+          <div class="field-row"><label>Kapasitas Maksimum (Maks)</label><span class="colon">:</span><input type="text" name="kapasitas_maks" id="kapasitas_maks" placeholder="mis. 500 kg"></div>
+          <div class="field-row"><label>Kapasitas Minimum (Min)</label><span class="colon">:</span><input type="text" name="kapasitas_min" placeholder="mis. 10 kg"></div>
+          <div class="field-row"><label>Interval Skala Terkecil (d)</label><span class="colon">:</span><input type="text" name="nilai_d" placeholder="mis. 0,1 kg"></div>
+          <div class="field-row"><label>Interval Skala Verifikasi (e)</label><span class="colon">:</span><input type="text" name="nilai_e"></div>
+          <div class="field-row"><label>Kelas Keakurasian</label><span class="colon">:</span><input type="text" name="kelas_keakurasian" placeholder="mis. III"></div>
+          <div class="field-row"><label>BKD Acuan</label><span class="colon">:</span><input type="text" name="bkd_acuan" placeholder="nilai BKD yang dipakai sbg acuan pada uji di bawah"></div>
+        </div>
+        <div>
+          <div class="field-row"><label>Merek</label><span class="colon">:</span><input type="text" name="merek"></div>
+          <div class="field-row"><label>Negara Pembuat</label><span class="colon">:</span><input type="text" name="negara_pembuat"></div>
+          <div class="field-row"><label>Tipe / Model</label><span class="colon">:</span><input type="text" name="tipe"></div>
+          <div class="field-row"><label>Nomor Seri</label><span class="colon">:</span><input type="text" name="no_seri"></div>
+        </div>
+      </div>
+      <div class="note">Catatan: untuk menguji timbangan Sentisimal, ATS yang digunakan minimal memenuhi kelas M2.</div>
+    </div>
+
+    <div class="section-head">PEMERIKSAAN VISUAL</div>
+    <div class="section-body" id="visualChecklist">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- ===================== HALAMAN 2: PENYETELAN NOL, KEBENARAN, KEPEKAAN ===================== -->
+  <div class="sheet">
+    <div class="section-head">HASIL PENGUJIAN 1 — PENYETELAN NOL</div>
+    <div class="section-body">
+      <div class="langkah-box">Pastikan timbangan dalam keadaan tanpa muatan. Amati posisi jarum penunjuk terhadap tolok.</div>
+      <div class="grid2" style="max-width:760px;">
+        <div class="field-row"><label>Posisi Jarum Terhadap Tolok</label><span class="colon">:</span>
+          <select name="nol_posisi" id="nol_posisi" onchange="updateNolTindakan()">
+            <option value="">- pilih -</option>
+            <option value="1">1. Setimbang (jarum sejajar dengan tolok)</option>
+            <option value="2">2. Tidak setimbang (posisi jarum berada di bawah tolok)</option>
+            <option value="3">3. Tidak setimbang (posisi jarum berada di atas tolok)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row" style="max-width:760px;"><label>Keterangan / Tindakan</label><span class="colon">:</span><input type="text" id="nol_keterangan" disabled placeholder="akan terisi otomatis sesuai posisi jarum"></div>
+      <div class="field-row" style="max-width:640px; margin-top:6px;"><label>Hasil Penyetelan Nol</label><span class="colon">:</span>
+        <div class="radio-group">
+          <label><input type="radio" name="hasil_nol" value="SAH" onchange="updateRekap()"> SAH</label>
+          <label><input type="radio" name="hasil_nol" value="BATAL" onchange="updateRekap()"> BATAL</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">HASIL PENGUJIAN 2 — PENGUJIAN KEBENARAN (Titik Uji: Maks)</div>
+    <div class="section-body">
+      <div class="langkah-box"><b>Langkah:</b> Naikkan ATS sebesar Maks pada lantai penerima muatan, kemudian naikkan ATS sebesar 1/100 Maks pada piring anak timbangan. Pilih baris yang sesuai dengan kondisi hasil pengamatan.</div>
+      <div id="tblKebenaran"></div>
+      <div class="hasil-indicator">Hasil Pengujian Kebenaran: <b id="hasil_kebenaran" class="val-pending">-</b></div>
+    </div>
+
+    <div class="section-head">HASIL PENGUJIAN 3 — PENGUJIAN KEPEKAAN</div>
+    <div class="section-body">
+      <div class="langkah-box"><b>Langkah:</b> Dilakukan bersamaan dengan pengujian kebenaran. Pastikan timbangan dengan muatan ujinya berada pada posisi setimbang, lalu tambahkan imbuh sebesar 1 BKD pada muatan uji. Pilih hasil pengamatan.</div>
+      <div id="tblKepekaan"></div>
+      <div class="hasil-indicator">Hasil Pengujian Kepekaan: <b id="hasil_kepekaan" class="val-pending">-</b></div>
+    </div>
+  </div>
+
+  <!-- ===================== HALAMAN 3: KEMAMPUAN ULANG & EKSENTRISITAS ===================== -->
+  <div class="sheet">
+    <div class="section-head">HASIL PENGUJIAN 4 — PENGUJIAN KEMAMPUAN ULANG</div>
+    <div class="section-body">
+      <div class="langkah-box"><b>Langkah:</b> Naikkan ATS sebesar Maks pada lantai penerima muatan, kemudian naikkan ATS sebesar 1/100 Maks pada piring anak timbangan. Diulang 3 kali.</div>
+      <div id="ulangContainer"></div>
+      <div class="hasil-indicator">Hasil Keseluruhan Kemampuan Ulang: <b id="hasil_ulang" class="val-pending">-</b></div>
+    </div>
+
+    <div class="section-head">HASIL PENGUJIAN 5 — PENGUJIAN EKSENTRISITAS</div>
+    <div class="section-body">
+      <div class="langkah-box"><b>Langkah:</b> Geser bobot ingsut tepat pada skala maksimum gandar utama, lalu naikkan ATS sebesar nilai maksimum gandar utama pada penerima muatan pada masing-masing dari 4 titik uji (kuadran), dimulai dari kuadran 1.</div>
+      <div class="note">Timbangan dinyatakan SAH apabila hasil pengujian untuk ke-4 kuadran adalah SAH.</div>
+      <div id="eksContainer"></div>
+      <div class="hasil-indicator">Hasil Keseluruhan Eksentrisitas: <b id="hasil_eks" class="val-pending">-</b></div>
+    </div>
+  </div>
+
+  <!-- ===================== HALAMAN 4: KEMIRINGAN & KEBENARAN GANDAR (UNTUK TERA) ===================== -->
+  <div class="sheet tera-only" id="halamanTeraOnly">
+    <div class="section-head">HASIL PENGUJIAN 6 — PENGUJIAN KEMIRINGAN <span class="tera-only-tag">UNTUK TERA</span></div>
+    <div class="section-body">
+      <div class="langkah-box">Posisikan timbangan dalam keadaan miring sebesar 50/1000. <b>Langkah:</b> Naikkan ATS sekitar 50% maksimum pada lantai penerima muatan, kemudian naikkan ATS sebesar 1/100 muatan pada piring anak timbangan.</div>
+      <div id="tblKemiringan"></div>
+      <div class="hasil-indicator">Hasil Pengujian Kemiringan: <b id="hasil_kemiringan" class="val-pending">-</b></div>
+    </div>
+
+    <div class="section-head">HASIL PENGUJIAN 7 — PENGUJIAN KEBENARAN GANDAR <span class="tera-only-tag">UNTUK TERA</span></div>
+    <div class="section-body">
+      <div class="langkah-box"><b>Langkah:</b> Geser bobot ingsut tepat pada skala maksimum gandar utama, kemudian naikkan ATS sebesar nilai maksimum gandar utama pada penerima muatan.</div>
+      <div id="tblGandar"></div>
+      <div class="hasil-indicator">Hasil Pengujian Kebenaran Gandar: <b id="hasil_gandar" class="val-pending">-</b></div>
+    </div>
+  </div>
+
+  <!-- ===================== HALAMAN 5: KESIMPULAN & TTD ===================== -->
+  <div class="sheet">
+    <div class="section-head">REKAPITULASI & KESIMPULAN AKHIR</div>
+    <div class="section-body">
+      <div class="note">Ringkasan otomatis dari seluruh hasil pengujian di atas. Pengujian Kemiringan dan Kebenaran Gandar hanya berlaku untuk Tera.</div>
+      <div class="summary-box" id="rekapBox"></div>
+      <div class="final-hasil" id="finalHasilBox">Kesimpulan akhir: belum lengkap</div>
+      <div class="field-row" style="max-width:640px; margin-top:12px;">
+        <label>Catatan / Keterangan Tambahan</label><span class="colon">:</span>
+        <textarea name="catatan_akhir" rows="3"></textarea>
+      </div>
+    </div>
+
+    <div class="section-head">TANDA TANGAN ELEKTRONIK</div>
+    <div class="section-body">
+      <div class="note">Bubuhkan tanda tangan pada kotak di bawah ini menggunakan mouse / jari (touchscreen). Nama dan NIP diambil otomatis dari data petugas pada Data Pengujian.</div>
+      <div class="ttd-grid" id="ttdGrid">
+        <!-- 4 petugas cards + pemilik card filled by JS -->
+      </div>
+    </div>
+  </div>
+
+</form>
+</div>
+
+<script>
+/* ---------- DATA STRUCTURES ---------- */
+const visualItems = [
+  "Terdapat Tanda Tera Sebelumnya Untuk Tera Ulang",
+  "Tanda Skala Dan Nilai Penunjukan Skala Dapat Terlihat Dengan Jelas",
+  "Timbangan Bersih, Kering, & Tidak Berkarat",
+  "Sesuai Dengan Persetujuan Tipe Yang Berlaku",
+  "Bahan & Konstruksi Sesuai (untuk Tera) Dan Tidak Ada Alat Tambahan",
+  "Pastikan Keadaan Timbangan Dalam Keadaan Datar"
+];
+
+/* Decision-table row datasets, transcribed from formulir cerapan Sentisimal */
+const kebenaranRows = [
+  {posisi:"1. Setimbang", lanjutan:"-", posisiLanjut:"-", hasil:"SAH", e:"0"},
+  {posisi:"2. Tidak setimbang (jarum penunjuk menjungkit ke bawah)", lanjutan:"Beri imbuh sebesar BKD pada lantai muatan", posisiLanjut:"Setimbang", hasil:"SAH", e:"+1 BKD"},
+  {posisi:"2. Tidak setimbang (jarum penunjuk menjungkit ke bawah)", lanjutan:"Beri imbuh sebesar BKD pada lantai muatan", posisiLanjut:"Tidak sampai setimbang", hasil:"BATAL", e:"> +1 BKD"},
+  {posisi:"2. Tidak setimbang (jarum penunjuk menjungkit ke bawah)", lanjutan:"Beri imbuh sebesar BKD pada lantai muatan", posisiLanjut:"Melewati titik setimbang", hasil:"SAH", e:"< +1 BKD"},
+  {posisi:"3. Tidak setimbang (jarum penunjuk menjungkit ke atas)", lanjutan:"Beri imbuh sebesar 1/100 BKD pada piring anak timbangan", posisiLanjut:"Setimbang", hasil:"SAH", e:"+1 BKD"},
+  {posisi:"3. Tidak setimbang (jarum penunjuk menjungkit ke atas)", lanjutan:"Beri imbuh sebesar 1/100 BKD pada piring anak timbangan", posisiLanjut:"Tidak sampai setimbang", hasil:"BATAL", e:"> +1 BKD"},
+  {posisi:"3. Tidak setimbang (jarum penunjuk menjungkit ke atas)", lanjutan:"Beri imbuh sebesar 1/100 BKD pada piring anak timbangan", posisiLanjut:"Melewati titik setimbang", hasil:"SAH", e:"< +1 BKD"},
+];
+
+const ulangRows = [
+  {posisi:"1. Setimbang", lanjutan:"-", posisiLanjut:"-", hasil:"SAH", e:"0"},
+  {posisi:"2. Tidak setimbang (jarum penunjuk menjungkit ke bawah)", lanjutan:"Beri imbuh sebesar BKD pada lantai muatan", posisiLanjut:"Setimbang", hasil:"SAH", e:"0 < E ≤ +BKD"},
+  {posisi:"2. Tidak setimbang (jarum penunjuk menjungkit ke bawah)", lanjutan:"Beri imbuh sebesar BKD pada lantai muatan", posisiLanjut:"Tidak sampai setimbang", hasil:"BATAL", e:"> +1 BKD"},
+  {posisi:"2. Tidak setimbang (jarum penunjuk menjungkit ke bawah)", lanjutan:"Beri imbuh sebesar BKD pada lantai muatan", posisiLanjut:"Melewati titik setimbang", hasil:"SAH", e:"0 < E ≤ +BKD"},
+  {posisi:"3. Tidak setimbang (jarum penunjuk menjungkit ke atas)", lanjutan:"Geser bobot ingsut ke kanan sebesar 1 BKD", posisiLanjut:"Setimbang", hasil:"SAH", e:"-BKD ≤ E < 0"},
+  {posisi:"3. Tidak setimbang (jarum penunjuk menjungkit ke atas)", lanjutan:"Geser bobot ingsut ke kanan sebesar 1 BKD", posisiLanjut:"Tidak sampai setimbang", hasil:"BATAL", e:"> +1 BKD"},
+  {posisi:"3. Tidak setimbang (jarum penunjuk menjungkit ke atas)", lanjutan:"Geser bobot ingsut ke kanan sebesar 1 BKD", posisiLanjut:"Melewati titik setimbang", hasil:"SAH", e:"-BKD ≤ E < 0"},
+];
+
+const eksGandarRows = [
+  {posisi:"1. Setimbang", lanjutan:"-", posisiLanjut:"-", hasil:"SAH", e:"0"},
+  {posisi:"2. Tidak setimbang (jarum penunjuk menjungkit ke bawah)", lanjutan:"Beri imbuh sebesar BKD pada lantai muatan", posisiLanjut:"Setimbang", hasil:"SAH", e:"0 < E ≤ +BKD"},
+  {posisi:"2. Tidak setimbang (jarum penunjuk menjungkit ke bawah)", lanjutan:"Beri imbuh sebesar BKD pada lantai muatan", posisiLanjut:"Tidak sampai setimbang", hasil:"BATAL", e:"> +1 BKD"},
+  {posisi:"2. Tidak setimbang (jarum penunjuk menjungkit ke bawah)", lanjutan:"Beri imbuh sebesar BKD pada lantai muatan", posisiLanjut:"Melewati titik setimbang", hasil:"SAH", e:"0 < E ≤ +BKD"},
+  {posisi:"3. Tidak setimbang (jarum penunjuk menjungkit ke atas)", lanjutan:"Tambahkan imbuh sebesar 1/100 BKD pada piring anak timbangan", posisiLanjut:"Setimbang", hasil:"SAH", e:"-BKD ≤ E < 0"},
+  {posisi:"3. Tidak setimbang (jarum penunjuk menjungkit ke atas)", lanjutan:"Tambahkan imbuh sebesar 1/100 BKD pada piring anak timbangan", posisiLanjut:"Tidak sampai setimbang", hasil:"BATAL", e:"> +1 BKD"},
+  {posisi:"3. Tidak setimbang (jarum penunjuk menjungkit ke atas)", lanjutan:"Tambahkan imbuh sebesar 1/100 BKD pada piring anak timbangan", posisiLanjut:"Melewati titik setimbang", hasil:"SAH", e:"-BKD ≤ E < 0"},
+];
+
+const kemiringanRows = eksGandarRows; // struktur & hasil sama persis dgn tabel gandar/eksentrisitas pada dokumen acuan
+
+const kepekaanRows = [
+  {amati:"Jarum bergerak minimal 2 mm dari posisi semula", hasil:"SAH"},
+  {amati:"Jarum bergerak kurang dari 2 mm dari posisi semula", hasil:"BATAL"},
+  {amati:"Jarum tidak bergerak dari posisi semula", hasil:"BATAL"},
+];
+
+const nolTindakan = {
+  "1": "Penunjukan tepat nol",
+  "2": "Lakukan penyetelan nol dengan memutar sekrup pada bagian bobot lawan ke arah kanan sampai jarum penunjuk sejajar dengan tolok",
+  "3": "Lakukan penyetelan nol dengan memutar sekrup pada bagian bobot lawan ke arah kiri sampai jarum penunjuk sejajar dengan tolok"
+};
+
+/* ---------- INIT: visual checklist ---------- */
+function initVisual(){
+  const box = document.getElementById('visualChecklist');
+  let html = '';
+  visualItems.forEach((txt,i)=>{
+    html += `<div class="checklist-row">
+      <div class="qtext">${i+1}. ${txt}</div>
+      <div class="yn"><label><input type="radio" name="visual_${i}" value="Ya"> Ya</label></div>
+      <div class="yn"><label><input type="radio" name="visual_${i}" value="Tidak"> Tidak</label></div>
+      <input type="text" name="visual_ket_${i}" placeholder="Keterangan">
+    </div>`;
+  });
+  box.innerHTML = html;
+}
+
+/* ---------- Generic decision-table builder (Posisi/Lanjutan/PosisiLanjut/Hasil/E) ---------- */
+function buildDecisionTable(containerId, rows, groupName, onChangeFn){
+  let html = `<table class="datatable"><thead><tr>
+    <th style="width:38px;">Pilih</th>
+    <th>Posisi Jarum Terhadap Tolok</th>
+    <th>Langkah Lanjutan</th>
+    <th>Posisi Jarum Setelah Langkah Lanjutan</th>
+    <th style="width:70px;">Hasil</th>
+    <th style="width:110px;">Kesalahan (E)</th>
+  </tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    const cls = r.hasil==='SAH' ? 'result-sah' : 'result-batal';
+    html += `<tr>
+      <td><input type="radio" class="pilih-radio" name="${groupName}" value="${i}" onchange="${onChangeFn}(this)"></td>
+      <td class="txt-cell">${r.posisi}</td>
+      <td class="txt-cell">${r.lanjutan}</td>
+      <td class="txt-cell">${r.posisiLanjut}</td>
+      <td class="result-cell ${cls}">${r.hasil}</td>
+      <td>${r.e}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function buildKepekaanTable(containerId, groupName, onChangeFn){
+  let html = `<table class="datatable"><thead><tr>
+    <th style="width:38px;">Pilih</th>
+    <th>Pengamatan</th>
+    <th style="width:80px;">Hasil</th>
+  </tr></thead><tbody>`;
+  kepekaanRows.forEach((r,i)=>{
+    const cls = r.hasil==='SAH' ? 'result-sah' : 'result-batal';
+    html += `<tr>
+      <td><input type="radio" class="pilih-radio" name="${groupName}" value="${i}" onchange="${onChangeFn}(this)"></td>
+      <td class="txt-cell">${r.amati}</td>
+      <td class="result-cell ${cls}">${r.hasil}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function setHasilIndicator(elId, hasil){
+  const el = document.getElementById(elId);
+  el.textContent = hasil || '-';
+  el.className = hasil==='SAH' ? 'val-sah' : (hasil==='BATAL' ? 'val-batal' : 'val-pending');
+}
+
+/* ---------- Penyetelan Nol ---------- */
+function updateNolTindakan(){
+  const val = document.getElementById('nol_posisi').value;
+  document.getElementById('nol_keterangan').value = nolTindakan[val] || '';
+}
+
+/* ---------- Pengujian Kebenaran (single point, Maks) ---------- */
+function onKebenaranChange(radio){
+  const r = kebenaranRows[parseInt(radio.value)];
+  setHasilIndicator('hasil_kebenaran', r.hasil);
+  updateRekap();
+}
+
+/* ---------- Pengujian Kepekaan ---------- */
+function onKepekaanChange(radio){
+  const r = kepekaanRows[parseInt(radio.value)];
+  setHasilIndicator('hasil_kepekaan', r.hasil);
+  updateRekap();
+}
+
+/* ---------- Pengujian Kemampuan Ulang (3x) ---------- */
+function buildUlangContainer(){
+  let html = '';
+  for(let i=1;i<=3;i++){
+    html += `<div class="sub-head"><span class="idx">Pengulangan ke-${i}</span></div><div id="tblUlang${i}"></div>
+    <div class="hasil-indicator">Hasil Pengulangan ${i}: <b id="hasil_ulang_${i}" class="val-pending">-</b></div>`;
+  }
+  document.getElementById('ulangContainer').innerHTML = html;
+  for(let i=1;i<=3;i++){
+    buildDecisionTable(`tblUlang${i}`, ulangRows, `ulang_${i}`, `onUlangChange${i}`);
+  }
+}
+function onUlangChangeGeneric(i, radio){
+  const r = ulangRows[parseInt(radio.value)];
+  setHasilIndicator(`hasil_ulang_${i}`, r.hasil);
+  recomputeUlangOverall();
+}
+function onUlangChange1(radio){ onUlangChangeGeneric(1, radio); }
+function onUlangChange2(radio){ onUlangChangeGeneric(2, radio); }
+function onUlangChange3(radio){ onUlangChangeGeneric(3, radio); }
+function recomputeUlangOverall(){
+  const vals = [1,2,3].map(i=>document.getElementById(`hasil_ulang_${i}`).textContent);
+  const filled = vals.filter(v=>v!=='-');
+  let hasil = null;
+  if(filled.length===3){
+    hasil = vals.includes('BATAL') ? 'BATAL' : 'SAH';
+  } else if(vals.includes('BATAL')){
+    hasil = 'BATAL';
+  }
+  setHasilIndicator('hasil_ulang', hasil);
+  updateRekap();
+}
+
+/* ---------- Pengujian Eksentrisitas (4 kuadran) ---------- */
+function buildEksContainer(){
+  let html = '';
+  for(let i=1;i<=4;i++){
+    html += `<div class="sub-head"><span class="idx">Kuadran ${i}</span></div><div id="tblEks${i}"></div>
+    <div class="hasil-indicator">Hasil Kuadran ${i}: <b id="hasil_eks_${i}" class="val-pending">-</b></div>`;
+  }
+  document.getElementById('eksContainer').innerHTML = html;
+  for(let i=1;i<=4;i++){
+    buildDecisionTable(`tblEks${i}`, eksGandarRows, `eks_${i}`, `onEksChange${i}`);
+  }
+}
+function onEksChangeGeneric(i, radio){
+  const r = eksGandarRows[parseInt(radio.value)];
+  setHasilIndicator(`hasil_eks_${i}`, r.hasil);
+  recomputeEksOverall();
+}
+function onEksChange1(radio){ onEksChangeGeneric(1, radio); }
+function onEksChange2(radio){ onEksChangeGeneric(2, radio); }
+function onEksChange3(radio){ onEksChangeGeneric(3, radio); }
+function onEksChange4(radio){ onEksChangeGeneric(4, radio); }
+function recomputeEksOverall(){
+  const vals = [1,2,3,4].map(i=>document.getElementById(`hasil_eks_${i}`).textContent);
+  const filled = vals.filter(v=>v!=='-');
+  let hasil = null;
+  if(filled.length===4){
+    hasil = vals.includes('BATAL') ? 'BATAL' : 'SAH';
+  } else if(vals.includes('BATAL')){
+    hasil = 'BATAL';
+  }
+  setHasilIndicator('hasil_eks', hasil);
+  updateRekap();
+}
+
+/* ---------- Pengujian Kemiringan (untuk Tera) ---------- */
+function onKemiringanChange(radio){
+  const r = kemiringanRows[parseInt(radio.value)];
+  setHasilIndicator('hasil_kemiringan', r.hasil);
+  updateRekap();
+}
+
+/* ---------- Pengujian Kebenaran Gandar (untuk Tera) ---------- */
+function onGandarChange(radio){
+  const r = eksGandarRows[parseInt(radio.value)];
+  setHasilIndicator('hasil_gandar', r.hasil);
+  updateRekap();
+}
+
+/* ---------- Toggle Tera-only sections ---------- */
+function toggleTeraSections(){
+  const rangka = document.querySelector('[name=rangka]:checked').value;
+  const box = document.getElementById('halamanTeraOnly');
+  if(rangka === 'TERA'){
+    box.classList.remove('hidden');
+  } else {
+    box.classList.add('hidden');
+  }
+  updateRekap();
+}
+
+/* ---------- Rekap ---------- */
+function updateRekap(){
+  const rangka = (document.querySelector('[name=rangka]:checked')||{}).value || 'TERA';
+  const r1 = (document.querySelector('[name=hasil_nol]:checked')||{}).value || null;
+  const r2v = document.getElementById('hasil_kebenaran').textContent;
+  const r2 = (r2v==='SAH'||r2v==='BATAL') ? r2v : null;
+  const r3v = document.getElementById('hasil_kepekaan').textContent;
+  const r3 = (r3v==='SAH'||r3v==='BATAL') ? r3v : null;
+  const r4v = document.getElementById('hasil_ulang').textContent;
+  const r4 = (r4v==='SAH'||r4v==='BATAL') ? r4v : null;
+  const r5v = document.getElementById('hasil_eks').textContent;
+  const r5 = (r5v==='SAH'||r5v==='BATAL') ? r5v : null;
+
+  const items = [
+    ['1. Penyetelan Nol', r1],
+    ['2. Kebenaran', r2],
+    ['3. Kepekaan', r3],
+    ['4. Kemampuan Ulang', r4],
+    ['5. Eksentrisitas', r5],
+  ];
+
+  if(rangka === 'TERA'){
+    const r6v = document.getElementById('hasil_kemiringan').textContent;
+    const r6 = (r6v==='SAH'||r6v==='BATAL') ? r6v : null;
+    const r7v = document.getElementById('hasil_gandar').textContent;
+    const r7 = (r7v==='SAH'||r7v==='BATAL') ? r7v : null;
+    items.push(['6. Kemiringan (Tera)', r6]);
+    items.push(['7. Kebenaran Gandar (Tera)', r7]);
+  }
+
+  let html='';
+  let anyEntered=false, anyBatal=false;
+  items.forEach(([label,val])=>{
+    if(val){
+      anyEntered = true;
+      if(val==='BATAL') anyBatal = true;
+    }
+    const color = val==='SAH' ? 'var(--sah)' : (val==='BATAL' ? 'var(--batal)' : '#98a3b3');
+    html += `<div class="item">${label}<b style="color:${color}">${val||'-'}</b></div>`;
+  });
+  document.getElementById('rekapBox').innerHTML = html;
+
+  const finalBox = document.getElementById('finalHasilBox');
+  if(!anyEntered){
+    finalBox.textContent = 'Kesimpulan akhir: belum lengkap';
+    finalBox.className='final-hasil';
+  } else if(anyBatal){
+    finalBox.textContent = 'KESIMPULAN AKHIR: BATAL';
+    finalBox.className='final-hasil batal';
+  } else {
+    finalBox.textContent = 'KESIMPULAN AKHIR: SAH (sementara — lengkapi semua bagian pengujian)';
+    finalBox.className='final-hasil sah';
+  }
+}
+
+/* ---------- Petugas name/NIP sync into signature cards ---------- */
+function syncPetugasName(n){
+  const val = document.querySelector(`[name=petugas${n}_nama]`).value;
+  const target = document.getElementById(`sig_nama_${n}`);
+  if(target) target.textContent = val || `Petugas ${n}`;
+}
+function syncPetugasNip(n){
+  const val = document.querySelector(`[name=petugas${n}_nip]`).value;
+  const target = document.getElementById(`sig_nip_${n}`);
+  if(target) target.textContent = 'NIP. ' + (val || '-');
+}
+
+/* ---------- Signature pads ---------- */
+const sigPads = {};
+function buildSignature(cardId, title){
+  return `<div class="ttd-card" id="${cardId}">
+    <h4>${title}</h4>
+    <div id="sig_nama_${cardId}" style="font-weight:700; font-size:12.5px;">-</div>
+    <div id="sig_nip_${cardId}" style="font-size:11px; color:#5a6b80; margin-bottom:6px;">-</div>
+    <canvas class="sigpad" id="canvas_${cardId}" width="400" height="120"></canvas>
+    <div class="sig-actions">
+      <button type="button" class="btn-ghost" style="background:#5a6b80" onclick="clearSig('${cardId}')">Hapus</button>
+      <span class="sig-status" id="sigstatus_${cardId}">Belum ditandatangani</span>
+    </div>
+  </div>`;
+}
+
+function initSignatures(){
+  const grid = document.getElementById('ttdGrid');
+  grid.innerHTML =
+    buildSignature('1','Petugas 1') +
+    buildSignature('2','Petugas 2') +
+    buildSignature('3','Petugas 3') +
+    buildSignature('4','Petugas 4') +
+    buildSignature('pemilik','Pemilik / Kuasa Pemilik');
+
+  ['1','2','3','4','pemilik'].forEach(id=>{
+    const canvas = document.getElementById('canvas_'+id);
+    setupCanvas(canvas, id);
+  });
+  syncPetugasName(1); syncPetugasNip(1);
+  syncPetugasName(2); syncPetugasNip(2);
+  syncPetugasName(3); syncPetugasNip(3);
+  syncPetugasName(4); syncPetugasNip(4);
+  document.getElementById('sig_nama_pemilik').textContent = 'Pemilik / Kuasa Pemilik';
+  document.getElementById('sig_nip_pemilik').textContent = '';
+}
+
+function setupCanvas(canvas, id){
+  const ctx = canvas.getContext('2d');
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#1e3a5f';
+  let drawing = false;
+
+  function pos(e){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+    if(e.touches && e.touches[0]){
+      return {x:(e.touches[0].clientX-rect.left)*scaleX, y:(e.touches[0].clientY-rect.top)*scaleY};
+    }
+    return {x:(e.clientX-rect.left)*scaleX, y:(e.clientY-rect.top)*scaleY};
+  }
+  function start(e){ drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault(); }
+  function move(e){ if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke();
+    document.getElementById('sigstatus_'+id).textContent='Ditandatangani ✓';
+    document.getElementById('sigstatus_'+id).classList.add('ok');
+    e.preventDefault();
+  }
+  function end(){ drawing=false; }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive:false});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  canvas.addEventListener('touchend', end);
+
+  sigPads[id] = {canvas, ctx};
+}
+function clearSig(id){
+  const {canvas,ctx} = sigPads[id];
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  document.getElementById('sigstatus_'+id).textContent='Belum ditandatangani';
+  document.getElementById('sigstatus_'+id).classList.remove('ok');
+}
+
+/* ---------- Save / Load / Clear (localStorage) ---------- */
+function collectFormData(){
+  const form = document.getElementById('cerapanForm');
+  const data = {};
+  new FormData(form).forEach((v,k)=>{ data[k] = data[k] ? [].concat(data[k],v) : v; });
+
+  data.__decisions = {
+    kebenaran: (document.querySelector('[name=kebenaran]:checked')||{}).value ?? null,
+    kepekaan: (document.querySelector('[name=kepekaan]:checked')||{}).value ?? null,
+    ulang_1: (document.querySelector('[name=ulang_1]:checked')||{}).value ?? null,
+    ulang_2: (document.querySelector('[name=ulang_2]:checked')||{}).value ?? null,
+    ulang_3: (document.querySelector('[name=ulang_3]:checked')||{}).value ?? null,
+    eks_1: (document.querySelector('[name=eks_1]:checked')||{}).value ?? null,
+    eks_2: (document.querySelector('[name=eks_2]:checked')||{}).value ?? null,
+    eks_3: (document.querySelector('[name=eks_3]:checked')||{}).value ?? null,
+    eks_4: (document.querySelector('[name=eks_4]:checked')||{}).value ?? null,
+    kemiringan: (document.querySelector('[name=kemiringan]:checked')||{}).value ?? null,
+    gandar: (document.querySelector('[name=gandar]:checked')||{}).value ?? null,
+    nol_posisi: document.getElementById('nol_posisi').value
+  };
+  data.__signatures = {};
+  ['1','2','3','4','pemilik'].forEach(id=>{
+    data.__signatures[id] = sigPads[id].canvas.toDataURL();
+  });
+  return data;
+}
+
+function applyDecisionSelection(name, value, changeFn){
+  if(value===null || value===undefined || value==='') return;
+  const el = document.querySelector(`[name="${name}"][value="${value}"]`);
+  if(el){ el.checked = true; changeFn(el); }
+}
+
+function saveForm(){
+  const data = collectFormData();
+  localStorage.setItem('cerapan_sentisimal_data', JSON.stringify(data));
+  const chip = document.getElementById('statusChip');
+  chip.textContent = 'Tersimpan ✓ ' + new Date().toLocaleTimeString('id-ID');
+  chip.classList.add('show');
+  setTimeout(()=>chip.classList.remove('show'), 3000);
+}
+
+function loadForm(){
+  const raw = localStorage.getItem('cerapan_sentisimal_data');
+  if(!raw){ alert('Belum ada data tersimpan di perangkat ini.'); return; }
+  const data = JSON.parse(raw);
+  const form = document.getElementById('cerapanForm');
+  Object.keys(data).forEach(k=>{
+    if(k.startsWith('__')) return;
+    const els = form.querySelectorAll(`[name="${k}"]`);
+    els.forEach(el=>{
+      if(el.type==='radio'){ el.checked = (el.value === data[k]); }
+      else { el.value = data[k]; }
+    });
+  });
+  toggleTeraSections();
+  if(data.__decisions){
+    const dd = data.__decisions;
+    if(dd.nol_posisi){ document.getElementById('nol_posisi').value = dd.nol_posisi; updateNolTindakan(); }
+    applyDecisionSelection('kebenaran', dd.kebenaran, onKebenaranChange);
+    applyDecisionSelection('kepekaan', dd.kepekaan, onKepekaanChange);
+    applyDecisionSelection('ulang_1', dd.ulang_1, onUlangChange1);
+    applyDecisionSelection('ulang_2', dd.ulang_2, onUlangChange2);
+    applyDecisionSelection('ulang_3', dd.ulang_3, onUlangChange3);
+    applyDecisionSelection('eks_1', dd.eks_1, onEksChange1);
+    applyDecisionSelection('eks_2', dd.eks_2, onEksChange2);
+    applyDecisionSelection('eks_3', dd.eks_3, onEksChange3);
+    applyDecisionSelection('eks_4', dd.eks_4, onEksChange4);
+    applyDecisionSelection('kemiringan', dd.kemiringan, onKemiringanChange);
+    applyDecisionSelection('gandar', dd.gandar, onGandarChange);
+  }
+  if(data.__signatures){
+    Object.keys(data.__signatures).forEach(id=>{
+      const {canvas,ctx} = sigPads[id];
+      const img = new Image();
+      img.onload = ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0); };
+      img.src = data.__signatures[id];
+    });
+  }
+  syncPetugasName(1); syncPetugasNip(1);
+  syncPetugasName(2); syncPetugasNip(2);
+  syncPetugasName(3); syncPetugasNip(3);
+  syncPetugasName(4); syncPetugasNip(4);
+  updateRekap();
+  const chip = document.getElementById('statusChip');
+  chip.textContent = 'Data dimuat ✓';
+  chip.classList.add('show');
+  setTimeout(()=>chip.classList.remove('show'), 3000);
+}
+
+function clearForm(){
+  if(!confirm('Hapus semua data yang diisi pada formulir ini?')) return;
+  localStorage.removeItem('cerapan_sentisimal_data');
+  document.getElementById('cerapanForm').reset();
+  ['1','2','3','4','pemilik'].forEach(id=>clearSig(id));
+  document.getElementById('nol_keterangan').value = '';
+  ['hasil_kebenaran','hasil_kepekaan','hasil_ulang','hasil_ulang_1','hasil_ulang_2','hasil_ulang_3',
+   'hasil_eks','hasil_eks_1','hasil_eks_2','hasil_eks_3','hasil_eks_4','hasil_kemiringan','hasil_gandar']
+   .forEach(id=>setHasilIndicator(id, null));
+  toggleTeraSections();
+  updateRekap();
+}
+
+/* ---------- BOOT ---------- */
+window.addEventListener('DOMContentLoaded', ()=>{
+  initVisual();
+  buildDecisionTable('tblKebenaran', kebenaranRows, 'kebenaran', 'onKebenaranChange');
+  buildKepekaanTable('tblKepekaan', 'kepekaan', 'onKepekaanChange');
+  buildUlangContainer();
+  buildEksContainer();
+  buildDecisionTable('tblKemiringan', kemiringanRows, 'kemiringan', 'onKemiringanChange');
+  buildDecisionTable('tblGandar', eksGandarRows, 'gandar', 'onGandarChange');
+  initSignatures();
+  toggleTeraSections();
+  updateRekap();
+
+  if(localStorage.getItem('cerapan_sentisimal_data')){
+    loadForm();
+  }
+});
+</script>
+
+</body>
+</html>

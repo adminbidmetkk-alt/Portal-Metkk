@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register Tera/Tera Ulang UTTP 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --navy: #16324a;
+    --navy-deep: #0d2135;
+    --gold: #a9791f;
+    --gold-light: #d9b46a;
+    --cream: #f6f3ea;
+    --paper: #fffdf8;
+    --ink: #24303a;
+    --ink-soft: #5b6a76;
+    --line: #d9d2bf;
+    --danger: #a13d3d;
+    --ok: #2f6b4f;
+    --radius: 4px;
+    --serif: "Iowan Old Style","Palatino Linotype", Palatino, Georgia, serif;
+    --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--cream);
+    background-image:
+      radial-gradient(circle at 100% 0%, rgba(169,121,31,0.06), transparent 40%),
+      radial-gradient(circle at 0% 100%, rgba(22,50,74,0.06), transparent 40%);
+    font-family: var(--sans);
+    color: var(--ink);
+    padding: 28px 18px 60px;
+  }
+  .wrap{ max-width: 1180px; margin: 0 auto; }
+
+  /* ---- Title block, mimicking the register's kop surat ---- */
+  .titleblock{
+    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+    color: #f3ede0;
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    border: 1px solid #0a1c2c;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 20px -12px rgba(0,0,0,0.5);
+  }
+  .titleblock .eyebrow{
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin: 0 0 4px;
+  }
+  .titleblock h1{
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .titleblock .sub{
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #cfd8de;
+  }
+  .seal{
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 2px solid var(--gold-light);
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--serif); font-weight: 700; font-size: 20px;
+    color: var(--gold-light);
+    flex: 0 0 auto;
+    background: radial-gradient(circle, rgba(217,180,106,0.12), transparent 70%);
+  }
+  .kop-fields{
+    display:flex; gap: 14px; flex-wrap: wrap;
+  }
+  .kop-fields label{
+    display:block; font-size: 10.5px; letter-spacing:0.08em; text-transform:uppercase; color:#b9c3ca; margin-bottom:4px;
+  }
+  .kop-fields input, .kop-fields select{
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.22);
+    color: #f6f3ea;
+    padding: 7px 10px;
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    min-width: 150px;
+  }
+  .kop-fields input::placeholder{ color: #9fb0ba; }
+
+  /* ---- Summary strip ---- */
+  .summary{
+    margin-top: 16px;
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+    gap: 10px;
+  }
+  .stat{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+  }
+  .stat .num{ font-family: var(--serif); font-size: 24px; color: var(--navy); font-weight:700; }
+  .stat .lbl{ font-size: 11px; text-transform: uppercase; letter-spacing:0.06em; color: var(--ink-soft); }
+
+  /* ---- Card / panel ---- */
+  .panel{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-top: 18px;
+  }
+  .panel-head{
+    display:flex; align-items:center; justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    gap: 10px; flex-wrap: wrap;
+  }
+  .panel-head h2{
+    font-family: var(--serif);
+    font-size: 16px;
+    margin: 0;
+    color: var(--navy-deep);
+  }
+  .panel-body{ padding: 18px; }
+
+  /* ---- Form ---- */
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px 14px;
+  }
+  @media (max-width: 860px){ .grid{ grid-template-columns: repeat(2,1fr);} }
+  @media (max-width: 520px){ .grid{ grid-template-columns: 1fr;} }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field.span2{ grid-column: span 2; }
+  .field.span4{ grid-column: 1 / -1; }
+  .field label{ font-size: 11.5px; font-weight:600; color: var(--ink-soft); text-transform:uppercase; letter-spacing:0.03em; }
+  .field input, .field select, .field textarea{
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 8px 10px;
+    border: 1px solid #c9c0a6;
+    border-radius: var(--radius);
+    background: #fff;
+    color: var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline: 2px solid var(--gold-light);
+    outline-offset: 1px;
+    border-color: var(--gold);
+  }
+  .field textarea{ resize: vertical; min-height: 40px; }
+  .hint{ font-size: 11px; color: var(--ink-soft); }
+
+  .btn{
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: transform .05s ease, background .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn-primary{ background: var(--navy); color: #fff; }
+  .btn-primary:hover{ background: var(--navy-deep); }
+  .btn-gold{ background: var(--gold); color: #fff; }
+  .btn-gold:hover{ background: #8f6519; }
+  .btn-ghost{ background: transparent; color: var(--navy); border-color: var(--navy); }
+  .btn-ghost:hover{ background: rgba(22,50,74,0.06); }
+  .btn-danger{ background:#fff; color: var(--danger); border-color: var(--danger); }
+  .btn-danger:hover{ background: #fbeeee; }
+  .btn-sm{ padding: 5px 10px; font-size: 12px; }
+  .row-actions{ display:flex; gap:8px; }
+  .form-actions{ display:flex; gap: 10px; margin-top: 16px; justify-content:flex-end; flex-wrap:wrap; }
+
+  /* ---- Toolbar / filters ---- */
+  .toolbar{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  }
+  .toolbar input, .toolbar select{
+    padding: 7px 10px; border:1px solid #c9c0a6; border-radius: var(--radius); font-size:13px; background:#fff;
+  }
+
+  /* ---- Table ---- */
+  .table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse: collapse; font-size: 13px; min-width: 1050px; }
+  thead th{
+    background: var(--navy);
+    color: #f3ede0;
+    text-align:left;
+    padding: 9px 10px;
+    font-weight:600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    position: sticky; top:0;
+  }
+  tbody td{
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even){ background: #fbf9f2; }
+  tbody tr:hover{ background: #f2ecda; }
+  .muted{ color: var(--ink-soft); font-size:12px; }
+  .empty-state{
+    text-align:center;
+    padding: 40px 20px;
+    color: var(--ink-soft);
+  }
+  .empty-state .glyph{ font-size: 30px; margin-bottom:8px; color: var(--gold); }
+
+  .badge{
+    display:inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: rgba(22,50,74,0.08); color: var(--navy-deep); font-weight:600;
+  }
+
+  footer{
+    margin-top: 26px; text-align:center; font-size: 12px; color: var(--ink-soft);
+  }
+
+  .toast{
+    position: fixed; bottom: 20px; right: 20px;
+    background: var(--navy-deep); color:#f6f3ea;
+    padding: 10px 16px; border-radius: var(--radius);
+    font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    opacity:0; transform: translateY(8px);
+    transition: all .25s ease;
+    pointer-events:none;
+    z-index: 50;
+  }
+  .toast.show{ opacity:1; transform:translateY(0); }
+
+  @media print{
+    body{ background:#fff; padding:0; }
+    .no-print{ display:none !important; }
+    .panel{ border:none; }
+    thead th{ background:#eee !important; color:#111 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="titleblock">
+    <div>
+      <p class="eyebrow">Buku Register &middot; Tahun 2026</p>
+      <h1>Register Tera / Tera Ulang UTTP</h1>
+      <p class="sub">Unit Metrologi Legal Kecamatan &mdash; catatan digital pengganti buku register kertas</p>
+    </div>
+    <div class="kop-fields no-print">
+      <div>
+        <label for="kecamatanUnit">Nama Kecamatan / Unit</label>
+        <input id="kecamatanUnit" type="text" placeholder="mis. Kecamatan Oebobo">
+      </div>
+      <div>
+        <label for="petugasNama">Petugas Pencatat</label>
+        <input id="petugasNama" type="text" placeholder="Nama petugas">
+      </div>
+    </div>
+    <div class="seal">'26</div>
+  </div>
+
+  <div class="summary no-print">
+    <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Entri</div></div>
+    <div class="stat"><div class="num" id="statUnit">0</div><div class="lbl">Total Unit UTTP</div></div>
+    <div class="stat"><div class="num" id="statBulan">-</div><div class="lbl">Bulan Terpilih</div></div>
+    <div class="stat"><div class="num" id="statKec">0</div><div class="lbl">Kecamatan Tercakup</div></div>
+  </div>
+
+  <!-- ============ FORM INPUT ============ -->
+  <div class="panel no-print">
+    <div class="panel-head">
+      <h2 id="formTitle">Tambah Data Baru</h2>
+      <div class="row-actions">
+        <button class="btn btn-ghost btn-sm" id="cancelEditBtn" style="display:none;">Batal Edit</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <form id="entryForm">
+        <div class="grid">
+          <div class="field">
+            <label for="f_tanggal">Tanggal</label>
+            <input type="date" id="f_tanggal" required>
+          </div>
+          <div class="field span2">
+            <label for="f_namaWajibTera">Nama Wajib Tera</label>
+            <input type="text" id="f_namaWajibTera" placeholder="Nama pemilik / penanggung jawab">
+          </div>
+          <div class="field">
+            <label for="f_pasar">Pasar (bila ada)</label>
+            <input type="text" id="f_pasar" placeholder="Nama pasar">
+          </div>
+
+          <div class="field span2">
+            <label for="f_namaTempatUsaha">Nama Tempat Usaha</label>
+            <input type="text" id="f_namaTempatUsaha" placeholder="mis. Toko / Kios / Perusahaan">
+          </div>
+          <div class="field">
+            <label for="f_jalan">Jalan</label>
+            <input type="text" id="f_jalan">
+          </div>
+          <div class="field">
+            <label for="f_kelurahan">Kelurahan</label>
+            <input type="text" id="f_kelurahan">
+          </div>
+
+          <div class="field span2">
+            <label for="f_kecamatan">Kecamatan</label>
+            <input type="text" id="f_kecamatan" placeholder="Lokasi tempat usaha">
+          </div>
+          <div class="field span2">
+            <label for="f_jenisUTTP">Jenis UTTP</label>
+            <select id="f_jenisUTTP">
+              <option value="">-- pilih jenis --</option>
+            </select>
+          </div>
+
+          <div class="field" id="f_jenisLainWrap" style="display:none;">
+            <label for="f_jenisLain">Sebutkan Jenis Lain</label>
+            <input type="text" id="f_jenisLain">
+          </div>
+
+          <div class="field">
+            <label for="f_merek">Merek</label>
+            <input type="text" id="f_merek">
+          </div>
+          <div class="field">
+            <label for="f_tipe">Tipe</label>
+            <input type="text" id="f_tipe">
+          </div>
+          <div class="field">
+            <label for="f_noSeri">No. Seri</label>
+            <input type="text" id="f_noSeri">
+          </div>
+          <div class="field">
+            <label for="f_kapasitas">Kapasitas / Ukuran</label>
+            <input type="text" id="f_kapasitas" placeholder="mis. 150 kg, 500 g s/d 2000 g">
+          </div>
+
+          <div class="field">
+            <label for="f_jumlah">Jumlah Unit</label>
+            <input type="number" id="f_jumlah" min="1" step="1" value="1">
+          </div>
+          <div class="field span2">
+            <label for="f_keterangan">Keterangan</label>
+            <input type="text" id="f_keterangan" placeholder="Catatan tambahan (opsional)">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" id="clearFormBtn">Bersihkan Form</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">Simpan Entri</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ TABLE ============ -->
+  <div class="panel">
+    <div class="panel-head no-print">
+      <h2>Daftar Entri</h2>
+      <div class="toolbar">
+        <input type="text" id="searchBox" placeholder="Cari nama, tempat usaha, alat...">
+        <select id="filterBulan"><option value="">Semua Bulan</option></select>
+        <select id="filterJenis"><option value="">Semua Jenis UTTP</option></select>
+        <button class="btn btn-gold btn-sm" id="exportBtn">Ekspor ke Buku Register</button>
+        <button class="btn btn-gold btn-sm" id="exportInfografisBtn">Ekspor ke Infografis</button>
+        <button class="btn btn-ghost btn-sm" id="printBtn">Cetak</button>
+      </div>
+    </div>
+    <div class="panel-body" style="padding-top:10px;">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Tanggal</th>
+              <th>Nama Wajib Tera</th>
+              <th>Tempat Usaha</th>
+              <th>Alamat</th>
+              <th>Kecamatan</th>
+              <th>Jenis UTTP</th>
+              <th>Identitas Alat</th>
+              <th>Kapasitas</th>
+              <th>Jml</th>
+              <th>Keterangan</th>
+              <th class="no-print">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="glyph">&#9998;</div>
+        <div>Belum ada data. Mulai isi form di atas untuk mencatat entri pertama.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Data tersimpan otomatis di perangkat ini. Gunakan tombol "Ekspor ke Excel" untuk menyimpan salinan cadangan.</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const UTTP_LIST = [
+    "TIMBANGAN MEJA","TIMBANGAN PEGAS","DACIN LOGAM","TIMBANGAN SENTISIMAL","TIMBANGAN CEPAT",
+    "TIMBANGAN BOBOT INGSUT","NERACA","TIMBANGAN PENGECEK DAN PENYORTIR","TIMBANGAN ELEKTRONIK",
+    "TIMBANGAN JEMBATAN","WEIGHT IN MOTION","ANAK TIMBANGAN","METER KAYU","ALAT UKUR TINGGI ORANG",
+    "FLOAT LEVEL GAUGE","TAKARAN BASAH","BEJANA UKUR","TANGKI UKUR MOBIL BBM","TUTSIT BAHAN BAKAR MINYAK",
+    "TUTBO","METER ARUS BBM","METER AIR","POMPA UKUR BBM","SERBA SERBI","LAINNYA"
+  ];
+  const BULAN_LIST = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+  // Peta jenis UTTP -> kolom pada format resmi "Buku Register Kecamatan"
+  // (mengikuti tata-letak kolom N..AM pada file Buku_Register_Kecamatan_2026.xlsx)
+  const UTTP_COLUMN_MAP = {
+    'METER KAYU':'N',
+    'ALAT UKUR TINGGI ORANG':'O',
+    'FLOAT LEVEL GAUGE':'P',
+    'TIMBANGAN MEJA':'Q',
+    'TIMBANGAN PEGAS':'R',
+    'DACIN LOGAM':'S',
+    'TIMBANGAN SENTISIMAL':'T',
+    'TIMBANGAN CEPAT':'U',
+    'TIMBANGAN BOBOT INGSUT':'V',
+    'NERACA':'W',
+    'TIMBANGAN PENGECEK DAN PENYORTIR':'X',
+    'TIMBANGAN ELEKTRONIK':'Y',
+    'TIMBANGAN JEMBATAN':'Z',
+    'WEIGHT IN MOTION':'AA',
+    'ANAK TIMBANGAN':'AB',
+    'TAKARAN BASAH':'AC',
+    'BEJANA UKUR':'AD',
+    'TANGKI UKUR MOBIL BBM':'AE',
+    'TUTSIT BAHAN BAKAR MINYAK':'AF',
+    'TUTBO':'AG',
+    'METER ARUS BBM':'AH',   // catatan: kolom resmi dipecah METER INDUK(AH)/METER KERJA(AI); form ini belum membedakan sub-jenis sehingga jumlah otomatis masuk ke METER INDUK (AH)
+    'METER AIR':'AJ',        // sama: masuk ke METER INDUK (AJ), sub METER KERJA (AK) tidak terisi otomatis
+    'POMPA UKUR BBM':'AL'
+    // 'SERBA SERBI' dan 'LAINNYA' tidak punya kolom angka khusus di form resmi -> ditulis sebagai teks uraian di kolom AM
+  };
+  const BUKU_COLS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL','AM','AN','AO'];
+  const BUKU_WIDTHS = {A:3.7,B:7.6,C:25.7,D:17.9,E:18.4,F:10.1,G:10.3,H:10.3,I:14.4,J:12,K:10,L:10,M:10,N:7.3,O:7.3,P:7.3,Q:7.3,R:7.3,S:7.3,T:7.3,U:7.3,V:7.3,W:7.3,X:7.3,Y:7.3,Z:7.3,AA:7.3,AB:7.3,AC:7.3,AD:7.3,AE:7.3,AF:7.3,AG:7.3,AH:7.3,AI:7.3,AJ:7.3,AK:7.3,AL:7.3,AM:60.7,AN:3.7,AO:23.4};
+
+  const $ = (id) => document.getElementById(id);
+  let entries = [];
+  let editingId = null;
+
+  // ---------- storage ----------
+  async function loadEntries(){
+    try{
+      const res = await window.storage.get('register_uttp_entries', false);
+      entries = res && res.value ? JSON.parse(res.value) : [];
+    }catch(e){
+      entries = [];
+    }
+    try{
+      const meta = await window.storage.get('register_uttp_meta', false);
+      if(meta && meta.value){
+        const m = JSON.parse(meta.value);
+        if(m.kecamatanUnit) $('kecamatanUnit').value = m.kecamatanUnit;
+        if(m.petugasNama) $('petugasNama').value = m.petugasNama;
+      }
+    }catch(e){ /* no meta yet */ }
+  }
+  async function saveEntries(){
+    try{ await window.storage.set('register_uttp_entries', JSON.stringify(entries), false); }
+    catch(e){ showToast('Gagal menyimpan data.'); }
+  }
+  async function saveMeta(){
+    try{
+      await window.storage.set('register_uttp_meta', JSON.stringify({
+        kecamatanUnit: $('kecamatanUnit').value,
+        petugasNama: $('petugasNama').value
+      }), false);
+    }catch(e){ /* ignore */ }
+  }
+
+  // ---------- init selects ----------
+  function initSelects(){
+    const jenisSel = $('f_jenisUTTP');
+    UTTP_LIST.forEach(j => {
+      const opt = document.createElement('option');
+      opt.value = j; opt.textContent = j;
+      jenisSel.appendChild(opt);
+    });
+    const filterJenis = $('filterJenis');
+    UTTP_LIST.forEach(j => {
+      const opt = document.createElement('option');
+      opt.value = j; opt.textContent = j;
+      filterJenis.appendChild(opt);
+    });
+    const filterBulan = $('filterBulan');
+    BULAN_LIST.forEach((b,i) => {
+      const opt = document.createElement('option');
+      opt.value = i+1; opt.textContent = b;
+      filterBulan.appendChild(opt);
+    });
+  }
+
+  $('f_jenisUTTP').addEventListener('change', (e)=>{
+    $('f_jenisLainWrap').style.display = e.target.value === 'LAINNYA' ? 'flex' : 'none';
+  });
+
+  // ---------- toast ----------
+  let toastTimer;
+  function showToast(msg){
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+  }
+
+  // ---------- form helpers ----------
+  function readForm(){
+    const jenis = $('f_jenisUTTP').value === 'LAINNYA' ? ($('f_jenisLain').value || 'LAINNYA') : $('f_jenisUTTP').value;
+    return {
+      tanggal: $('f_tanggal').value,
+      namaWajibTera: $('f_namaWajibTera').value.trim(),
+      namaTempatUsaha: $('f_namaTempatUsaha').value.trim(),
+      jalan: $('f_jalan').value.trim(),
+      kelurahan: $('f_kelurahan').value.trim(),
+      kecamatan: $('f_kecamatan').value.trim(),
+      pasar: $('f_pasar').value.trim(),
+      jenisUTTP: jenis,
+      merek: $('f_merek').value.trim(),
+      tipe: $('f_tipe').value.trim(),
+      noSeri: $('f_noSeri').value.trim(),
+      kapasitas: $('f_kapasitas').value.trim(),
+      jumlah: parseInt($('f_jumlah').value || '1', 10),
+      keterangan: $('f_keterangan').value.trim()
+    };
+  }
+  function fillForm(entry){
+    $('f_tanggal').value = entry.tanggal || '';
+    $('f_namaWajibTera').value = entry.namaWajibTera || '';
+    $('f_namaTempatUsaha').value = entry.namaTempatUsaha || '';
+    $('f_jalan').value = entry.jalan || '';
+    $('f_kelurahan').value = entry.kelurahan || '';
+    $('f_kecamatan').value = entry.kecamatan || '';
+    $('f_pasar').value = entry.pasar || '';
+    if(UTTP_LIST.includes(entry.jenisUTTP)){
+      $('f_jenisUTTP').value = entry.jenisUTTP;
+      $('f_jenisLainWrap').style.display = 'none';
+    } else if(entry.jenisUTTP){
+      $('f_jenisUTTP').value = 'LAINNYA';
+      $('f_jenisLainWrap').style.display = 'flex';
+      $('f_jenisLain').value = entry.jenisUTTP;
+    }
+    $('f_merek').value = entry.merek || '';
+    $('f_tipe').value = entry.tipe || '';
+    $('f_noSeri').value = entry.noSeri || '';
+    $('f_kapasitas').value = entry.kapasitas || '';
+    $('f_jumlah').value = entry.jumlah || 1;
+    $('f_keterangan').value = entry.keterangan || '';
+  }
+  function clearForm(){
+    $('entryForm').reset();
+    $('f_jumlah').value = 1;
+    $('f_jenisLainWrap').style.display = 'none';
+    editingId = null;
+    $('formTitle').textContent = 'Tambah Data Baru';
+    $('submitBtn').textContent = 'Simpan Entri';
+    $('cancelEditBtn').style.display = 'none';
+  }
+
+  $('clearFormBtn').addEventListener('click', clearForm);
+  $('cancelEditBtn').addEventListener('click', clearForm);
+
+  $('entryForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const data = readForm();
+    if(!data.tanggal){ showToast('Tanggal wajib diisi.'); return; }
+    if(!data.jenisUTTP){ showToast('Pilih jenis UTTP.'); return; }
+
+    if(editingId){
+      const idx = entries.findIndex(x => x.id === editingId);
+      if(idx > -1) entries[idx] = { ...entries[idx], ...data };
+      showToast('Entri diperbarui.');
+    } else {
+      data.id = 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+      entries.push(data);
+      showToast('Entri disimpan.');
+    }
+    await saveEntries();
+    clearForm();
+    render();
+  });
+
+  // ---------- table ----------
+  function monthOf(dateStr){
+    if(!dateStr) return null;
+    const d = new Date(dateStr);
+    if(isNaN(d)) return null;
+    return d.getMonth()+1;
+  }
+  function fmtDate(dateStr){
+    if(!dateStr) return '-';
+    const d = new Date(dateStr);
+    if(isNaN(d)) return dateStr;
+    return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric'});
+  }
+
+  function getFiltered(){
+    const q = $('searchBox').value.trim().toLowerCase();
+    const bulan = $('filterBulan').value;
+    const jenis = $('filterJenis').value;
+    return entries
+      .filter(en => {
+        if(bulan && String(monthOf(en.tanggal)) !== String(bulan)) return false;
+        if(jenis && en.jenisUTTP !== jenis) return false;
+        if(q){
+          const hay = [en.namaWajibTera, en.namaTempatUsaha, en.jalan, en.kelurahan, en.kecamatan, en.jenisUTTP, en.merek, en.tipe, en.noSeri, en.keterangan].join(' ').toLowerCase();
+          if(!hay.includes(q)) return false;
+        }
+        return true;
+      })
+      .sort((a,b) => (a.tanggal || '').localeCompare(b.tanggal || ''));
+  }
+
+  function render(){
+    const filtered = getFiltered();
+    const tbody = $('tableBody');
+    tbody.innerHTML = '';
+    $('emptyState').style.display = filtered.length ? 'none' : 'block';
+
+    filtered.forEach((en, i) => {
+      const tr = document.createElement('tr');
+      const identitas = [en.merek, en.tipe, en.noSeri].filter(Boolean).join(' / ') || '-';
+      const alamat = [en.jalan, en.kelurahan, en.pasar ? ('Pasar '+en.pasar) : ''].filter(Boolean).join(', ') || '-';
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td>${fmtDate(en.tanggal)}</td>
+        <td>${escapeHtml(en.namaWajibTera) || '<span class="muted">-</span>'}</td>
+        <td>${escapeHtml(en.namaTempatUsaha) || '<span class="muted">-</span>'}</td>
+        <td>${escapeHtml(alamat)}</td>
+        <td>${escapeHtml(en.kecamatan) || '<span class="muted">-</span>'}</td>
+        <td><span class="badge">${escapeHtml(en.jenisUTTP)}</span></td>
+        <td>${escapeHtml(identitas)}</td>
+        <td>${escapeHtml(en.kapasitas) || '-'}</td>
+        <td>${en.jumlah ?? '-'}</td>
+        <td>${escapeHtml(en.keterangan) || '<span class="muted">-</span>'}</td>
+        <td class="no-print">
+          <div class="row-actions">
+            <button class="btn btn-ghost btn-sm" data-edit="${en.id}">Ubah</button>
+            <button class="btn btn-danger btn-sm" data-del="${en.id}">Hapus</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('[data-edit]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const en = entries.find(x=>x.id === btn.dataset.edit);
+        if(!en) return;
+        editingId = en.id;
+        fillForm(en);
+        $('formTitle').textContent = 'Ubah Entri';
+        $('submitBtn').textContent = 'Perbarui Entri';
+        $('cancelEditBtn').style.display = 'inline-block';
+        window.scrollTo({top:0, behavior:'smooth'});
+      });
+    });
+    tbody.querySelectorAll('[data-del]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(!confirm('Hapus entri ini?')) return;
+        entries = entries.filter(x=>x.id !== btn.dataset.del);
+        await saveEntries();
+        render();
+      });
+    });
+
+    updateStats(filtered);
+  }
+
+  function escapeHtml(str){
+    if(str === undefined || str === null) return '';
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+
+  function updateStats(filtered){
+    $('statTotal').textContent = filtered.length;
+    $('statUnit').textContent = filtered.reduce((s,e)=> s + (parseInt(e.jumlah)||0), 0);
+    const bulanVal = $('filterBulan').value;
+    $('statBulan').textContent = bulanVal ? BULAN_LIST[bulanVal-1] : 'Semua';
+    const kecSet = new Set(filtered.map(e => (e.kecamatan||'').toUpperCase()).filter(Boolean));
+    $('statKec').textContent = kecSet.size;
+  }
+
+  ['searchBox','filterBulan','filterJenis'].forEach(id=>{
+    $(id).addEventListener('input', render);
+    $(id).addEventListener('change', render);
+  });
+
+  $('kecamatanUnit').addEventListener('change', saveMeta);
+  $('petugasNama').addEventListener('change', saveMeta);
+
+  // ---------- export helpers (format resmi Buku Register Kecamatan) ----------
+  const DASH_BORDER = { top:{style:'dashed'}, bottom:{style:'dashed'}, left:{style:'dashed'}, right:{style:'dashed'} };
+
+  function hStyle(rot, wrap){
+    return {
+      font:{ bold:true, sz:8 },
+      alignment:{ horizontal:'center', vertical:'center', textRotation: rot||0, wrapText: !!wrap },
+      border: DASH_BORDER
+    };
+  }
+  function dStyle(bold){
+    return {
+      font:{ sz:9, bold: !!bold },
+      alignment:{ vertical:'center', horizontal: bold?'center':'left', wrapText:true },
+      border: DASH_BORDER
+    };
+  }
+  function nStyle(){
+    return {
+      font:{ sz:9 },
+      alignment:{ vertical:'center', horizontal:'center' },
+      border: DASH_BORDER
+    };
+  }
+  function setC(ws, addr, v, style){
+    if(v === undefined || v === null) v = '';
+    ws[addr] = { v: v, t: (typeof v === 'number' ? 'n' : 's') };
+    if(style) ws[addr].s = style;
+  }
+
+  // Menggambar kop/header resmi (baris 1-13) ke sebuah worksheet kosong
+  function drawBukuHeader(ws, merges, monthName, sheetNo){
+    // Baris 3-4: BULAN / nama bulan / judul / nomor lembar
+    merges.push({s:{r:2,c:0},e:{r:3,c:1}});   setC(ws,'A3','BULAN', hStyle(0,false));
+    merges.push({s:{r:2,c:2},e:{r:3,c:2}});   setC(ws,'C3', (monthName||'').toUpperCase(), hStyle(0,false));
+    merges.push({s:{r:2,c:13},e:{r:3,c:37}}); setC(ws,'N3','REGISTER TERA/TERA ULANG UTTP TAHUN 2026', {font:{bold:true, sz:18}, alignment:{horizontal:'center', vertical:'top'}});
+    merges.push({s:{r:2,c:40},e:{r:3,c:40}}); setC(ws,'AO3', sheetNo, hStyle(0,false));
+
+    // Baris 6-11: header kolom
+    merges.push({s:{r:5,c:0},e:{r:10,c:0}});  setC(ws,'A6','Nomor terus', hStyle(90));
+    merges.push({s:{r:5,c:1},e:{r:10,c:1}});  setC(ws,'B6','Tanggal', hStyle(90));
+    merges.push({s:{r:5,c:2},e:{r:10,c:2}});  setC(ws,'C6','NAMA WAJIB TERA', hStyle(0));
+    merges.push({s:{r:5,c:3},e:{r:5,c:7}});   setC(ws,'D6','TEMPAT UTTP TERPAKAI/TERPASANG', hStyle(0));
+    merges.push({s:{r:6,c:3},e:{r:10,c:3}});  setC(ws,'D7','NAMA TEMPAT USAHA', hStyle(0));
+    merges.push({s:{r:6,c:4},e:{r:10,c:4}});  setC(ws,'E7','JALAN', hStyle(0));
+    merges.push({s:{r:6,c:5},e:{r:10,c:5}});  setC(ws,'F7','KELURAHAN', hStyle(0));
+    merges.push({s:{r:6,c:6},e:{r:10,c:6}});  setC(ws,'G7','KECAMATAN', hStyle(0));
+    merges.push({s:{r:6,c:7},e:{r:10,c:7}});  setC(ws,'H7','PASAR', hStyle(0));
+    merges.push({s:{r:5,c:8},e:{r:10,c:8}});  setC(ws,'I6','Jenis UTTP', hStyle(0));
+    merges.push({s:{r:5,c:9},e:{r:9,c:12}});  setC(ws,'J6','Identitas UTTP', hStyle(0,true));
+    setC(ws,'J11','Merek', hStyle(0));
+    setC(ws,'K11','Tipe', hStyle(0));
+    setC(ws,'L11','No. Seri', hStyle(0));
+    setC(ws,'M11','Kapasitas', hStyle(0));
+
+    merges.push({s:{r:5,c:13},e:{r:6,c:15}}); setC(ws,'N6','UKURAN\nPANJANG', hStyle(0,true));
+    merges.push({s:{r:7,c:13},e:{r:10,c:13}}); setC(ws,'N8','     METER KAYU', hStyle(90));
+    merges.push({s:{r:7,c:14},e:{r:10,c:14}}); setC(ws,'O8','     ALAT UKUR TINGGI ORANG', hStyle(90));
+    merges.push({s:{r:7,c:15},e:{r:10,c:15}}); setC(ws,'P8','     FLOAT LEVEL GAUGE', hStyle(90));
+
+    merges.push({s:{r:5,c:16},e:{r:5,c:25}}); setC(ws,'Q6','TIMBANGAN BUKAN OTOMATIS', hStyle(0));
+    merges.push({s:{r:6,c:16},e:{r:6,c:23}}); setC(ws,'Q7','Mekanik', hStyle(0));
+    merges.push({s:{r:7,c:16},e:{r:10,c:16}}); setC(ws,'Q8','     TIMBANGAN MEJA', hStyle(90));
+    merges.push({s:{r:7,c:17},e:{r:10,c:17}}); setC(ws,'R8','     TIMBANGAN PEGAS', hStyle(90));
+    merges.push({s:{r:7,c:18},e:{r:10,c:18}}); setC(ws,'S8','     DACIN LOGAM', hStyle(90));
+    merges.push({s:{r:7,c:19},e:{r:10,c:19}}); setC(ws,'T8','     TIMBANGAN SENTISIMAL', hStyle(90));
+    merges.push({s:{r:7,c:20},e:{r:10,c:20}}); setC(ws,'U8','     TIMBANGAN CEPAT', hStyle(90));
+    merges.push({s:{r:7,c:21},e:{r:10,c:21}}); setC(ws,'V8','     TIMB. BOBOT INGSUR', hStyle(90));
+    merges.push({s:{r:7,c:22},e:{r:10,c:22}}); setC(ws,'W8','     NERACA', hStyle(90));
+    merges.push({s:{r:7,c:23},e:{r:10,c:23}}); setC(ws,'X8','     TIMBANGAN PENGECEK DAN PENYORTIR', hStyle(90));
+    merges.push({s:{r:6,c:24},e:{r:10,c:24}}); setC(ws,'Y7','     TIMBANGAN ELEKTRONIK', hStyle(90));
+    merges.push({s:{r:6,c:25},e:{r:10,c:25}}); setC(ws,'Z7','     TIMBANGAN JEMBATAN (per ton)', hStyle(90));
+
+    merges.push({s:{r:5,c:26},e:{r:10,c:26}}); setC(ws,'AA6','     WEIGHT IN MOTION', hStyle(90));
+    merges.push({s:{r:5,c:27},e:{r:10,c:27}}); setC(ws,'AB6','     ANAK TIMBANGAN', hStyle(90));
+    merges.push({s:{r:5,c:28},e:{r:10,c:28}}); setC(ws,'AC6','     TAKARAN BASAH', hStyle(90));
+    merges.push({s:{r:5,c:29},e:{r:10,c:29}}); setC(ws,'AD6','     BEJANA UKUR', hStyle(90));
+    merges.push({s:{r:5,c:30},e:{r:10,c:30}}); setC(ws,'AE6','     TANGKI UKUR MOBIL BBM', hStyle(90));
+    merges.push({s:{r:5,c:31},e:{r:10,c:31}}); setC(ws,'AF6','     TUTSIT BAHAN BAKAR MINYAK', hStyle(90));
+    merges.push({s:{r:5,c:32},e:{r:10,c:32}}); setC(ws,'AG6','     TUTBO', hStyle(90));
+
+    merges.push({s:{r:5,c:33},e:{r:6,c:34}}); setC(ws,'AH6','METER ARUS BBM', hStyle(0,true));
+    merges.push({s:{r:7,c:33},e:{r:10,c:33}}); setC(ws,'AH8','     METER INDUK', hStyle(90));
+    merges.push({s:{r:7,c:34},e:{r:10,c:34}}); setC(ws,'AI8','     METER KERJA', hStyle(90));
+    merges.push({s:{r:5,c:35},e:{r:6,c:36}}); setC(ws,'AJ6','METER AIR', hStyle(0,true));
+    merges.push({s:{r:7,c:35},e:{r:10,c:35}}); setC(ws,'AJ8','     METER INDUK', hStyle(90));
+    merges.push({s:{r:7,c:36},e:{r:10,c:36}}); setC(ws,'AK8','     METER KERJA', hStyle(90));
+    merges.push({s:{r:5,c:37},e:{r:10,c:37}}); setC(ws,'AL6','     POMPA UKUR BBM', hStyle(90,true));
+
+    merges.push({s:{r:5,c:38},e:{r:7,c:38}}); setC(ws,'AM6','SERBA SERBI', hStyle(0));
+    merges.push({s:{r:8,c:38},e:{r:10,c:38}}); setC(ws,'AM9','U R A I A N', hStyle(0));
+
+    merges.push({s:{r:5,c:39},e:{r:10,c:39}}); setC(ws,'AN6','Nomor Terus', hStyle(90));
+    merges.push({s:{r:5,c:40},e:{r:10,c:40}}); setC(ws,'AO6','Keterangan', hStyle(0));
+
+    // Baris 12: nomor kolom 1..41
+    BUKU_COLS.forEach((col,idx)=> setC(ws, col+'12', idx+1, nStyle()));
+  }
+
+  // Membangun satu sheet Buku Register untuk satu bulan
+  function buildBukuSheet(monthName, monthEntries, sheetNo){
+    const ws = {};
+    const merges = [];
+    drawBukuHeader(ws, merges, monthName, sheetNo);
+
+    // Urutkan agar entri milik pemilik yang sama berdekatan (identitas cukup ditulis 1x)
+    const sorted = monthEntries.slice().sort((a,b)=>{
+      const da = a.tanggal || '', db = b.tanggal || '';
+      if(da !== db) return da.localeCompare(db);
+      const ka = (a.namaWajibTera||'')+'|'+(a.namaTempatUsaha||'');
+      const kb = (b.namaWajibTera||'')+'|'+(b.namaTempatUsaha||'');
+      return ka.localeCompare(kb);
+    });
+
+    let r = 14; // baris data pertama (setelah baris nomor 12; baris 13 dikosongkan/tanpa pindahan)
+    let prevKey = null;
+    sorted.forEach((en, i)=>{
+      const key = (en.tanggal||'')+'|'+(en.namaWajibTera||'')+'|'+(en.namaTempatUsaha||'');
+      const isNewGroup = key !== prevKey;
+      prevKey = key;
+
+      setC(ws, 'A'+r, i+1, nStyle());
+      if(isNewGroup){
+        setC(ws, 'B'+r, fmtDate(en.tanggal), dStyle());
+        setC(ws, 'C'+r, en.namaWajibTera, dStyle());
+        setC(ws, 'D'+r, en.namaTempatUsaha, dStyle());
+        setC(ws, 'E'+r, en.jalan, dStyle());
+        setC(ws, 'F'+r, en.kelurahan, dStyle());
+        setC(ws, 'G'+r, en.kecamatan, dStyle());
+        setC(ws, 'H'+r, en.pasar, dStyle());
+      } else {
+        ['B','C','D','E','F','G','H'].forEach(c=> setC(ws, c+r, '', dStyle()));
+      }
+      setC(ws, 'I'+r, en.jenisUTTP, dStyle());
+      setC(ws, 'J'+r, en.merek, dStyle());
+      setC(ws, 'K'+r, en.tipe, dStyle());
+      setC(ws, 'L'+r, en.noSeri, dStyle());
+      setC(ws, 'M'+r, en.kapasitas, dStyle());
+
+      const jumlah = parseInt(en.jumlah)||0;
+      const col = UTTP_COLUMN_MAP[en.jenisUTTP];
+      let keterangan = en.keterangan || '';
+      if(col){
+        setC(ws, col+r, jumlah, nStyle());
+      } else {
+        // SERBA SERBI / LAINNYA: tidak ada kolom angka khusus -> tulis sebagai uraian
+        const uraian = `${en.jenisUTTP}${en.merek? ' - '+en.merek:''}${en.tipe? ' '+en.tipe:''} (Jumlah: ${jumlah})`;
+        setC(ws, 'AM'+r, uraian, dStyle());
+      }
+      setC(ws, 'AN'+r, i+1, nStyle());
+      setC(ws, 'AO'+r, keterangan, dStyle());
+
+      // pastikan semua kolom pada baris ini punya border walau kosong
+      BUKU_COLS.forEach(c=>{ const addr=c+r; if(!ws[addr]) setC(ws, addr, '', dStyle()); });
+
+      r++;
+    });
+
+    const lastRow = Math.max(r-1, 13);
+    ws['!ref'] = `A1:AO${lastRow}`;
+    ws['!merges'] = merges;
+    ws['!cols'] = BUKU_COLS.map(c => ({ wch: BUKU_WIDTHS[c] || 9 }));
+    ws['!rows'] = [];
+    ws['!rows'][10] = { hpt: 183 };
+    for(let rr=13; rr<lastRow; rr++){ ws['!rows'][rr] = { hpt: 20.1 }; }
+    return ws;
+  }
+
+  $('exportBtn').addEventListener('click', ()=>{
+    const filtered = getFiltered();
+    if(!filtered.length){ showToast('Tidak ada data untuk diekspor.'); return; }
+
+    // Kelompokkan entri per bulan -> tiap bulan jadi satu sheet, mengikuti pola berkas resmi
+    const byMonth = {};
+    filtered.forEach(en=>{
+      const m = monthOf(en.tanggal);
+      const key = m ? BULAN_LIST[m-1] : 'TANPA_TANGGAL';
+      if(!byMonth[key]) byMonth[key] = [];
+      byMonth[key].push(en);
+    });
+
+    const wb = XLSX.utils.book_new();
+    let sheetNo = 1;
+    Object.keys(byMonth).forEach(monthName=>{
+      const ws = buildBukuSheet(monthName, byMonth[monthName], sheetNo);
+      let sheetName = monthName.substring(0,31) || `BULAN ${sheetNo}`;
+      // hindari nama sheet duplikat/tidak valid
+      sheetName = sheetName.replace(/[\\/*?:\[\]]/g,'-');
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      sheetNo++;
+    });
+
+    const fname = `Buku_Register_${($('kecamatanUnit').value || 'Kecamatan').replace(/\s+/g,'_')}_2026.xlsx`;
+    XLSX.writeFile(wb, fname, { cellStyles:true });
+    showToast('Buku Register (format resmi) berhasil diunduh.');
+  });
+
+  // ---------- export: Register Infografis (pivot per pemilik) ----------
+  $('exportInfografisBtn').addEventListener('click', ()=>{
+    const filtered = getFiltered();
+    if(!filtered.length){ showToast('Tidak ada data untuk diekspor.'); return; }
+
+    // Kelompokkan berdasarkan pemilik (Nama Wajib Tera + Nama Tempat Usaha)
+    const groups = {};
+    const jenisOrder = []; // urutan kemunculan jenis UTTP, mengikuti UTTP_LIST lalu jenis custom (LAINNYA)
+    UTTP_LIST.filter(j=>j!=='LAINNYA').forEach(j=> jenisOrder.push(j));
+    const extraJenis = [];
+
+    filtered.forEach(en=>{
+      const ownerKey = (en.namaWajibTera||'(Tanpa Nama)') + '||' + (en.namaTempatUsaha||'');
+      if(!groups[ownerKey]){
+        groups[ownerKey] = {
+          namaWajibTera: en.namaWajibTera || '',
+          namaTempatUsaha: en.namaTempatUsaha || '',
+          jalan: en.jalan || '',
+          kelurahan: en.kelurahan || '',
+          kecamatan: en.kecamatan || '',
+          pasar: en.pasar || '',
+          counts: {}
+        };
+      }
+      const g = groups[ownerKey];
+      // pakai alamat terisi pertama kali dijumpai bila sebelumnya kosong
+      ['jalan','kelurahan','kecamatan','pasar'].forEach(f=>{ if(!g[f] && en[f]) g[f] = en[f]; });
+
+      const jenisName = en.jenisUTTP || 'LAINNYA';
+      if(!jenisOrder.includes(jenisName) && !extraJenis.includes(jenisName)) extraJenis.push(jenisName);
+      const jumlah = parseInt(en.jumlah)||0;
+      g.counts[jenisName] = (g.counts[jenisName]||0) + jumlah;
+    });
+
+    // kolom jenis UTTP yang dipakai: hanya jenis yang benar-benar muncul di data, urut sesuai UTTP_LIST lalu jenis custom
+    const usedJenis = jenisOrder.filter(j => Object.values(groups).some(g => g.counts[j]));
+    extraJenis.sort();
+    const allJenisCols = usedJenis.concat(extraJenis);
+
+    const header = ['No','Nama Wajib Tera','Nama Tempat Usaha','Jalan','Kelurahan','Kecamatan','Pasar', ...allJenisCols, 'Total Unit'];
+    const ownerList = Object.values(groups).sort((a,b)=> (a.namaWajibTera||'').localeCompare(b.namaWajibTera||''));
+
+    const rows = ownerList.map((g,i)=>{
+      let total = 0;
+      const jenisVals = allJenisCols.map(j=>{
+        const v = g.counts[j] || 0;
+        total += v;
+        return v || '';
+      });
+      return [i+1, g.namaWajibTera, g.namaTempatUsaha, g.jalan, g.kelurahan, g.kecamatan, g.pasar, ...jenisVals, total];
+    });
+
+    const title = `REGISTER TERA/TERA ULANG UTTP TAHUN 2026 - INFOGRAFIS - ${($('kecamatanUnit').value || 'KECAMATAN').toUpperCase()}`;
+    const aoa = [[title], [], header, ...rows];
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!merges'] = [{ s:{r:0,c:0}, e:{r:0,c:header.length-1} }];
+    ws['!cols'] = header.map((h,idx)=>{
+      if(idx < 7) return { wch: Math.max(14, h.length+2) };
+      return { wch: Math.max(16, h.length+2) };
+    });
+    // styling ringan: header tebal
+    header.forEach((h,idx)=>{
+      const addr = XLSX.utils.encode_cell({r:2, c:idx});
+      if(ws[addr]) ws[addr].s = { font:{bold:true}, alignment:{horizontal:'center', vertical:'center', wrapText:true} };
+    });
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Register UTTP');
+    const fname = `Register_Infografis_${($('kecamatanUnit').value || 'Kecamatan').replace(/\s+/g,'_')}_2026.xlsx`;
+    XLSX.writeFile(wb, fname, { cellStyles:true });
+    showToast(`Infografis diunduh (${ownerList.length} pemilik).`);
+  });
+
+  $('printBtn').addEventListener('click', ()=> window.print());
+
+  // ---------- boot ----------
+  (async function init(){
+    initSelects();
+    await loadEntries();
+    render();
+  })();
+})();
+</script>
+</body>
+</html>
