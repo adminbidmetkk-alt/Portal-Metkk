@@ -88,7 +88,7 @@
 
   .constellation{
     position:relative;
-    height:750px;
+    height:680px;
     max-width:640px;
     margin:0 auto;
   }
@@ -97,7 +97,7 @@
     position:relative;
     z-index:1;
     max-width:900px;
-    margin:0 auto 24px;
+    margin:0 auto 6px;
     overflow:hidden;
     border-top:1px solid rgba(232,216,174,0.35);
     border-bottom:1px solid rgba(232,216,174,0.35);
@@ -172,22 +172,22 @@
 
   /* Positions mirroring the original layout: top, left, right, and a large center hub */
   /* topleft & topright ditarik lebih dekat ke hub agar tampak mengelilingi Admin (orbit ~250px dari pusat hub, sudut 45°/315°) */
-  .node--topleft{ top:243px; left:93px; }
+  .node--topleft{ top:173px; left:93px; }
   .node--topleft .circle{ width:100px; height:100px; font-size:30px; }
 
-  .node--topright{ top:243px; right:93px; }
+  .node--topright{ top:173px; right:93px; }
   .node--topright .circle{ width:100px; height:100px; font-size:30px; }
 
-  .node--top{ top:180px; left:50%; transform:translateX(-50%); }
+  .node--top{ top:110px; left:50%; transform:translateX(-50%); }
   .node--top .circle{ width:110px; height:110px; font-size:34px; }
 
-  .node--left{ top:370px; left:0; }
+  .node--left{ top:300px; left:0; }
   .node--left .circle{ width:110px; height:110px; font-size:34px; }
 
-  .node--right{ top:370px; right:0; }
+  .node--right{ top:300px; right:0; }
   .node--right .circle{ width:110px; height:110px; font-size:34px; }
 
-  .node--hub{ top:370px; left:50%; transform:translateX(-50%); z-index:2; }
+  .node--hub{ top:300px; left:50%; transform:translateX(-50%); z-index:2; }
   .node--hub .circle{
     width:200px; height:200px;
     font-size:20px;
@@ -227,7 +227,7 @@
 
   .node--footer{
     position:absolute;
-    top:620px;
+    top:550px;
     left:50%;
     transform:translateX(-50%);
     width:260px;
@@ -251,6 +251,47 @@
     font-size:12px;
     color:#D8BE86;
   }
+
+  .tim-admin{
+    position:relative;
+    z-index:1;
+    max-width:640px;
+    margin:6px auto 0;
+    text-align:center;
+  }
+
+  .tim-admin .tim-admin-title{
+    font-size:12px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:var(--gold-light);
+    margin-bottom:12px;
+    font-weight:600;
+  }
+
+  .foto-admin-box{
+    width:113px;
+    height:151px;
+    margin:0 auto;
+    position:relative;
+    border-radius:6px;
+    overflow:hidden;
+    border:4px solid var(--gold-light);
+    box-shadow:0 10px 26px rgba(0,0,0,.4), inset 0 0 0 2px rgba(107,66,38,.3);
+    background:var(--paper);
+  }
+
+  .foto-admin-box img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    opacity:0;
+    transition:opacity 1.2s ease-in-out;
+  }
+
+  .foto-admin-box img.active{ opacity:1; }
 
   @media (max-width:600px){
     header{ padding:32px 16px 6px; }
@@ -488,6 +529,16 @@
       <div class="circle">📖 Layanan Pendukung</div>
     </a>
 
+  </div>
+
+  <div class="tim-admin">
+    <div class="tim-admin-title">Tim Administrasi 2026</div>
+    <div class="foto-admin-box" id="fotoAdminBox">
+      <img src="foto_admin/admin1.jpeg" class="active" alt="Tim Administrasi 2026">
+      <img src="foto_admin/admin2.jpg" alt="Tim Administrasi 2026">
+      <img src="foto_admin/admin3.jpg" alt="Tim Administrasi 2026">
+      <img src="foto_admin/admin4.jpg" alt="Tim Administrasi 2026">
+    </div>
   </div>
 </main>
 
@@ -1729,6 +1780,20 @@
     showView(supportView);
   });
 
+
+  // Rotasi foto Tim Administrasi 2026 (silih berganti dengan efek fade)
+  (function(){
+    const box = document.getElementById('fotoAdminBox');
+    if(!box) return;
+    const photos = box.querySelectorAll('img');
+    if(photos.length < 2) return;
+    let current = 0;
+    setInterval(function(){
+      photos[current].classList.remove('active');
+      current = (current + 1) % photos.length;
+      photos[current].classList.add('active');
+    }, 3500);
+  })();
 </script>
 
 
