@@ -620,9 +620,9 @@
       <div class="circle">📊</div>
       <div class="label">STATUS LAYANAN</div>
     </a>
-    <a href="#" id="cerapanBtn" class="admin-node" title="SIPANIK">
+    <a href="#" id="cerapanBtn" class="admin-node" title="Cerapan Elektronik">
       <div class="circle">📝</div>
-      <div class="label">SIPANIK</div>
+      <div class="label">Cerapan Elektronik</div>
     </a>
     <a href="#" id="skhpBtn" class="admin-node" title="SKHP ELEKTRONIK">
       <div class="circle">📜</div>
@@ -631,6 +631,10 @@
     <a href="#" id="dokumenElektronikBtn" class="admin-node" title="BA ELEKTRONIK">
       <div class="circle">📁</div>
       <div class="label">BA ELEKTRONIK</div>
+    </a>
+    <a href="#" id="suratTugasBtn" class="admin-node" title="SURAT TUGAS">
+      <div class="circle">🧾</div>
+      <div class="label">SURAT TUGAS</div>
     </a>
     <a href="arsip-digital-kemetrologian.html" id="arsipBtn" class="admin-node" title="ARSIP" target="_blank" rel="noopener">
       <div class="circle">🗄️</div>
@@ -1733,6 +1737,10 @@
   document.getElementById('dokumenElektronikBtn').addEventListener('click', function(e){
     e.preventDefault();
     showView(dokumenElektronikView);
+  });
+  document.getElementById('suratTugasBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    window.open('surat-tugas.html', '_blank', 'noopener');
   });
   document.getElementById('ksoBtn').addEventListener('click', function(e){
     e.preventDefault();
