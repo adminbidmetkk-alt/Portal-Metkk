@@ -192,12 +192,15 @@
 <div class="topbar">
   <div>
     <h1>CERAPAN ELEKTRONIK PENGUJIAN TIMBANGAN ELEKTRONIK UNTUK PERHIASAN</h1>
-    <div class="sub">Formulir digital tera / tera ulang timbangan perhiasan (dacin, timbangan meja, neraca obat/biasa, neraca emas)</div>
+    <div class="sub">Formulir digital tera / tera ulang timbangan bukan otomatis</div>
   </div>
   <div class="btns">
     <span class="status-chip" id="statusChip">Tersimpan</span>
     <button class="btn-ghost" onclick="saveForm()">💾 Simpan</button>
     <button class="btn-ghost" onclick="loadForm()">📂 Muat Data</button>
+    <button class="btn-ghost" onclick="exportForm()">⬇️ Unduh Data (.json)</button>
+    <button class="btn-ghost" onclick="importForm()">⬆️ Impor Data (.json)</button>
+    <input type="file" id="importFileInput" accept=".json,application/json" style="display:none" onchange="handleImportFile(event)">
     <button class="btn-danger" onclick="clearForm()">🗑 Reset</button>
     <button class="btn-primary" onclick="window.print()">🖨 Cetak / Simpan PDF</button>
   </div>
@@ -214,13 +217,13 @@
         <div class="l1">PEMERINTAH KOTA KUPANG</div>
         <div class="l2">DINAS PERINDUSTRIAN DAN PERDAGANGAN</div>
         <div class="l3">BIDANG KEMETROLOGIAN</div>
-        <div class="l4">Jl. Perintis Kemerdekaan III, Kel. Kelapa Lima, Kec. Kelapa Lima, Kupang, Kode Pos 85228, email: bidmetkupangkota@gmail.com</div>
+        <div class="l4">Jalan Perintis Kemerdekaan III Kelapa Lima - Kupang, Kode Pos 85228, email: bidmetkupangkota@gmail.com</div>
       </div>
     </div>
-    <div class="form-code">Kode Formulir: <b>F.C.2-06.2.26.1.2</b></div>
+    <div class="form-code">Kode Formulir: <b>F.C.2-06.2.16.1.2</b></div>
 
     <div class="doc-title">
-      <h2>CERAPAN ELEKTRONIK PENGUJIAN TIMBANGAN ELEKTRONIK UNTUK PERHIASAN</h2>
+      <h2>CERAPAN ELEKTRONIK PENGUJIAN TIMBANGAN ELEKTRONIK (TE) UNTUK PERHIASAN</h2>
       <div class="sub2">Pengujian dilakukan dalam rangka:
         <label style="margin-left:10px;"><input type="radio" name="rangka" value="TERA" checked> TERA</label>
         <label style="margin-left:10px;"><input type="radio" name="rangka" value="TERA ULANG"> TERA ULANG</label>
@@ -239,16 +242,16 @@
         <div>
           <div class="ptitle" style="font-weight:700; font-size:12px; color:var(--navy-dark); margin-bottom:6px;">Petugas Penguji</div>
           <div class="petugas-block">
-            <div class="field-row"><label>1. Nama</label><span class="colon">:</span><input type="text" name="petugas1_nama" onkeyup="syncPetugasName(1)"></div>
-            <div class="field-row"><label>NIP</label><span class="colon">:</span><input type="text" name="petugas1_nip" onkeyup="syncPetugasNip(1)"></div>
+            <div class="field-row"><label>1. Nama</label><span class="colon">:</span><select name="petugas1_nama" id="petugas1_nama" onchange="onPetugasChange(1)"></select></div>
+            <div class="field-row"><label>NIP</label><span class="colon">:</span><input type="text" name="petugas1_nip" id="petugas1_nip" readonly style="background:#eef2f7;"></div>
           </div>
           <div class="petugas-block">
-            <div class="field-row"><label>2. Nama</label><span class="colon">:</span><input type="text" name="petugas2_nama" onkeyup="syncPetugasName(2)"></div>
-            <div class="field-row"><label>NIP</label><span class="colon">:</span><input type="text" name="petugas2_nip" onkeyup="syncPetugasNip(2)"></div>
+            <div class="field-row"><label>2. Nama</label><span class="colon">:</span><select name="petugas2_nama" id="petugas2_nama" onchange="onPetugasChange(2)"></select></div>
+            <div class="field-row"><label>NIP</label><span class="colon">:</span><input type="text" name="petugas2_nip" id="petugas2_nip" readonly style="background:#eef2f7;"></div>
           </div>
           <div class="petugas-block">
-            <div class="field-row"><label>3. Nama</label><span class="colon">:</span><input type="text" name="petugas3_nama" onkeyup="syncPetugasName(3)"></div>
-            <div class="field-row"><label>NIP</label><span class="colon">:</span><input type="text" name="petugas3_nip" onkeyup="syncPetugasNip(3)"></div>
+            <div class="field-row"><label>3. Nama</label><span class="colon">:</span><select name="petugas3_nama" id="petugas3_nama" onchange="onPetugasChange(3)"></select></div>
+            <div class="field-row"><label>NIP</label><span class="colon">:</span><input type="text" name="petugas3_nip" id="petugas3_nip" readonly style="background:#eef2f7;"></div>
           </div>
         </div>
       </div>
@@ -258,32 +261,17 @@
     <div class="section-body">
       <div class="grid2">
         <div>
-          <div class="field-row"><label>Jenis Timbangan</label><span class="colon">:</span>
-            <select name="jenis_timbangan" id="jenis_timbangan_select">
-              <option value="">- pilih -</option>
-              <option value="Dacin">Dacin</option>
-              <option value="Timbangan Meja">Timbangan Meja</option>
-              <option value="Neraca Obat/Biasa">Neraca Obat / Biasa (kelas II)</option>
-              <option value="Neraca Emas">Neraca Emas (kelas II)</option>
-            </select>
-          </div>
           <div class="field-row"><label>No. Tanda Kesesuaian Tipe</label><span class="colon">:</span><input type="text" name="tkt"></div>
           <div class="field-row"><label>Merek / Buatan</label><span class="colon">:</span><input type="text" name="merek"></div>
           <div class="field-row"><label>Tipe</label><span class="colon">:</span><input type="text" name="tipe"></div>
           <div class="field-row"><label>No. Seri</label><span class="colon">:</span><input type="text" name="no_seri"></div>
         </div>
         <div>
-          <div class="field-row"><label>Kapasitas Maksimum</label><span class="colon">:</span><input type="text" name="kapasitas_maks" placeholder="mis. 300 kg"></div>
-          <div class="field-row"><label>d</label><span class="colon">:</span><input type="text" name="nilai_d" id="nilai_d" placeholder="mis. 0,1 kg" onkeyup="hitungKelas()"></div>
-          <div class="field-row"><label>e</label><span class="colon">:</span><input type="text" name="nilai_e" id="nilai_e" placeholder="mis. 0,1 kg" onkeyup="hitungKelas()"></div>
+          <div class="field-row"><label>Kapasitas Maksimum</label><span class="colon">:</span><input type="text" name="kapasitas_maks" id="kapasitas_maks" placeholder="mis. 300 kg" oninput="hitungKelas()"></div>
+          <div class="field-row"><label>d</label><span class="colon">:</span><input type="text" name="nilai_d" id="nilai_d" placeholder="mis. 0,1 kg"></div>
+          <div class="field-row"><label>e</label><span class="colon">:</span><input type="text" name="nilai_e" id="nilai_e" placeholder="mis. 0,1 kg" oninput="hitungKelas()"></div>
           <div class="field-row"><label>Kelas</label><span class="colon">:</span>
-            <select name="kelas" id="kelas_select">
-              <option value="">- pilih -</option>
-              <option value="I">I</option>
-              <option value="II">II</option>
-              <option value="III">III</option>
-              <option value="IIII">IIII</option>
-            </select>
+            <input type="text" name="kelas" id="kelas_select" readonly placeholder="otomatis" style="background:#eef2f7; font-weight:700; text-align:center; color:var(--navy-dark);">
           </div>
           <div class="kelas-hint" id="kelasHint"></div>
         </div>
@@ -307,31 +295,6 @@
           <tr><td>± 1,5 e</td><td>200.000 &lt; m</td><td>20.000 &lt; m ≤ 100.000</td><td>2.000 &lt; m ≤ 10.000</td><td>200 &lt; m ≤ 1.000</td></tr>
         </table>
         <div class="note">Untuk Tera Ulang, BKD dikalikan 2 (dua kali nilai BKD Tera).</div>
-
-        <div class="sub-head">Interval Skala Verifikasi (e) per Jenis Timbangan Perhiasan</div>
-        <table class="ref-table">
-          <tr><th>Jenis Timbangan</th><th>Dacin</th><th>Timbangan Meja</th><th>Neraca Obat / Biasa (kelas II)</th><th>Neraca Emas (kelas II)</th></tr>
-          <tr>
-            <td class="label-cell" style="text-align:center; font-weight:700;">Interval Skala Verifikasi (e)</td>
-            <td><input type="text" name="e_dacin" placeholder="isi e"></td>
-            <td><input type="text" name="e_meja" placeholder="isi e"></td>
-            <td><input type="text" name="e_obat" placeholder="isi e"></td>
-            <td><input type="text" name="e_emas" placeholder="isi e"></td>
-          </tr>
-        </table>
-
-        <div class="sub-head">BKD per Jenis Timbangan Perhiasan</div>
-        <table class="ref-table">
-          <tr><th>Jenis Timbangan</th><th>Dacin</th><th>Timbangan Meja</th><th>Neraca Obat / Biasa (kelas II)</th><th>Neraca Emas (kelas II)</th></tr>
-          <tr>
-            <td class="label-cell" style="text-align:center; font-weight:700;">BKD</td>
-            <td><input type="text" name="bkd_dacin" placeholder="isi BKD"></td>
-            <td><input type="text" name="bkd_meja" placeholder="isi BKD"></td>
-            <td><input type="text" name="bkd_obat" placeholder="isi BKD"></td>
-            <td><input type="text" name="bkd_emas" placeholder="isi BKD"></td>
-          </tr>
-        </table>
-        <div class="note">Isi tabel di atas sesuai ketentuan/SOP internal untuk masing-masing jenis timbangan perhiasan yang diuji.</div>
       </details>
     </div>
 
@@ -343,8 +306,8 @@
 
   <!-- ===================== HALAMAN 2: HASIL PENGUJIAN ===================== -->
   <div class="sheet">
-    <div class="section-head">HASIL PENGUJIAN 1 — PENGUJIAN KEBENARAN UNTUK TERA</div>
-    <div class="section-body">
+    <div class="section-head hp-head" data-hp="1">HASIL PENGUJIAN <span class="hp-num">1</span> — PENGUJIAN KEBENARAN UNTUK TERA</div>
+    <div class="section-body" data-hp="1">
       <div class="note">Muatan uji: Min, Muatan yang mewakili BKD 1e, Maks. BKD: ±0,5e (Min) / ±1e (BKD 1e) / ±1,5e (Maks). Hasil dihitung otomatis: SAH bila selisih penunjukan terhadap ATS berada dalam rentang BKD.</div>
       <table class="datatable" id="tblKebenaranTera">
         <thead>
@@ -354,8 +317,8 @@
       </table>
     </div>
 
-    <div class="section-head">HASIL PENGUJIAN 2 — PENGUJIAN KEBENARAN UNTUK TERA ULANG</div>
-    <div class="section-body">
+    <div class="section-head hp-head" data-hp="2">HASIL PENGUJIAN <span class="hp-num">2</span> — PENGUJIAN KEBENARAN UNTUK TERA ULANG</div>
+    <div class="section-body" data-hp="2">
       <div class="note">Muatan uji: Min, Muatan yang mewakili BKD 2e, Maks. BKD: ±1e (Min) / ±2e (BKD 2e) / ±3e (Maks).</div>
       <table class="datatable" id="tblKebenaranTeraUlang">
         <thead>
@@ -365,8 +328,8 @@
       </table>
     </div>
 
-    <div class="section-head">HASIL PENGUJIAN 3 — PENGUJIAN EKSENTRISITAS</div>
-    <div class="section-body">
+    <div class="section-head hp-head" data-hp="3">HASIL PENGUJIAN <span class="hp-num">3</span> — PENGUJIAN EKSENTRISITAS</div>
+    <div class="section-body" data-hp="3">
       <div class="note">Timbangan dengan jumlah penyangga tidak lebih dari 4. Muatan uji sekitar 1/3 Maks.</div>
       <div class="field-row" style="max-width:320px;"><label>Muatan Uji (≈1/3 Maks)</label><span class="colon">:</span><input type="text" name="eks_muatan_uji"></div>
       <div class="field-row" style="max-width:320px;"><label>BKD</label><span class="colon">:</span><input type="text" name="eks_bkd"></div>
@@ -378,8 +341,8 @@
       </table>
     </div>
 
-    <div class="section-head">HASIL PENGUJIAN 4 — PENGUJIAN PENYETELAN NOL</div>
-    <div class="section-body">
+    <div class="section-head hp-head" data-hp="4">HASIL PENGUJIAN <span class="hp-num">4</span> — PENGUJIAN PENYETELAN NOL</div>
+    <div class="section-body" data-hp="4">
       <div class="sub-head">4.a Jenis Penyetel Nol Otomatis</div>
       <div class="note">Naikkan ATS ±2% Maks → penyetel nol bekerja otomatis. Amati penunjukan setelah dalam 5–15 detik penunjukan kembali nol. Bila d≠e, tambah imbuh 0,25e untuk memeriksa apakah penunjukan berubah.</div>
       <div class="checklist-row">
@@ -411,8 +374,8 @@
       </div>
     </div>
 
-    <div class="section-head">HASIL PENGUJIAN 5 — PENGUJIAN PENYETEL TARA (hanya saat Tera)</div>
-    <div class="section-body">
+    <div class="section-head hp-head" data-hp="5">HASIL PENGUJIAN <span class="hp-num">5</span> — PENGUJIAN PENYETEL TARA (hanya saat Tera)</div>
+    <div class="section-body" data-hp="5">
       <div class="sub-head">5.a Timbangan elektronik dengan display digital</div>
       <div class="note">Naikkan ATS ±20% Maks → tekan Tara → tambah imbuh 10e → amati penunjukan (BKD ±0,25e, bila d≠e tambah imbuh lanjutan).</div>
       <div class="field-row" style="max-width:640px;"><label>Hasil Penyetel Tara (5.a)</label><span class="colon">:</span>
@@ -432,8 +395,8 @@
       </div>
     </div>
 
-    <div class="section-head">HASIL PENGUJIAN 6 — PENGUJIAN KEMAMPUAN ULANG</div>
-    <div class="section-body">
+    <div class="section-head hp-head" data-hp="6">HASIL PENGUJIAN <span class="hp-num">6</span> — PENGUJIAN KEMAMPUAN ULANG</div>
+    <div class="section-body" data-hp="6">
       <div class="note">Titik uji = muatan yang berada pada BKD ± 1e (Tera) atau BKD ± 2e (Tera Ulang). Dilakukan 3 kali pengulangan (P1, P2, P3). R = Pmaks − Pmin harus ≤ BKD.</div>
       <div class="grid2" style="max-width:640px;">
         <div class="field-row"><label>Titik Uji</label><span class="colon">:</span><input type="text" name="ulang_titik_uji"></div>
@@ -452,27 +415,8 @@
         <div class="item">Hasil<b id="ulangHasil">-</b></div>
       </div>
     </div>
-
-    <div class="section-head">HASIL PENGUJIAN 7 — PENGUJIAN FUNGSI PENJATAH <span style="font-weight:400; font-size:10.5px;">(khusus timbangan pada AMP / CBP)</span></div>
-    <div class="section-body">
-      <div class="note">BKD fungsi penjatah = 1% PL (Tera) / 2% PL (Tera Ulang). E = Penunjukan (I) − Muatan Preset (PL). Kesalahan rata-rata = (E1+E2+E3)/3.</div>
-      <table class="datatable" id="tblPenjatah">
-        <thead><tr><th>Ulangan</th><th>Muatan Preset (PL)</th><th>Penunjukan (I)</th><th>Kesalahan E = I − PL</th></tr></thead>
-        <tbody>
-          <tr><td class="label-cell">1</td><td><input type="number" step="any" class="pl-val" onkeyup="hitungPenjatah()"></td><td><input type="number" step="any" class="i-val" onkeyup="hitungPenjatah()"></td><td class="e-out">-</td></tr>
-          <tr><td class="label-cell">2</td><td><input type="number" step="any" class="pl-val" onkeyup="hitungPenjatah()"></td><td><input type="number" step="any" class="i-val" onkeyup="hitungPenjatah()"></td><td class="e-out">-</td></tr>
-          <tr><td class="label-cell">3</td><td><input type="number" step="any" class="pl-val" onkeyup="hitungPenjatah()"></td><td><input type="number" step="any" class="i-val" onkeyup="hitungPenjatah()"></td><td class="e-out">-</td></tr>
-        </tbody>
-      </table>
-      <div class="grid2" style="max-width:640px; margin-top:8px;">
-        <div class="field-row"><label>BKD (1% / 2% PL)</label><span class="colon">:</span><input type="text" name="penjatah_bkd" id="penjatah_bkd" onkeyup="hitungPenjatah()"></div>
-      </div>
-      <div class="summary-box">
-        <div class="item">Kesalahan Rata-rata<b id="penjatahRata">-</b></div>
-        <div class="item">Hasil<b id="penjatahHasil">-</b></div>
-      </div>
-    </div>
   </div>
+
 
   <!-- ===================== HALAMAN 3: KESIMPULAN & TTD ===================== -->
   <div class="sheet">
@@ -508,12 +452,86 @@ const visualItems = [
   "Telah Dilakukan Pemanasan Timbangan"
 ];
 
-const kelasTable = [
-  {kelas:"I",   eMin:0.001, eMax:null, tol0_5:50000,  tol1_0_hi:200000},
-  {kelas:"II",  eMin:0.001, eMax:0.05, tol0_5:5000,   tol1_0_hi:20000},
-  {kelas:"III", eMin:0.1,   eMax:2,    tol0_5:500,    tol1_0_hi:2000},
-  {kelas:"IIII",eMin:5,     eMax:null, tol0_5:50,     tol1_0_hi:200}
+/* ---------- Data Petugas (sumber: data_petugas.xlsx) ---------- */
+const petugasData = [{"nama": "DJAMI MAXIN WILA HUKY, S.E., M.Si.", "nip": "197403072000121004"}, {"nama": "TOMMY CHARLES SINLAELOE, S.T.", "nip": "197910152009031004"}, {"nama": "MARGARETA SENO, S.Si.", "nip": "198403302009032006"}, {"nama": "NYONGKY GABRIEL SUSAK, S.Si.", "nip": "198511032010011012"}, {"nama": "VINSENSIUS ARKIAN PAOKUMA, S.T.", "nip": "198307262010011018"}, {"nama": "JOCE CLEMENS SEKONI, S.Si.", "nip": "198207142010011014"}, {"nama": "NICK DWI NUGROHO, S.T.", "nip": "198309122010011016"}, {"nama": "MARKUS YERRY ELY MANAFE, S.Si.", "nip": "198701212010011008"}, {"nama": "ASTRID IVONNY OTTU, S.T.", "nip": "198306092010012020"}, {"nama": "VONI SAIRLAY, S.Si.", "nip": "199109042015022003"}, {"nama": "WILLEM JORHANS BENTURA", "nip": "196909031992031008"}, {"nama": "CHRISTIAN PISTHER MONE", "nip": "196911071995031003"}, {"nama": "DAN LUKAS SPRIANUS LANGKOLA, S.Si.", "nip": "198509162015021001"}, {"nama": "MARIA DESYNOVINI DULE, S.Si.", "nip": "198612042015022001"}, {"nama": "NAWANG BAYU SASONGKO, S.Si.", "nip": "198708282022031005"}, {"nama": "REGINA SERAN, S.Si., M.Si.", "nip": "198901182022032006"}, {"nama": "MARTHA VERONIKA CHRISTINA SORU, S.Si.", "nip": "199103282022032011"}, {"nama": "IKKA DINAMIKA OTTA LADO, S.Si.", "nip": "199205142022032006"}, {"nama": "MOHAMMAD TRYADI DJAHILAPE, S.Si.", "nip": "199606242022031008"}, {"nama": "SANCE THERSIA OLLA, S.Si.", "nip": "199709042022032013"}, {"nama": "SAY GRACE MBEO, S.Si.", "nip": "199709242022031013"}, {"nama": "LUKAS LIA DONNY MUKIN, S.Si.", "nip": "199802282022031007"}, {"nama": "DOMINIKUS DO LALU", "nip": "198303132008011010"}, {"nama": "RUSLY ABDULLAH ALKATIRI", "nip": "198401142008011002"}, {"nama": "NIKSON TALAN, A.Md.", "nip": "198607152022031002"}, {"nama": "FELISITUS PENAMA LENGARI, A.Md.", "nip": "198703072022031003"}, {"nama": "YOHANES WOLANG WADA, A.Md.", "nip": "198806152022031007"}, {"nama": "MARK GIDEON BIRE, A.Md.", "nip": "198911262022031001"}, {"nama": "IRENE FRISILIA, A.Md.", "nip": "199311172022032011"}, {"nama": "YUDA PAMBUDI, A.Md.T.", "nip": "199707142022031009"}, {"nama": "LORENA OHAR, S.STP.", "nip": "198005082000032001"}, {"nama": "DJEFRI WETY HADJO", "nip": "198203062009011012"}, {"nama": "DENROS SQUART MILKO LUDJI", "nip": "198009092025211032"}, {"nama": "BECI KAROLINA LADA", "nip": "198001122025212014"}, {"nama": "MELKY ERLY LAZARINO SEUBELAN", "nip": "197807082025211019"}];
+
+function findNipByNama(nama){
+  const found = petugasData.find(p=>p.nama===nama);
+  return found ? (found.nip||'') : '';
+}
+
+function buildPetugasSelect(n){
+  const sel = document.getElementById('petugas'+n+'_nama');
+  if(!sel) return;
+  let html = '<option value="">- pilih petugas -</option>';
+  petugasData.forEach(p=>{
+    html += `<option value="${p.nama.replace(/"/g,'&quot;')}">${p.nama}</option>`;
+  });
+  sel.innerHTML = html;
+}
+
+function initPetugasSelects(){
+  [1,2,3].forEach(n=>buildPetugasSelect(n));
+  refreshPetugasOptions();
+}
+
+/* Dipanggil saat pilihan nama petugas 1/2/3 berubah:
+   isi NIP otomatis, lalu kunci nama tsb agar tidak bisa dipilih di petugas lain */
+function onPetugasChange(n){
+  const sel = document.getElementById('petugas'+n+'_nama');
+  document.getElementById('petugas'+n+'_nip').value = findNipByNama(sel.value);
+  syncPetugasName(n);
+  syncPetugasNip(n);
+  refreshPetugasOptions();
+}
+
+function refreshPetugasOptions(){
+  const semua = [1,2,3];
+  const terpilih = {};
+  semua.forEach(n=>{
+    const sel = document.getElementById('petugas'+n+'_nama');
+    terpilih[n] = sel ? sel.value : '';
+  });
+  semua.forEach(n=>{
+    const sel = document.getElementById('petugas'+n+'_nama');
+    if(!sel) return;
+    Array.from(sel.options).forEach(opt=>{
+      if(opt.value===''){ opt.disabled=false; return; }
+      const dipakaiPetugasLain = semua.some(m => m!==n && terpilih[m]===opt.value);
+      opt.disabled = dipakaiPetugasLain;
+    });
+  });
+}
+
+/* Aturan klasifikasi timbangan (mengikuti Tabel Klasifikasi & OIML R76):
+   setiap baris disyaratkan oleh rentang e (dalam gram) DAN rentang n
+   (jumlah interval verifikasi = Kapasitas Maksimum / e, tanpa satuan).
+   Beberapa kelas punya rentang e yang beririsan, sehingga n dipakai
+   untuk membedakan kelasnya. */
+const klasifikasiRules = [
+  {kelas:"I",    eMin:0.001, eMax:Infinity, nMin:50000, nMax:Infinity},
+  {kelas:"II",   eMin:0.001, eMax:0.05,     nMin:100,   nMax:100000},
+  {kelas:"II",   eMin:0.1,   eMax:Infinity, nMin:5000,  nMax:100000},
+  {kelas:"III",  eMin:0.1,   eMax:2,        nMin:100,   nMax:10000},
+  {kelas:"III",  eMin:5,     eMax:Infinity, nMin:500,   nMax:10000},
+  {kelas:"IIII", eMin:5,     eMax:Infinity, nMin:100,   nMax:1000}
 ];
+
+/* Konversi satuan massa ke gram, untuk mencocokkan Tabel Klasifikasi (satuan gram) */
+const satuanKeGram = {mg:0.001, g:1, gr:1, kg:1000, kuintal:100000, ton:1000000, t:1000000};
+
+function parseNilaiSatuan(str){
+  if(!str) return null;
+  const s = str.toString().trim().toLowerCase().replace(',', '.');
+  const m = s.match(/^([\d.]+)\s*(mg|kg|kuintal|ton|t|gr|g)?\s*$/);
+  if(!m) return null;
+  const angka = parseFloat(m[1]);
+  if(isNaN(angka)) return null;
+  const satuan = m[2] || 'kg'; // jika satuan tidak ditulis, asumsikan kg (lazim untuk timbangan)
+  const faktor = satuanKeGram[satuan];
+  if(!faktor) return null;
+  return angka * faktor; // hasil dalam gram
+}
 
 /* ---------- INIT: build visual checklist ---------- */
 function initVisual(){
@@ -530,19 +548,39 @@ function initVisual(){
   box.innerHTML = html;
 }
 
-/* ---------- Kelas hint ---------- */
+/* ---------- Kelas (dihitung otomatis dari Kapasitas Maksimum & nilai e) ---------- */
 function hitungKelas(){
-  const e = parseFloat(document.getElementById('nilai_d').value.toString().replace(',','.'));
+  const kelasField = document.getElementById('kelas_select');
   const hint = document.getElementById('kelasHint');
   hint.classList.remove('show');
-  if(isNaN(e)) return;
-  let suggestion = null;
-  if(e>=0.001 && e<0.05) suggestion="II";
-  else if(e<0.001) suggestion="I";
-  else if(e>=0.1 && e<5) suggestion="III";
-  else if(e>=5) suggestion="IIII";
-  if(suggestion){
-    hint.innerHTML = `💡 Berdasarkan nilai e/d yang dimasukkan, kelas timbangan kemungkinan: <b>Kelas ${suggestion}</b> (lihat tabel referensi untuk memastikan).`;
+
+  const kapStr = document.getElementById('kapasitas_maks').value;
+  const eStr = document.getElementById('nilai_e').value;
+
+  const kapGram = parseNilaiSatuan(kapStr);
+  const eGram = parseNilaiSatuan(eStr);
+
+  if(!kapStr || !eStr){ kelasField.value=''; return; }
+
+  if(kapGram===null || eGram===null){
+    kelasField.value = '';
+    hint.innerHTML = `⚠️ Tulis Kapasitas Maksimum &amp; nilai e lengkap dengan satuannya (mg/g/kg/ton), mis. "300 kg" atau "0,1 g".`;
+    hint.classList.add('show');
+    return;
+  }
+  if(eGram<=0){ kelasField.value=''; return; }
+
+  const n = kapGram / eGram; // jumlah interval verifikasi
+
+  const cocok = klasifikasiRules.find(r => eGram>=r.eMin && eGram<=r.eMax && n>=r.nMin && n<=r.nMax);
+
+  if(cocok){
+    kelasField.value = cocok.kelas;
+    hint.innerHTML = `💡 Kelas dihitung otomatis: e = ${eGram} g, n = Kap.Maks/e ≈ ${Math.round(n).toLocaleString('id-ID')} → <b>Kelas ${cocok.kelas}</b> (lihat tabel referensi untuk verifikasi).`;
+    hint.classList.add('show');
+  } else {
+    kelasField.value = '';
+    hint.innerHTML = `⚠️ Kombinasi e = ${eGram} g dan n ≈ ${Math.round(n).toLocaleString('id-ID')} tidak cocok dengan rentang kelas manapun pada tabel referensi. Periksa kembali nilai Kapasitas Maksimum dan e.`;
     hint.classList.add('show');
   }
 }
@@ -561,22 +599,42 @@ function parseNum(str){
   return parseFloat(String(str).replace(',','.'));
 }
 
-/* ---------- Build Pengujian Kebenaran tables (Tera & Tera Ulang) ---------- */
-function buildKebenaranTable(tableId, rows){
+/* ---------- Build Pengujian Kebenaran tables (Tera & Tera Ulang) ----------
+   opts.bkdSource   : true untuk tabel Tera -> perubahan BKD-nya memicu sinkronisasi ke Tera Ulang
+   opts.bkdReadonly : true untuk tabel Tera Ulang -> BKD tidak bisa diketik manual, selalu 2x BKD Tera
+*/
+function buildKebenaranTable(tableId, rows, opts={}){
   const tbody = document.querySelector('#'+tableId+' tbody');
   let html='';
   rows.forEach((r,idx)=>{
+    const bkdReadonlyAttr = opts.bkdReadonly ? 'readonly style="background:#eef2f7;"' : '';
+    const bkdHandler = opts.bkdSource
+      ? `onkeyup="hitungKebenaran('${tableId}'); syncBkdTeraUlang();"`
+      : `onkeyup="hitungKebenaran('${tableId}')"`;
     html += `<tr data-bkd="${r.bkd}">
       <td>${r.no}</td>
       <td class="label-cell">${r.titik}</td>
       <td><input type="text" class="ats-val" placeholder="nilai ATS"></td>
       <td><input type="number" step="any" class="penunjukan-val" onkeyup="hitungKebenaran('${tableId}')"></td>
-      <td><input type="number" step="any" class="bkd-val" value="${r.bkd}" onkeyup="hitungKebenaran('${tableId}')"></td>
+      <td><input type="number" step="any" class="bkd-val" value="${r.bkd}" ${bkdReadonlyAttr} ${bkdHandler}></td>
       <td class="selisih-out">-</td>
       <td class="hasil-out result-pending">-</td>
     </tr>`;
   });
   tbody.innerHTML = html;
+}
+
+/* Tera Ulang BKD = 2 x BKD Tera pada titik uji yang bersesuaian, dihitung otomatis */
+function syncBkdTeraUlang(){
+  const teraRows = document.querySelectorAll('#tblKebenaranTera tbody tr');
+  const ulangRows = document.querySelectorAll('#tblKebenaranTeraUlang tbody tr');
+  teraRows.forEach((row,i)=>{
+    const ulangRow = ulangRows[i];
+    if(!ulangRow) return;
+    const bkdTera = parseNum(row.querySelector('.bkd-val').value);
+    ulangRow.querySelector('.bkd-val').value = isNaN(bkdTera) ? '' : (bkdTera*2);
+  });
+  hitungKebenaran('tblKebenaranTeraUlang');
 }
 
 function hitungKebenaran(tableId){
@@ -651,38 +709,6 @@ function hitungKemampuanUlang(){
   updateRekap();
 }
 
-/* ---------- Fungsi Penjatah ---------- */
-function hitungPenjatah(){
-  const rows = document.querySelectorAll('#tblPenjatah tbody tr');
-  let es = [];
-  rows.forEach(row=>{
-    const pl = parseNum(row.querySelector('.pl-val').value);
-    const iv = parseNum(row.querySelector('.i-val').value);
-    const eOut = row.querySelector('.e-out');
-    if(!isNaN(pl) && !isNaN(iv)){
-      const e = iv - pl;
-      eOut.textContent = e.toFixed(3);
-      es.push(e);
-    } else {
-      eOut.textContent = '-';
-    }
-  });
-  const rataOut = document.getElementById('penjatahRata');
-  const hasilOut = document.getElementById('penjatahHasil');
-  const bkd = parseNum(document.getElementById('penjatah_bkd').value);
-  if(es.length===3){
-    const rata = es.reduce((a,b)=>a+b,0)/3;
-    rataOut.textContent = rata.toFixed(3);
-    if(!isNaN(bkd)){
-      if(Math.abs(rata) <= Math.abs(bkd)){ hasilOut.textContent='SAH'; hasilOut.style.color='var(--sah)'; }
-      else { hasilOut.textContent='BATAL'; hasilOut.style.color='var(--batal)'; }
-    } else { hasilOut.textContent='-'; }
-  } else {
-    rataOut.textContent='-'; hasilOut.textContent='-';
-  }
-  updateRekap();
-}
-
 /* ---------- Rekap ---------- */
 function overallResultOfTable(tableId){
   const cells = document.querySelectorAll('#'+tableId+' tbody .hasil-out, #'+tableId+' tbody .eks-hasil');
@@ -701,25 +727,36 @@ function updateRekap(){
   const r3 = overallResultOfTable('tblEksentrisitas');
   const r6el = document.getElementById('ulangHasil');
   const r6 = (r6el.textContent==='SAH'||r6el.textContent==='BATAL') ? r6el.textContent : null;
-  const r7el = document.getElementById('penjatahHasil');
-  const r7 = (r7el.textContent==='SAH'||r7el.textContent==='BATAL') ? r7el.textContent : null;
 
   const r4a = (document.querySelector('[name=hasil_nol_otomatis]:checked')||{}).value || null;
   const r4b = (document.querySelector('[name=hasil_nol_semi]:checked')||{}).value || null;
   const r5a = (document.querySelector('[name=hasil_tara_a]:checked')||{}).value || null;
   const r5b = (document.querySelector('[name=hasil_tara_b]:checked')||{}).value || null;
 
-  const items = [
-    ['1. Kebenaran (Tera)', r1],
-    ['2. Kebenaran (Tera Ulang)', r2],
-    ['3. Eksentrisitas', r3],
-    ['4a. Penyetelan Nol Otomatis', r4a],
-    ['4b. Penyetelan Nol Semi Otomatis', r4b],
-    ['5a. Penyetel Tara (digital)', r5a],
-    ['5b. Penyetel Tara (mekanik)', r5b],
-    ['6. Kemampuan Ulang', r6],
-    ['7. Fungsi Penjatah', r7],
-  ];
+  const hpItemsMap = {
+    1: [['Kebenaran (Tera)', r1]],
+    2: [['Kebenaran (Tera Ulang)', r2]],
+    3: [['Eksentrisitas', r3]],
+    4: [['Penyetelan Nol Otomatis', r4a], ['Penyetelan Nol Semi Otomatis', r4b]],
+    5: [['Penyetel Tara (digital)', r5a], ['Penyetel Tara (mekanik)', r5b]],
+    6: [['Kemampuan Ulang', r6]],
+  };
+
+  const checked = document.querySelector('[name="rangka"]:checked');
+  const rangka = checked ? checked.value : 'TERA';
+  const order = (rangka === 'TERA ULANG') ? HP_ORDER_TERA_ULANG : HP_ORDER_TERA;
+
+  const items = [];
+  order.forEach((hp, idx)=>{
+    const n = idx + 1;
+    const subItems = hpItemsMap[hp];
+    subItems.forEach(([suffix, val], subIdx)=>{
+      const label = subItems.length > 1
+        ? `${n}${String.fromCharCode(97 + subIdx)}. ${suffix}`
+        : `${n}. ${suffix}`;
+      items.push([label, val]);
+    });
+  });
 
   let html='';
   let anyEntered=false, anyBatal=false;
@@ -748,6 +785,31 @@ function updateRekap(){
 
 document.addEventListener('change', function(e){
   if(e.target.name && (e.target.name.startsWith('hasil_') )) updateRekap();
+});
+
+/* ---------- Tampilkan Hasil Pengujian sesuai Tera / Tera Ulang ---------- */
+const HP_ORDER_TERA = [1,3,4,5,6];
+const HP_ORDER_TERA_ULANG = [2,3,4,6];
+const HP_ALL = [1,2,3,4,5,6];
+
+function updateHasilPengujianVisibility(){
+  const checked = document.querySelector('[name="rangka"]:checked');
+  const rangka = checked ? checked.value : 'TERA';
+  const order = (rangka === 'TERA ULANG') ? HP_ORDER_TERA_ULANG : HP_ORDER_TERA;
+
+  HP_ALL.forEach(hp=>{
+    document.querySelectorAll(`[data-hp="${hp}"]`).forEach(el=>{ el.style.display = 'none'; });
+  });
+
+  order.forEach((hp, idx)=>{
+    document.querySelectorAll(`[data-hp="${hp}"]`).forEach(el=>{ el.style.display = ''; });
+    const numEl = document.querySelector(`.hp-head[data-hp="${hp}"] .hp-num`);
+    if(numEl) numEl.textContent = idx + 1;
+  });
+}
+
+document.addEventListener('change', function(e){
+  if(e.target.name === 'rangka'){ updateHasilPengujianVisibility(); updateRekap(); }
 });
 
 /* ---------- Petugas name/NIP sync into signature cards ---------- */
@@ -852,10 +914,7 @@ function collectFormData(){
     eksentrisitas: Array.from(document.querySelectorAll('#tblEksentrisitas tbody tr')).map(r=>({
       p:r.querySelector('.eks-penunjukan').value, ats:r.querySelector('.eks-ats').value
     })),
-    kemampuanUlang: Array.from(document.querySelectorAll('.pval')).map(el=>el.value),
-    penjatah: Array.from(document.querySelectorAll('#tblPenjatah tbody tr')).map(r=>({
-      pl:r.querySelector('.pl-val').value, i:r.querySelector('.i-val').value
-    }))
+    kemampuanUlang: Array.from(document.querySelectorAll('.pval')).map(el=>el.value)
   };
   data.__signatures = {};
   ['1','2','3','pemilik'].forEach(id=>{
@@ -866,7 +925,7 @@ function collectFormData(){
 
 function saveForm(){
   const data = collectFormData();
-  localStorage.setItem('cerapan_te_data', JSON.stringify(data));
+  localStorage.setItem('cerapan_te_perhiasan_data', JSON.stringify(data));
   const chip = document.getElementById('statusChip');
   chip.textContent = 'Tersimpan ✓ ' + new Date().toLocaleTimeString('id-ID');
   chip.classList.add('show');
@@ -874,9 +933,18 @@ function saveForm(){
 }
 
 function loadForm(){
-  const raw = localStorage.getItem('cerapan_te_data');
+  const raw = localStorage.getItem('cerapan_te_perhiasan_data');
   if(!raw){ alert('Belum ada data tersimpan di perangkat ini.'); return; }
   const data = JSON.parse(raw);
+  applyFormData(data);
+  const chip = document.getElementById('statusChip');
+  chip.textContent = 'Data dimuat ✓';
+  chip.classList.add('show');
+  setTimeout(()=>chip.classList.remove('show'), 3000);
+}
+
+/* Menerapkan objek data (dari localStorage ATAU dari file .json yang diimpor) ke formulir */
+function applyFormData(data){
   const form = document.getElementById('cerapanForm');
   Object.keys(data).forEach(k=>{
     if(k.startsWith('__')) return;
@@ -898,9 +966,6 @@ function loadForm(){
       if(t.eksentrisitas[i]){ r.querySelector('.eks-penunjukan').value=t.eksentrisitas[i].p||''; r.querySelector('.eks-ats').value=t.eksentrisitas[i].ats||''; }
     });
     document.querySelectorAll('.pval').forEach((el,i)=>{ if(t.kemampuanUlang[i]!==undefined) el.value=t.kemampuanUlang[i]; });
-    document.querySelectorAll('#tblPenjatah tbody tr').forEach((r,i)=>{
-      if(t.penjatah[i]){ r.querySelector('.pl-val').value=t.penjatah[i].pl||''; r.querySelector('.i-val').value=t.penjatah[i].i||''; }
-    });
   }
   if(data.__signatures){
     Object.keys(data.__signatures).forEach(id=>{
@@ -910,33 +975,91 @@ function loadForm(){
       img.src = data.__signatures[id];
     });
   }
+  refreshPetugasOptions();
   syncPetugasName(1); syncPetugasNip(1);
   syncPetugasName(2); syncPetugasNip(2);
   syncPetugasName(3); syncPetugasNip(3);
   hitungKebenaran('tblKebenaranTera');
-  hitungKebenaran('tblKebenaranTeraUlang');
+  syncBkdTeraUlang();
   hitungEksentrisitas();
   hitungKemampuanUlang();
-  hitungPenjatah();
   hitungKelas();
+  updateHasilPengujianVisibility();
+}
+
+/* ---------- Ekspor / Impor sebagai file .json (pindah data antar perangkat) ---------- */
+function exportForm(){
+  const data = collectFormData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+
+  const namaPemilik = (document.querySelector('[name=nama_pemilik]')||{}).value || '';
+  const tanggal = (document.querySelector('[name=tanggal_pengujian]')||{}).value || '';
+  let fname = 'cerapan_te_perhiasan';
+  if(namaPemilik.trim()) fname += '_' + namaPemilik.trim().replace(/\s+/g,'_');
+  if(tanggal) fname += '_' + tanggal;
+  fname += '.json';
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
   const chip = document.getElementById('statusChip');
-  chip.textContent = 'Data dimuat ✓';
+  chip.textContent = 'File diunduh ✓ (' + fname + ')';
   chip.classList.add('show');
   setTimeout(()=>chip.classList.remove('show'), 3000);
 }
 
+function importForm(){
+  document.getElementById('importFileInput').click();
+}
+
+function handleImportFile(event){
+  const file = event.target.files[0];
+  event.target.value = ''; // supaya file yang sama bisa dipilih lagi nanti
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    let data;
+    try{
+      data = JSON.parse(e.target.result);
+    }catch(err){
+      alert('Gagal membaca file. Pastikan file adalah hasil "Unduh Data (.json)" dari formulir ini.');
+      return;
+    }
+    applyFormData(data);
+    const chip = document.getElementById('statusChip');
+    chip.textContent = 'Data diimpor ✓';
+    chip.classList.add('show');
+    setTimeout(()=>chip.classList.remove('show'), 3000);
+  };
+  reader.onerror = function(){
+    alert('Gagal membaca file yang dipilih.');
+  };
+  reader.readAsText(file);
+}
+
 function clearForm(){
   if(!confirm('Hapus semua data yang diisi pada formulir ini?')) return;
-  localStorage.removeItem('cerapan_te_data');
+  localStorage.removeItem('cerapan_te_perhiasan_data');
   document.getElementById('cerapanForm').reset();
   ['1','2','3','pemilik'].forEach(id=>clearSig(id));
   document.querySelectorAll('.hasil-out, .eks-hasil').forEach(c=>{c.textContent='-'; c.className=c.className.split(' ')[0]+' result-pending';});
   document.querySelectorAll('.selisih-out, .eks-selisih, .e-out').forEach(c=>c.textContent='-');
   document.getElementById('ulangR').textContent='-';
   document.getElementById('ulangHasil').textContent='-';
-  document.getElementById('penjatahRata').textContent='-';
-  document.getElementById('penjatahHasil').textContent='-';
   document.getElementById('kelasHint').classList.remove('show');
+  syncBkdTeraUlang();
+  refreshPetugasOptions();
+  syncPetugasName(1); syncPetugasNip(1);
+  syncPetugasName(2); syncPetugasNip(2);
+  syncPetugasName(3); syncPetugasNip(3);
+  updateHasilPengujianVisibility();
   updateRekap();
 }
 
@@ -947,18 +1070,21 @@ window.addEventListener('DOMContentLoaded', ()=>{
     {no:1, titik:'Min', bkd:0.5},
     {no:2, titik:'Muatan pada BKD 1e', bkd:1},
     {no:3, titik:'Maks', bkd:1.5},
-  ]);
+  ], {bkdSource:true});
   buildKebenaranTable('tblKebenaranTeraUlang', [
     {no:1, titik:'Min', bkd:1},
     {no:2, titik:'Muatan pada BKD 2e', bkd:2},
     {no:3, titik:'Maks', bkd:3},
-  ]);
+  ], {bkdReadonly:true});
+  syncBkdTeraUlang();
   buildEksentrisitas();
   initSignatures();
+  initPetugasSelects();
+  updateHasilPengujianVisibility();
   updateRekap();
 
   // auto load if data exists
-  if(localStorage.getItem('cerapan_te_data')){
+  if(localStorage.getItem('cerapan_te_perhiasan_data')){
     loadForm();
   }
 });
