@@ -1,0 +1,2219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal MetKK — Kemetrologian Kota Kupang</title>
+<style>
+  :root{
+    --cream:#F6E7C1;
+    --gold:#C9962C;
+    --gold-light:#E8B84B;
+    --brown-deep:#3B2414;
+    --brown:#6B4226;
+    --brown-soft:#8C5A34;
+    --ink:#2A1A0E;
+    --paper:#FBF3DE;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Segoe UI', 'Trebuchet MS', sans-serif;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(255,244,214,0.35), transparent 55%),
+      linear-gradient(160deg, var(--brown-deep) 0%, var(--brown) 45%, var(--gold) 100%);
+    color:var(--paper);
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* faint measurement-tick backdrop, nods to UTTP calibration scales */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255,235,180,0.06) 0 1px, transparent 1px 40px),
+      repeating-linear-gradient(0deg, rgba(255,235,180,0.05) 0 1px, transparent 1px 40px);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  header{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    padding:48px 20px 12px;
+  }
+
+  .eyebrow{
+    letter-spacing:.35em;
+    font-size:12px;
+    color:var(--gold-light);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+
+  h1{
+    font-family:Georgia, 'Times New Roman', serif;
+    font-size:clamp(32px, 6vw, 56px);
+    margin:0;
+    letter-spacing:.04em;
+    color:var(--paper);
+    text-shadow:0 2px 12px rgba(0,0,0,.35);
+  }
+
+  h1 span{ color:var(--gold-light); }
+
+  .subtitle{
+    margin-top:10px;
+    font-size:15px;
+    color:#EBD8AE;
+    max-width:520px;
+    margin-left:auto;
+    margin-right:auto;
+    line-height:1.5;
+  }
+
+  main{
+    position:relative;
+    z-index:1;
+    max-width:900px;
+    margin:0 auto;
+    padding:40px 20px 80px;
+  }
+
+  .constellation{
+    position:relative;
+    height:680px;
+    max-width:640px;
+    margin:0 auto;
+  }
+
+  .marquee-wrap{
+    position:relative;
+    z-index:1;
+    max-width:900px;
+    margin:0 auto 6px;
+    overflow:hidden;
+    border-top:1px solid rgba(232,216,174,0.35);
+    border-bottom:1px solid rgba(232,216,174,0.35);
+    background:linear-gradient(90deg, rgba(59,36,20,0.55), rgba(107,66,38,0.35), rgba(59,36,20,0.55));
+    padding:9px 0;
+    white-space:nowrap;
+  }
+
+  .marquee-wrap .marquee-track{
+    display:inline-block;
+    padding-left:100%;
+    animation:marquee-scroll 22s linear infinite;
+  }
+
+  .marquee-wrap .marquee-track span{
+    display:inline-block;
+    padding:0 3em;
+    font-size:13px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--gold-light);
+    text-shadow:0 1px 6px rgba(0,0,0,.4);
+  }
+
+  @keyframes marquee-scroll{
+    0%{ transform:translateX(0); }
+    100%{ transform:translateX(-100%); }
+  }
+
+  @media (max-width:600px){
+    .marquee-wrap .marquee-track span{ font-size:11px; letter-spacing:.08em; }
+  }
+
+  .node{
+    position:absolute;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-decoration:none;
+    color:var(--ink);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+
+  .node .circle{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:linear-gradient(160deg, var(--paper), #EFD9A6);
+    box-shadow:0 8px 22px rgba(0,0,0,.35), inset 0 0 0 3px rgba(107,66,38,.25);
+    transition:transform .25s ease, box-shadow .25s ease;
+    overflow:hidden;
+  }
+
+  .node .circle img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+  }
+
+  .node:hover{ transform:translateY(-6px); }
+  .node:hover .circle{ box-shadow:0 14px 30px rgba(0,0,0,.45), inset 0 0 0 3px var(--gold); }
+
+  .node .label{
+    margin-top:12px;
+    font-size:14px;
+    font-weight:600;
+    color:var(--paper);
+    text-align:center;
+    text-shadow:0 1px 6px rgba(0,0,0,.4);
+  }
+
+  .node .sub{
+    font-size:11px;
+    color:#E4CE9C;
+    margin-top:2px;
+  }
+
+  /* Positions mirroring the original layout: top, left, right, and a large center hub */
+  /* topleft & topright ditarik lebih dekat ke hub agar tampak mengelilingi Admin (orbit ~250px dari pusat hub, sudut 45°/315°) */
+  .node--topleft{ top:173px; left:93px; }
+  .node--topleft .circle{ width:100px; height:100px; font-size:30px; }
+
+  .node--topright{ top:173px; right:93px; }
+  .node--topright .circle{ width:100px; height:100px; font-size:30px; }
+
+  .node--top{ top:110px; left:50%; transform:translateX(-50%); }
+  .node--top .circle{ width:110px; height:110px; font-size:34px; }
+
+  .node--left{ top:300px; left:0; }
+  .node--left .circle{ width:110px; height:110px; font-size:34px; }
+
+  .node--right{ top:300px; right:0; }
+  .node--right .circle{ width:110px; height:110px; font-size:34px; }
+
+  .node--hub{ top:300px; left:50%; transform:translateX(-50%); z-index:2; }
+  .node--hub .circle{
+    width:200px; height:200px;
+    font-size:20px;
+    font-family:Georgia, serif;
+    font-weight:700;
+    color:var(--brown-deep);
+    background:radial-gradient(circle at 35% 30%, #FFFBEE, var(--gold-light) 70%, var(--gold) 100%);
+    box-shadow:0 12px 34px rgba(0,0,0,.45), inset 0 0 0 4px rgba(107,66,38,.35);
+    flex-direction:column;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .node--hub .circle .hub-logo{
+    position:relative;
+    width:170px;
+    height:170px;
+    object-fit:contain;
+    pointer-events:none;
+    z-index:1;
+  }
+  .node--hub .circle small{
+    display:block;
+    font-family:'Segoe UI', sans-serif;
+    font-weight:800;
+    font-size:12px;
+    margin-top:4px;
+    color:var(--brown);
+  }
+
+  .footer-row{
+    position:absolute;
+    top:550px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:24px;
+  }
+
+  .node--footer{
+    position:static;
+    width:260px;
+  }
+  .node--footer .circle{
+    width:auto;
+    height:auto;
+    padding:12px 22px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:600;
+    gap:8px;
+    flex-direction:row;
+  }
+
+  .node--footer-side{ position:static; width:auto; }
+  .node--footer-side .circle{
+    width:78px;
+    height:78px;
+    font-size:24px;
+    padding:0;
+  }
+  .node--footer-side .label{ font-size:11px; margin-top:6px; }
+
+  footer{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    padding:20px;
+    font-size:12px;
+    color:#D8BE86;
+  }
+
+  .tim-admin{
+    position:relative;
+    z-index:1;
+    max-width:640px;
+    margin:6px auto 0;
+    text-align:center;
+  }
+
+  .tim-admin .tim-admin-title{
+    font-size:12px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:var(--gold-light);
+    margin-bottom:12px;
+    font-weight:600;
+  }
+
+  .foto-admin-box{
+    width:113px;
+    height:151px;
+    margin:0 auto;
+    position:relative;
+    border-radius:6px;
+    overflow:hidden;
+    border:4px solid var(--gold-light);
+    box-shadow:0 10px 26px rgba(0,0,0,.4), inset 0 0 0 2px rgba(107,66,38,.3);
+    background:var(--paper);
+  }
+
+  .foto-admin-box img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    opacity:0;
+    transition:opacity 1.2s ease-in-out;
+  }
+
+  .foto-admin-box img.active{ opacity:1; }
+
+  @media (max-width:600px){
+    header{ padding:28px 16px 4px; }
+    main{ padding:20px 16px 56px; }
+
+    h1{ font-size:clamp(26px, 8vw, 40px); }
+    .subtitle{ font-size:14px; padding:0 4px; }
+
+    .constellation{
+      height:auto;
+      max-width:320px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:24px;
+      margin:0 auto;
+    }
+
+    .node{ position:static; transform:none !important; }
+    .node:active .circle{ transform:scale(.96); }
+
+    .row-mobile-top{
+      order:0;
+      display:flex;
+      justify-content:center;
+      gap:16px;
+      width:100%;
+    }
+
+    .node--top{ order:1; }
+
+    .node--hub{ order:2; }
+    .node--hub .circle{ width:150px; height:150px; font-size:17px; }
+    .node--hub .circle .hub-logo{ width:128px; height:128px; }
+
+    .row-mobile{
+      order:3;
+      display:flex;
+      justify-content:center;
+      gap:16px;
+      width:100%;
+    }
+
+    .node--top,.node--left,.node--right,.node--topleft,.node--topright{
+      position:static;
+      width:auto;
+    }
+    .node--top .circle,.node--left .circle,.node--right .circle,.node--topleft .circle,.node--topright .circle{
+      width:82px; height:82px; font-size:24px;
+    }
+    .node--top .label,.node--left .label,.node--right .label,.node--topleft .label,.node--topright .label{
+      font-size:11.5px;
+      margin-top:8px;
+    }
+    .node--top .sub,.node--left .sub,.node--right .sub,.node--topleft .sub,.node--topright .sub{ font-size:9px; }
+
+    .footer-row{
+      order:4;
+      position:static;
+      left:auto;
+      transform:none;
+      display:flex;
+      flex-direction:row;
+      flex-wrap:wrap;
+      justify-content:center;
+      align-items:center;
+      row-gap:14px;
+      column-gap:10px;
+      width:100%;
+    }
+    .node--footer{
+      position:static;
+      width:auto;
+      order:2;
+    }
+    .node--footer .circle{
+      max-width:170px;
+      white-space:normal;
+      line-height:1.35;
+      padding:9px 16px;
+      font-size:11.5px;
+      text-align:center;
+    }
+
+    .node--footer-side .circle{ width:56px; height:56px; font-size:19px; }
+    .node--footer-side .label{ font-size:9.5px; margin-top:6px; }
+    .node--footer-side:first-of-type{ order:1; }
+    .node--footer-side:last-of-type{ order:3; }
+
+    .tim-admin{ margin-top:4px; }
+    .tim-admin .tim-admin-title{ font-size:11px; letter-spacing:.18em; }
+    .foto-admin-box{ width:100px; height:134px; }
+  }
+
+  @media (max-width:380px){
+    header{ padding:22px 12px 2px; }
+    main{ padding:16px 12px 48px; }
+
+    .constellation{ max-width:280px; gap:20px; }
+
+    .row-mobile-top, .row-mobile{ gap:12px; }
+
+    .node--top .circle,.node--left .circle,.node--right .circle,.node--topleft .circle,.node--topright .circle{
+      width:72px; height:72px; font-size:21px;
+    }
+    .node--top .label,.node--left .label,.node--right .label,.node--topleft .label,.node--topright .label{
+      font-size:10.5px;
+    }
+
+    .node--hub .circle{ width:132px; height:132px; font-size:15px; }
+    .node--hub .circle .hub-logo{ width:112px; height:112px; }
+
+    .footer-row{ column-gap:8px; row-gap:12px; }
+    .node--footer .circle{ max-width:150px; font-size:11px; padding:8px 14px; }
+    .node--footer-side .circle{ width:48px; height:48px; font-size:16px; }
+    .node--footer-side .label{ font-size:9px; }
+  }
+
+  .hidden{ display:none !important; }
+
+  .admin-header{
+    text-align:center;
+    padding:40px 20px 10px;
+  }
+  .admin-header .back{
+    display:inline-block;
+    margin-bottom:14px;
+    font-size:13px;
+    color:var(--gold-light);
+    text-decoration:none;
+    border:1px solid rgba(232,184,75,.5);
+    padding:5px 14px;
+    border-radius:20px;
+  }
+  .admin-header .back:hover{ background:rgba(232,184,75,.15); }
+
+  .admin-grid{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:36px;
+    max-width:760px;
+    margin:30px auto 60px;
+    padding:0 20px;
+  }
+
+  .admin-node{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-decoration:none;
+    width:130px;
+  }
+  .admin-node .circle{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:38px;
+    background:linear-gradient(160deg, var(--paper), #EFD9A6);
+    box-shadow:0 8px 22px rgba(0,0,0,.35), inset 0 0 0 3px rgba(107,66,38,.25);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .admin-node:hover .circle{
+    transform:translateY(-6px);
+    box-shadow:0 14px 30px rgba(0,0,0,.45), inset 0 0 0 3px var(--gold);
+  }
+  .admin-node .label{
+    margin-top:12px;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.03em;
+    color:var(--paper);
+    text-align:center;
+    text-shadow:0 1px 6px rgba(0,0,0,.4);
+  }
+
+  @media (max-width:600px){
+    .admin-grid{ gap:22px 18px; padding:0 12px; }
+    .admin-node{ width:96px; }
+    .admin-node .circle{ width:86px; height:86px; font-size:26px; }
+    .admin-node .label{ font-size:12px; }
+  }
+
+  @media (max-width:380px){
+    .admin-grid{ gap:18px 14px; }
+    .admin-node{ width:82px; }
+    .admin-node .circle{ width:72px; height:72px; font-size:22px; }
+    .admin-node .label{ font-size:10.5px; }
+  }
+
+  @media (max-width:600px){
+    .table-wrap{ padding:0 12px; margin:16px auto 48px; }
+    table.syarat-table{ font-size:13px; min-width:560px; }
+    table.syarat-table thead th{ padding:10px 12px; font-size:12px; }
+    table.syarat-table tbody td{ padding:10px 12px; }
+  }
+
+  .table-wrap{
+    max-width:960px;
+    margin:20px auto 60px;
+    padding:0 20px;
+    overflow-x:auto;
+  }
+  table.syarat-table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 10px 26px rgba(0,0,0,.35);
+    font-size:14px;
+    min-width:640px;
+  }
+  table.syarat-table thead th{
+    background:var(--brown-deep);
+    color:var(--gold-light);
+    text-align:left;
+    padding:12px 14px;
+    font-size:13px;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+  }
+  table.syarat-table tbody td{
+    padding:12px 14px;
+    border-bottom:1px solid rgba(107,66,38,.15);
+    vertical-align:top;
+  }
+  table.syarat-table tbody tr:nth-child(even){ background:#F0DFAF; }
+  table.syarat-table tbody tr:hover{ background:#E8CE8B; }
+  table.syarat-table td.col-no{ width:50px; text-align:center; font-weight:700; }
+  table.syarat-table a.dl-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:var(--brown-deep);
+    background:var(--gold-light);
+    padding:6px 12px;
+    border-radius:16px;
+    font-size:13px;
+    font-weight:700;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  table.syarat-table a.dl-link:hover{ background:var(--gold); }
+</style>
+</head>
+<body>
+
+<div id="homeView">
+
+<header>
+  <div class="eyebrow">Dinas Perindustrian &amp; Perdagangan · Kota Kupang</div>
+  <h1>Portal <span>MetKK</span></h1>
+  <p class="subtitle">Gerbang layanan digital Bidang Kemetrologian — akses tera, tera ulang, dan pemantauan UTTP dalam satu portal.</p>
+</header>
+
+<main>
+  <div class="marquee-wrap" aria-hidden="false">
+    <div class="marquee-track">
+      <span>Bidang Kemetrologian Dinas Perindustrian dan Perdagangan Kota Kupang - Tim ADMINISTRASI 2026</span>
+      <span>Bidang Kemetrologian Dinas Perindustrian dan Perdagangan Kota Kupang - Tim ADMINISTRASI 2026</span>
+    </div>
+  </div>
+
+  <div class="constellation">
+
+    <div class="row-mobile-top">
+      <a href="pengaduan-metrologi-kupang.html" target="_blank" rel="noopener" class="node node--topleft" title="DUMAS — Layanan Pengaduan Masyarakat">
+        <div class="circle"><img src="logo/logo_DUMAS.png" alt="DUMAS"></div>
+        <div class="label">DUMAS</div>
+	<div class="sub">Layanan Pengaduan Masyarakat</div>
+      </a>
+
+      <a href="skm-tera-kupang.html" target="_blank" rel="noopener" class="node node--topright" title="Survey Kepuasan Masyarakat">
+        <div class="circle"><img src="logo/logo_SKM.png" alt="SKM"></div>
+        <div class="label">SKM</div>
+        <div class="sub">Survey Kepuasan Masyarakat</div>
+      </a>
+    </div>
+
+    <a href="https://metrologi-kotakupang.web.app" target="_blank" rel="noopener" class="node node--top" title="SIWATER — Sistem Informasi Wajib Tera">
+      <div class="circle"><img src="logo/logo_SIWATER.jpg" alt="SIWATER"></div>
+      <div class="label">SIWATER</div>
+      <div class="sub">Sistem Informasi Wajib Tera</div>
+    </a>
+
+    <div class="row-mobile">
+      <a href="https://tera-ulang-tum.web.app" target="_blank" rel="noopener" class="node node--left" title="SITANTRUM — Sistem Antrian Tera Ulang TUM">
+        <div class="circle"><img src="logo/logo_SITANTRUM.jpg" alt="SITANTRUM"></div>
+        <div class="label">SITANTRUM</div>
+        <div class="sub">Antrian Tera Ulang TUM</div>
+      </a>
+
+      <a href="https://datastudio.google.com/u/0/reporting/fd7e3506-ab84-482f-83d2-c8f974f898ef/page/8pKtD" target="_blank" rel="noopener" class="node node--right" title="Infografis Metrologi">
+        <div class="circle"><img src="logo/logo_INFOGRAFIS.jpg" alt="Infografis"></div>
+        <div class="label">Infografis</div>
+        <div class="sub">Data &amp; Statistik</div>
+      </a>
+    </div>
+
+    <a href="#" id="loginBtn" class="node node--hub" title="Masuk ke Admin MetKK">
+      <div class="circle">
+        <img class="hub-logo" src="logo/logo_ADMIN.png" alt="Admin">
+      </div>
+    </a>
+
+    <div class="footer-row">
+      <a href="https://metrologi.kemendag.go.id" target="_blank" rel="noopener" class="node node--footer-side" title="SIMPEL Kemendag">
+        <div class="circle">🌐</div>
+        <div class="label">SIMPEL</div>
+      </a>
+
+      <a href="#" id="supportBtn" class="node node--footer" title="Layanan Pendukung">
+        <div class="circle">📖 Layanan Pendukung</div>
+      </a>
+
+      <a href="https://metrologi.kemendag.go.id/uptp4/uttp_guide/index.php/Main_Page" target="_blank" rel="noopener" class="node node--footer-side" title="Wiki UTTP">
+        <div class="circle">📚</div>
+        <div class="label">Wiki UTTP</div>
+      </a>
+    </div>
+
+  </div>
+
+  <div class="tim-admin">
+    <div class="tim-admin-title">Tim Administrasi 2026</div>
+    <div class="foto-admin-box" id="fotoAdminBox">
+      <img src="foto_admin/admin1.jpeg" class="active" alt="Tim Administrasi 2026">
+      <img src="foto_admin/admin2.jpg" alt="Tim Administrasi 2026">
+      <img src="foto_admin/admin3.jpg" alt="Tim Administrasi 2026">
+      <img src="foto_admin/admin4.jpg" alt="Tim Administrasi 2026">
+      <img src="foto_admin/admin5.jpeg" alt="Tim Administrasi 2026">
+      <img src="foto_admin/admin6.jpeg" alt="Tim Administrasi 2026">
+      <img src="foto_admin/admin7.jpeg" alt="Tim Administrasi 2026">
+      <img src="foto_admin/admin8.jpeg" alt="Tim Administrasi 2026">
+    </div>
+  </div>
+</main>
+
+<footer>
+  © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+</footer>
+
+</div>
+
+<div id="supportView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn2" class="back">← Kembali ke Portal</a>
+    <div class="eyebrow">Layanan Pendukung</div>
+    <h1>Portal <span>MetKK</span></h1>
+    <p class="subtitle">Referensi regulasi dan dokumen pendukung Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="admin-grid">
+    <a href="#" id="aturanBaruBtn" class="admin-node" title="REGULASI">
+      <div class="circle">🧾</div>
+      <div class="label">REGULASI</div>
+    </a>
+    <a href="#" id="dokumenLainnyaBtn" class="admin-node" title="SURAT KEPUTUSAN">
+      <div class="circle">🗂️</div>
+      <div class="label">SURAT KEPUTUSAN</div>
+    </a>
+    <a href="#" id="aturanBtn" class="admin-node" title="SYARAT TEKNIS UTTP">
+      <div class="circle">📐</div>
+      <div class="label">SYARAT TEKNIS UTTP</div>
+    </a>
+    <a href="#" id="stSumlBtn" class="admin-node" title="SYARAT TEKNIS SUML">
+      <div class="circle">⚖️</div>
+      <div class="label">SYARAT TEKNIS SUML</div>
+    </a>
+    <a href="#" id="sopBtn" class="admin-node" title="STANDAR OPERASIONAL PROSEDUR">
+      <div class="circle">📑</div>
+      <div class="label">STANDAR OPERASIONAL PROSEDUR</div>
+    </a>
+    <a href="#" id="pksBtn" class="admin-node" title="PERJANJIAN KERJA SAMA">
+      <div class="circle">📘</div>
+      <div class="label">PERJANJIAN KERJA SAMA</div>
+    </a>
+    <a href="#" id="ksoBtn" class="admin-node" title="KERJA SAMA OPERASIONAL">
+      <div class="circle">🤝</div>
+      <div class="label">KERJA SAMA OPERASIONAL</div>
+    </a>
+    <a href="#" id="formatCerapanBtn" class="admin-node" title="FORM CERAPAN">
+      <div class="circle">📝</div>
+      <div class="label">FORM CERAPAN</div>
+    </a>
+    <a href="#" id="formatSkhpBtn" class="admin-node" title="FORM SKHP">
+      <div class="circle">📜</div>
+      <div class="label">FORM SKHP</div>
+    </a>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="adminView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn" class="back">← Kembali ke Portal</a>
+    <div class="eyebrow">Admin Panel</div>
+    <h1>Portal <span>MetKK</span></h1>
+    <p class="subtitle">Menu administrasi Bidang Kemetrologian — kelola dokumen dan proses tera/tera ulang.</p>
+  </div>
+
+  <div class="admin-grid">
+    <a href="#" id="statusLayananBtn" class="admin-node" title="STATUS LAYANAN">
+      <div class="circle">📊</div>
+      <div class="label">STATUS LAYANAN</div>
+    </a>
+    <a href="register_uttp.html" id="brtBtn" class="admin-node" title="BUKU REGISTER ELEKTRONIK" target="_blank" rel="noopener">
+      <div class="circle">📖</div>
+      <div class="label">BUKU REGISTER ELEKTRONIK</div>
+    </a>
+    <a href="#" id="agendaSuratBtn" class="admin-node" title="AGENDA SURAT">
+      <div class="circle">📬</div>
+      <div class="label">AGENDA SURAT</div>
+    </a>
+    <a href="#" id="suratTugasBtn" class="admin-node" title="SURAT TUGAS">
+      <div class="circle">🧾</div>
+      <div class="label">SURAT TUGAS</div>
+    </a>
+    <a href="#" id="cerapanBtn" class="admin-node" title="CERAPAN & SKHP ELEKTRONIK">
+      <div class="circle">📝</div>
+      <div class="label">CERAPAN &amp; SKHP ELEKTRONIK</div>
+    </a>
+    <a href="berita-acara-peneraan.html" id="dokumenElektronikBtn" class="admin-node" title="BERITA ACARA ELEKTRONIK" target="_blank" rel="noopener">
+      <div class="circle">📁</div>
+      <div class="label">BERITA ACARA ELEKTRONIK</div>
+    </a>
+    <a href="#" id="laporanTugasBtn" class="admin-node" title="LAPORAN TUGAS">
+      <div class="circle">📋</div>
+      <div class="label">LAPORAN TUGAS</div>
+    </a>
+    <a href="arsip-digital-kemetrologian.html" id="arsipBtn" class="admin-node" title="ARSIP" target="_blank" rel="noopener">
+      <div class="circle">🗄️</div>
+      <div class="label">ARSIP</div>
+    </a>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="laporanTugasView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn16" class="back">← Kembali ke Admin Panel</a>
+    <div class="eyebrow">Admin Panel</div>
+    <h1>Laporan-Laporan <span>Tugas</span></h1>
+    <p class="subtitle">Kumpulan laporan kegiatan tugas Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="admin-grid">
+    <a href="#" id="laporanTeraBtn" class="admin-node" title="LAPORAN KEGIATAN TERA/TERA ULANG">
+      <div class="circle">⚖️</div>
+      <div class="label">LAPORAN KEGIATAN TERA/TERA ULANG</div>
+    </a>
+    <a href="#" id="laporanStuBtn" class="admin-node" title="LAPORAN KEGIATAN STU">
+      <div class="circle">🧮</div>
+      <div class="label">LAPORAN KEGIATAN STU</div>
+    </a>
+    <a href="#" id="laporanPendampinganBtn" class="admin-node" title="LAPORAN KEGIATAN PENDAMPINGAN TERA/TERA ULANG">
+      <div class="circle">🤝</div>
+      <div class="label">LAPORAN KEGIATAN PENDAMPINGAN TERA/TERA ULANG</div>
+    </a>
+    <a href="#" id="laporanPengawasanBtn" class="admin-node" title="LAPORAN KEGIATAN PENGAWASAN">
+      <div class="circle">🔍</div>
+      <div class="label">LAPORAN KEGIATAN PENGAWASAN</div>
+    </a>
+    <a href="#" id="laporanLainnyaBtn" class="admin-node" title="LAPORAN KEGIATAN LAINNYA">
+      <div class="circle">🗂️</div>
+      <div class="label">LAPORAN KEGIATAN LAINNYA</div>
+    </a>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="laporanTeraView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn17" class="back">← Kembali ke Laporan Tugas</a>
+    <div class="eyebrow">Laporan Tugas</div>
+    <h1>Laporan Kegiatan <span>Tera/Tera Ulang</span></h1>
+    <p class="subtitle">Laporan kegiatan tera dan tera ulang Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <p style="padding:24px; text-align:center;">Fitur Laporan Kegiatan Tera/Tera Ulang sedang dalam pengembangan.</p>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="laporanStuView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn18" class="back">← Kembali ke Laporan Tugas</a>
+    <div class="eyebrow">Laporan Tugas</div>
+    <h1>Laporan Kegiatan <span>STU</span></h1>
+    <p class="subtitle">Laporan kegiatan STU Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <p style="padding:24px; text-align:center;">Fitur Laporan Kegiatan STU sedang dalam pengembangan.</p>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="laporanPendampinganView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn19" class="back">← Kembali ke Laporan Tugas</a>
+    <div class="eyebrow">Laporan Tugas</div>
+    <h1>Laporan Kegiatan <span>Pendampingan Tera/Tera Ulang</span></h1>
+    <p class="subtitle">Laporan kegiatan pendampingan tera dan tera ulang Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <p style="padding:24px; text-align:center;">Fitur Laporan Kegiatan Pendampingan Tera/Tera Ulang sedang dalam pengembangan.</p>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="laporanPengawasanView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn20" class="back">← Kembali ke Laporan Tugas</a>
+    <div class="eyebrow">Laporan Tugas</div>
+    <h1>Laporan Kegiatan <span>Pengawasan</span></h1>
+    <p class="subtitle">Laporan kegiatan pengawasan Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <p style="padding:24px; text-align:center;">Fitur Laporan Kegiatan Pengawasan sedang dalam pengembangan.</p>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="laporanLainnyaView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn21" class="back">← Kembali ke Laporan Tugas</a>
+    <div class="eyebrow">Laporan Tugas</div>
+    <h1>Laporan Kegiatan <span>Lainnya</span></h1>
+    <p class="subtitle">Laporan kegiatan lainnya Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <p style="padding:24px; text-align:center;">Fitur Laporan Kegiatan Lainnya sedang dalam pengembangan.</p>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="aturanBaruView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn14" class="back">← Kembali ke Layanan Pendukung</a>
+    <div class="eyebrow">Layanan Pendukung</div>
+    <h1>Aturan <span>&amp; Regulasi</span></h1>
+    <p class="subtitle">Daftar peraturan perundang-undangan Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr>
+          <th class="col-no">No</th>
+          <th>Nama Aturan</th>
+          <th>Peraturan</th>
+          <th>Unduhan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>Metrologi Legal</td>
+          <td>UU Nomor 2 Tahun 1981</td>
+          <td><a class="dl-link" href="pdf_aturan/Metrologi_Legal_UU2_1981.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>Wajib dan Pembebasan Untuk Ditera dan/atau Ditera Ulang serta Syarat-Syarat bagi Alat-Alat UTTP</td>
+          <td>PP Nomor 2 Tahun 1985</td>
+          <td><a class="dl-link" href="pdf_aturan/Wajib_dan_Pembebasan_Tera_PP2_1985.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">3</td>
+          <td>Satuan Turunan, Satuan Tambahan dan Satuan Lain Yang Berlaku</td>
+          <td>PP Nomor 10 Tahun 1987</td>
+          <td><a class="dl-link" href="pdf_aturan/Satuan_Turunan_Tambahan_PP10_1987.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">4</td>
+          <td>Standar Nasional untuk Satuan Ukuran</td>
+          <td>PP Nomor 2 Tahun 1989</td>
+          <td><a class="dl-link" href="pdf_aturan/Standar_Nasional_Satuan_Ukuran_PP2_1989.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">5</td>
+          <td>Unit Metrologi Legal</td>
+          <td>Permendag Nomor 115 Tahun 2018</td>
+          <td><a class="dl-link" href="pdf_aturan/Unit_Metrologi_Legal_Permendag115_2018.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">6</td>
+          <td>Kegiatan Tera dan Tera Ulang Alat Ukur, Alat Takar, Alat Timbang dan Alat Perlengkapan Metrologi Legal</td>
+          <td>Permendag Nomor 24 Tahun 2024</td>
+          <td><a class="dl-link" href="pdf_aturan/Tera_dan_Tera_Ulang_Permendag24_2024.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">7</td>
+          <td>Standar Ukuran Metrologi Legal</td>
+          <td>Permendag Nomor 31 Tahun 2024</td>
+          <td><a class="dl-link" href="pdf_aturan/Standar_Ukuran_Metrologi_Legal_Permendag31_2024.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">8</td>
+          <td>Pengawasan Metrologi Legal</td>
+          <td>Permendag Nomor 30 Tahun 2025</td>
+          <td><a class="dl-link" href="pdf_aturan/Pengawasan_Metrologi_Legal_Permendag30_2025.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="syaratTeknisView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn3" class="back">← Kembali ke Layanan Pendukung</a>
+    <div class="eyebrow">Layanan Pendukung</div>
+    <h1>Syarat Teknis <span>UTTP</span></h1>
+    <p class="subtitle">Daftar syarat teknis UTTP beserta dasar hukum dan berkas unduhan.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr>
+          <th class="col-no">No</th>
+          <th>Nama Syarat Teknis</th>
+          <th>Peraturan</th>
+          <th>Unduhan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>Syarat Teknis Alat Ukur Panjang</td>
+          <td>Kep Dirjen PDN Nomor 32 Tahun 2010</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Alat_Ukur_Panjang_KepDirjenPDN32_2010.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>Syarat Teknis Alat Ukur Permukaan Cairan Otomatis (Automatic Level Gauge)</td>
+          <td>Kep Dirjen SPK Nomor 132 Tahun 2015</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_ALG_KepDirjenSPK132_2015.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">3</td>
+          <td>Syarat Teknis Meter Taksi</td>
+          <td>Kep Dirjen PDN Nomor 27 Tahun 2010</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Meter_Taksi_KepDirjenPDN27_2010.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">4</td>
+          <td>Syarat Teknis Timbangan Bukan Otomatis</td>
+          <td>Kep Dirjen PKTN Nomor 240 Tahun 2023</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_TBO_KepDirjenPKTN240_2023.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">5</td>
+          <td>Syarat Teknis Timbangan Ban Berjalan</td>
+          <td>Kep Dirjen PDN Nomor 28 Tahun 2010</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Timbangan_Ban_Berjalan_KepDirjenPDN28_2010.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">6</td>
+          <td>Syarat Teknis Timbangan Pengisian</td>
+          <td>Kep Dirjen SPK Nomor 900 Tahun 2011</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Timbangan_Pengisian_KepDirjenSPK900_2011.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">7</td>
+          <td>Syarat Teknis Timbangan Pengecek dan Penyortir</td>
+          <td>Kep Dirjen SPK Nomor 903 Tahun 2011</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Timbangan_Pengecek&Penyortir_KepDirjenSPK903_2011.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">8</td>
+          <td>Syarat Teknis Timbangan Kendaraan Bergerak (Weighing in Motion)</td>
+          <td>Kep Dirjen PKTN Nomor 20 Tahun 2021</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_WIM_KepDirjenPKTN20_2021.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">9</td>
+          <td>Syarat Teknis Takaran</td>
+          <td>Kep Dirjen SPK Nomor 904 Tahun 2011</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Takaran_KepDirjenSPK904_2011.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">10</td>
+          <td>Syarat Teknis Gelas Ukur</td>
+          <td>Kep Dirjen SPK Nomor 901 Tahun 2011</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Gelas_Ukur_KepDirjenSPK901_2011.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">11</td>
+          <td>Syarat Teknis Labu Ukur</td>
+          <td>Kep Dirjen SPK Nomor 902 Tahun 2011</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Labu_Ukur_KepDirjenSPK902_2011.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">12</td>
+          <td>Syarat Teknis Tangki Ukur Mobil</td>
+          <td>Kep Dirjen PDN Nomor 34 Tahun 2010</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_TUM_KepDirjenPDN34_2010.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">13</td>
+          <td>Syarat Teknis Tangki Ukur Kapal, Tangki Ukur Tongkang,  dan Tangki Ukur Apung</td>
+          <td>Kep Dirjen SPK Nomor 249 Tahun 2013</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_TUK_TUT&TUA_KepDirjenSPK249_2013.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">14</td>
+          <td>Syarat Teknis Tangki Ukur Tetap Silinder Tegak</td>
+          <td>Kep Dirjen PDN Nomor 25 Tahun 2010</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_TUTSIT_KepDirjenPDN25_2010.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">15</td>
+          <td>Syarat Teknis Tangki Ukur Tetap Bentuk Bola</td>
+          <td>Kep Dirjen SPK Nomor 250 Tahun 2013</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_TUTBO_KepDirjenSPK250_2013.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">16</td>
+          <td>Syarat Teknis Pompa Ukur BBM</td>
+          <td>Kep Dirjen PKTN Nomor 5 Tahun 2026</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_PUBBM_KepDirjenPKTN5_2026.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">17</td>
+          <td>Syarat Teknis Meter Arus BBM</td>
+          <td>Kep Dirjen PKTN Nomor 18 Tahun 2025</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Meter_Arus_BBM_KepDirjenPKTN18_2025.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">18</td>
+          <td>Syarat Teknis Meter Air</td>
+          <td>Kep Dirjen SPK Nomor 133 Tahun 2015</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Meter_Air_KepDirjenSPK133_2015.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">19</td>
+          <td>Syarat Teknis Meter Kadar Air</td>
+          <td>Kep Dirjen PKTN Nomor 122 Tahun 2020</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_MKA_KepDirjenPKTN122_2020.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">20</td>
+          <td>Syarat Teknis Meter Parkir</td>
+          <td>Kep Dirjen PKTN Nomor 162 Tahun 2019</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Meter_Parkir_KepDirjenPKTN162_2019.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">21</td>
+          <td>Syarat Teknis Meter kWh</td>
+          <td>Kep Dirjen PKTN Nomor 161 Tahun 2019</td>
+          <td><a class="dl-link" href="pdf_st_uttp/ST_Meter_kWh_KepDirjenPKTN161_2019.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="stSumlView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn15" class="back">← Kembali ke Layanan Pendukung</a>
+    <div class="eyebrow">Layanan Pendukung</div>
+    <h1>Syarat Teknis <span>SUML</span></h1>
+    <p class="subtitle">Daftar syarat teknis SUML beserta dasar hukum dan berkas unduhan.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr>
+          <th class="col-no">No</th>
+          <th>Nama Syarat Teknis</th>
+          <th>Peraturan</th>
+          <th>Unduhan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>Syarat Teknis SUML Besaran Massa</td>
+          <td>Kep Dirjen PKTN Nomor 123 Tahun 2020</td>
+          <td><a class="dl-link" href="pdf_st_suml/ST_SUML_Massa_KepDirjenPKTN123_2020.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>Syarat Teknis SUML Besaran Volume</td>
+          <td>Kep Dirjen PKTN Nomor 124 Tahun 2020</td>
+          <td><a class="dl-link" href="pdf_st_suml/ST_SUML_Volume_KepDirjenPKTN124_2020.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">3</td>
+          <td>Syarat Teknis SUML Besaran Panjang</td>
+          <td>Kep Dirjen PKTN Nomor 22 Tahun 2021</td>
+          <td><a class="dl-link" href="pdf_st_suml/ST_SUML_Panjang_KepDirjenPKTN22_2021.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">4</td>
+          <td>Syarat Teknis SUML Besaran Hambatan Listrik</td>
+          <td>Kep Dirjen PKTN Nomor 23 Tahun 2021</td>
+          <td><a class="dl-link" href="pdf_st_suml/ST_SUML_Hambatan_Listrik_KepDirjenPKTN23_2021.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">5</td>
+          <td>Syarat Teknis SUML Besaran Tegangan Listrik</td>
+          <td>Kep Dirjen PKTN Nomor 21 Tahun 2021</td>
+          <td><a class="dl-link" href="pdf_st_suml/ST_SUML_Tegangan_Listrik_KepDirjenPKTN21_2021.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">6</td>
+          <td>Syarat Teknis SUML Besaran Arus Listrik</td>
+          <td>Kep Dirjen PKTN Nomor 25 Tahun 2021</td>
+          <td><a class="dl-link" href="pdf_st_suml/ST_SUML_Arus_Listrik_KepDirjenPKTN25_2021.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">7</td>
+          <td>Syarat Teknis SUML Besaran Energi Listrik</td>
+          <td>Kep Dirjen PKTN Nomor 24 Tahun 2021</td>
+          <td><a class="dl-link" href="pdf_st_suml/ST_SUML_Energi_Listrik_KepDirjenPKTN24_2021.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">8</td>
+          <td>Syarat Teknis SUML Besaran Waktu</td>
+          <td>Kep Dirjen PKTN Nomor 116 Tahun 2022</td>
+          <td><a class="dl-link" href="pdf_st_suml/ST_SUML_Waktu_KepDirjenPKTN116_2022.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">9</td>
+          <td>Syarat Teknis SUML Besaran Tekanan</td>
+          <td>Kep Dirjen PKTN Nomor 241 Tahun 2023</td>
+          <td><a class="dl-link" href="pdf_st_suml/ST_SUML_Tekanan_KepDirjenPKTN241_2023.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="sopView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn6" class="back">← Kembali ke Layanan Pendukung</a>
+    <div class="eyebrow">Layanan Pendukung</div>
+    <h1>Standard Operating <span>Procedure</span></h1>
+    <p class="subtitle">Daftar SOP Bidang Kemetrologian beserta kode formulir dan berkas unduhan.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr>
+          <th class="col-no">No</th>
+          <th>Nama SOP</th>
+          <th>Kode Formulir</th>
+          <th>Unduhan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>SOP Penanganan Pengaduan Masyarakat</td>
+          <td>F.B.3-01.1</td>
+          <td><a class="dl-link" href="pdf_sop/SOP_Penanganan_Dumas.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>SOP Penanganan Konsultasi/Pengaduan Unit Metrologi Legal</td>
+          <td>F.B.3-01.2</td>
+          <td><a class="dl-link" href="pdf_sop/SOP_Penanganan_Konsultasi_Pengaduan_UML.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">3</td>
+          <td>SOP Pelayanan Tera Dan Tera Ulang UTTP di Kantor</td>
+          <td>F.E-01.1</td>
+          <td><a class="dl-link" href="pdf_sop/SOP_Pelayanan_TTU_di_Kantor.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">4</td>
+          <td>SOP Pelayanan Sidang Tera Ulang di Luar Kantor</td>
+          <td>F.E-01.2</td>
+          <td><a class="dl-link" href="pdf_sop/SOP_Pelayanan-STU_di_Luar_Kantor.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">5</td>
+          <td>SOP Pelayanan Tera dan Tera Ulang Di Tempat UTTP Terpakai, Tempat UTTP Terpasang Tetap, Gudang Importir, Pabrik dan Laboratorium Lain</td>
+          <td>F.E-01.3</td>
+          <td><a class="dl-link" href="pdf_sop/SOP_Pelayanan_TTU_di_Tempat_Terpakai.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">6</td>
+          <td>SOP Penanganan Pelayanan Tera Dan Tera Ulang Antar Unit Metrologi Legal</td>
+          <td>F.E-01.4</td>
+          <td><a class="dl-link" href="pdf_sop/SOP_Penanganan_Pelayanan_TTU_Antar_UML.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">7</td>
+          <td>SOP Monitoring Dan Evaluasi Kegiatan Operasional Bidang Kemetrologian</td>
+          <td>F.E-02.3</td>
+          <td><a class="dl-link" href="pdf_sop/SOP_Monev_Bidmet.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="cerapanView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn4" class="back">← Kembali ke Admin Panel</a>
+    <div class="eyebrow">Admin Panel</div>
+    <h1>Daftar <span>Cerapan</span></h1>
+    <p class="subtitle">Formulir cerapan pengujian UTTP. Klik "📄 Buka PDF" untuk membuka dokumen langsung di tab browser.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr>
+          <th class="col-no">No</th>
+          <th>Nama Cerapan</th>
+          <th>Kode Formulir</th>
+          <th>Dokumen</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>Cerapan Pengujian Meter Kayu</td>
+          <td>F.C.2-06.2.1</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_Meter_Kayu.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>Cerapan Pengujian Automatic Level Gauge</td>
+          <td>F.C.2-06.2.4.5</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_ALG.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">3</td>
+          <td>Cerapan Pengujian Meter Parkir</td>
+          <td>F.C.2-06.2.8</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_Meter_Parkir.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">4</td>
+          <td>Cerapan Pengujian Takaran Kering</td>
+          <td>F.C.2-06.2.9.1</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_Takaran_Kering.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">5</td>
+          <td>Cerapan Pengujian Takaran Basah</td>
+          <td>F.C.2-06.2.9.2</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_Takaran_Basah.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">6</td>
+          <td>Cerapan Pengujian Tangki Ukur Mobil</td>
+          <td>F.C.2-06.2.10</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TUM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">7</td>
+          <td>Cerapan Pengujian Tangki Ukur Tetap Silinder Tegak</td>
+          <td>F.C.2-06.2.11</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TUTSIT.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">8</td>
+          <td>Cerapan Pengujian Tangki Ukur Tetap Bentuk Bola</td>
+          <td>F.C.2-06.2.12</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TUTBO.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">9</td>
+          <td>Cerapan Pengujian Timbangan Ban Berjalan</td>
+          <td>F.C.2-06.2.15.1</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TBB.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">10</td>
+          <td>Cerapan Pengujian Weighing in Motion</td>
+          <td>F.C.2-06.2.15.2</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_WIM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">11</td>
+          <td>Cerapan Pengujian Timbangan Pengecek dan Penyortir</td>
+          <td>F.C.2-06.2.15.4</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_Pengecek&Penyortir.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">12</td>
+          <td>Cerapan Pengujian Timbangan Elektronik</td>
+          <td>F.C.2-06.2.16.1.1</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TE.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">13</td>
+          <td>Cerapan Pengujian Timbangan Elektronik untuk Perhiasan</td>
+          <td>F.C.2-06.2.16.1.2</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TE_Perhiasan.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">14</td>
+          <td>Cerapan Pengujian Timbangan Elektronik pada Asphalt Mixing Plant</td>
+          <td>F.C.2-06.2.16.1.3</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TE_AMP.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">15</td>
+          <td>Cerapan Pengujian Timbangan Elektronik pada Conctrete Batching Plant</td>
+          <td>F.C.2-06.2.16.1.4</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TE_CBP.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">16</td>
+          <td>Cerapan Pengujian Timbangan Jembatan Elektronik</td>
+          <td>F.C.2-06.2.16.1.5</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TJE.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">17</td>
+          <td>Cerapan Pengujian Timbangan Pegas</td>
+          <td>F.C.2-06.2.16.1.6</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TP.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">18</td>
+          <td>Cerapan Pengujian Timbangan Cepat</td>
+          <td>F.C.2-06.2.16.1.7</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TC.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">19</td>
+          <td>Cerapan Pengujian Timbangan Cepat Meja</td>
+          <td>F.C.2-06.2.16.2.1</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TCM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">20</td>
+          <td>Cerapan Pengujian Neraca</td>
+          <td>F.C.2-06.2.16.3.1</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_Neraca.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">21</td>
+          <td>Cerapan Pengujian Timbangan Dacin Logam</td>
+          <td>F.C.2-06.2.16.3.2</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_DL.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">22</td>
+          <td>Cerapan Pengujian Timbangan Sentisimal</td>
+          <td>F.C.2-06.2.16.3.4</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_Sentisimal.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">23</td>
+          <td>Cerapan Pengujian Timbangan Bobot Ingsut</td>
+          <td>F.C.2-06.2.16.3.6</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TBI.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">24</td>
+          <td>Cerapan Pengujian Timbangan Meja</td>
+          <td>F.C.2-06.2.16.3.7</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_TM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">25</td>
+          <td>Cerapan Pengujian Meter Kadar Air</td>
+          <td>F.C.2-06.2.17</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_MKA.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">26</td>
+          <td>Cerapan Pengujian Pompa Ukur BBM</td>
+          <td>F.C.2-06.2.18</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_PUBBM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">27</td>
+          <td>Cerapan Pengujian Meter Arus BBM metode Volumetrik</td>
+          <td>F.C.2-06.2.21.1</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_Meter_Arus_BBM_Volumetrik.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">28</td>
+          <td>Cerapan Pengujian Meter Arus BBM metode Gravimetrik</td>
+          <td>F.C.2-06.2.21.2</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_Meter_Arus_BBM_Gravimetrik.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">29</td>
+          <td>Cerapan Pengujian Meter Air</td>
+          <td>F.C.2-06.2.23</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_Meter_Air.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">30</td>
+          <td>Cerapan Pengujian Anak Timbangan</td>
+          <td>F.C.2-06.2.26</td>
+          <td><a class="dl-link" href="pdf_cerapan/Cerapan_AT.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="skhpView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn5" class="back">← Kembali ke Admin Panel</a>
+    <div class="eyebrow">Admin Panel</div>
+    <h1>Daftar <span>SKHP</span></h1>
+    <p class="subtitle">Surat Keterangan Hasil Pengujian (SKHP) UTTP. Klik "📄 Buka PDF" untuk membuka dokumen langsung di tab browser.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr>
+          <th class="col-no">No</th>
+          <th>Nama SKHP</th>
+          <th>Kode Formulir</th>
+          <th>Dokumen</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>SKHP Meter Kayu</td>
+          <td>F.C.3-01-02.1</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Meter_Kayu.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>SKHP Automatic Level Gauge</td>
+          <td>F.C.3-01-02.4</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_ALG.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">3</td>
+          <td>SKHP Meter Parkir</td>
+          <td>F.C.3-01-02.8</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Meter_Parkir.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">4</td>
+          <td>SKHP Takaran Kering</td>
+          <td>F.C.3-01-02.9.1</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Takaran_Kering.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">5</td>
+          <td>SKHP Takaran Basah</td>
+          <td>F.C.3-01-02.9.2</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Takaran_Basah.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">6</td>
+          <td>SKHP Tangki Ukur Mobil</td>
+          <td>F.C.3-01-02.10</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TUM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">7</td>
+          <td>SKHP Tangki Ukur Tetap Silinder Tegak</td>
+          <td>F.C.3-01-02.11</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TUTSIT.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">8</td>
+          <td>SKHP Tangki Ukur Tetap Bentuk Bola</td>
+          <td>F.C.3-01-02.12</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TUTBO.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">9</td>
+          <td>SKHP Timbangan Ban Berjalan</td>
+          <td>F.C.3-01-02.15.1</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TBB.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">10</td>
+          <td>SKHP Weighing in Motion</td>
+          <td>F.C.3-01-02.15.2</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Weighing_in_Motion.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">11</td>
+          <td>SKHP Timbangan Pengecek dan Penyortir</td>
+          <td>F.C.3-01-02.15.4</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Pengecek&Penyortir.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">12</td>
+          <td>SKHP Timbangan Elektronik</td>
+          <td>F.C.3-01-02.16.1.1</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TE.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">13</td>
+          <td>SKHP Timbangan Elektronik untuk Perhiasan</td>
+          <td>F.C.3-01-02.16.1.2</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TE_Perhiasan.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">14</td>
+          <td>SKHP Timbangan Elektronik pada Asphalt Mixing Plant</td>
+          <td>F.C.3-01-02.16.1.3</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TE_AMP.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">15</td>
+          <td>SKHP Timbangan Elektronik pada Conctrete Batching Plant</td>
+          <td>F.C.3-01-02.16.1.4</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TE_CBP.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">16</td>
+          <td>SKHP Timbangan Jembatan Elektronik</td>
+          <td>F.C.3-01-02.16.1.5</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TJE.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">17</td>
+          <td>SKHP Timbangan Pegas</td>
+          <td>F.C.3-01-02.16.1.6</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TP.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">18</td>
+          <td>SKHP Timbangan Cepat</td>
+          <td>F.C.3-01-02.16.1.7</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TC.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">19</td>
+          <td>SKHP Timbangan Cepat Meja</td>
+          <td>F.C.3-01-02.16.2.1</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TCM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">20</td>
+          <td>SKHP Timbangan Bobot Ingsut</td>
+          <td>F.C.3-01-02.16.2.6</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TBI.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">21</td>
+          <td>SKHP Timbangan Meja</td>
+          <td>F.C.3-01-02.16.2.7</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">22</td>
+          <td>SKHP Timbangan Jembatan Mekanik</td>
+          <td>F.C.3-01-02.16.2.8</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_TJM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">23</td>
+          <td>SKHP Neraca</td>
+          <td>F.C.3-01-02.16.3.1</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Neraca.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">24</td>
+          <td>SKHP Timbangan Dacin Logam</td>
+          <td>F.C.3-01-02.16.3.2</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_DL.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">25</td>
+          <td>SKHP Timbangan Milisimal</td>
+          <td>F.C.3-01-02.16.3.3</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Milisimal.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">26</td>
+          <td>SKHP Timbangan Sentisimal</td>
+          <td>F.C.3-01-02.16.3.4</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Sentisimal.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">27</td>
+          <td>SKHP Pompa Ukur BBM</td>
+          <td>F.C.3-01-02.18</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_PUBBM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">28</td>
+          <td>SKHP Meter Arus BBM</td>
+          <td>F.C.3-01-02.21</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Meter_Arus_BBM.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">29</td>
+          <td>SKHP Meter Air</td>
+          <td>F.C.3-01-02.23</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_Meter_Air.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">30</td>
+          <td>SKHP Anak Timbangan</td>
+          <td>F.C.3-01-02.26</td>
+          <td><a class="dl-link" href="pdf_skhp/SKHP_AT.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="agendaSuratView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn7" class="back">← Kembali ke Admin Panel</a>
+    <div class="eyebrow">Admin Panel</div>
+    <h1>Agenda <span>Surat</span></h1>
+    <p class="subtitle">Pencatatan surat masuk dan surat keluar Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <p style="padding:24px; text-align:center;">Fitur Agenda Surat sedang dalam pengembangan.</p>
+  </div>
+
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="statusLayananView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn8" class="back">← Kembali ke Admin Panel</a>
+    <div class="eyebrow">Admin Panel</div>
+    <h1>Status <span>Layanan</span></h1>
+    <p class="subtitle">Pemantauan status proses layanan tera dan tera ulang.</p>
+  </div>
+
+  <div class="table-wrap">
+    <p style="padding:24px; text-align:center;">Fitur Status Layanan sedang dalam pengembangan.</p>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="dokumenElektronikView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn9" class="back">← Kembali ke Admin Panel</a>
+    <div class="eyebrow">Admin Panel</div>
+    <h1>Berita Acara <span>Pengujian Elektronik</span></h1>
+    <p class="subtitle">Kumpulan Berita Acara Pengujian Elektronik Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <p style="padding:24px; text-align:center;">Fitur BA Elektronik sedang dalam pengembangan.</p>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="arsipView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn10" class="back">← Kembali ke Admin Panel</a>
+    <div class="eyebrow">Admin Panel</div>
+    <h1>Arsip</h1>
+    <p class="subtitle">Arsip dokumen dan berkas Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <p style="padding:24px; text-align:center;">Fitur Arsip sedang dalam pengembangan.</p>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="ksoView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn11" class="back">← Kembali ke Layanan Pendukung</a>
+    <div class="eyebrow">Layanan Pendukung</div>
+    <h1>Kerja Sama <span>Operasional</span></h1>
+    <p class="subtitle">Dokumen Kerja Sama Operasional (KSO) Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr>
+          <th class="col-no">No</th>
+          <th>Nama Kerja Sama Operasional</th>
+          <th>Nomor Surat</th>
+          <th>Unduhan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>KSO dengan Kabupaten Kupang</td>
+          <td>-</td>
+          <td><a class="dl-link" href="pdf_kso/KSO_Kabupaten_Kupang.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>KSO dengan PT. Pertamina</td>
+          <td>-</td>
+          <td><a class="dl-link" href="pdf_kso/KSO_PT_Pertamina.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="pksView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn12" class="back">← Kembali ke Layanan Pendukung</a>
+    <div class="eyebrow">Layanan Pendukung</div>
+    <h1>Perjanjian Kerja <span>Sama</span></h1>
+    <p class="subtitle">Dokumen Perjanjian Kerja Sama (PKS) Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr>
+          <th class="col-no">No</th>
+          <th>Nama PKS</th>
+          <th>Dengan Kabupaten</th>
+          <th>Tanggal Ditandatangani</th>
+          <th>Tanggal Berlaku</th>
+          <th>Sisa Hari</th>
+          <th>Unduhan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>PKS Penyelenggaraan Pelayanan Tera, Tera Ulang dan Pengawasan Metrologi Legal</td>
+          <td>Manggarai</td>
+          <td>29 Agustus 2024</td>
+          <td>29 Agustus 2026</td>
+          <td style="color:#B22222; font-weight:700;">33 hari</td>
+          <td><a class="dl-link" href="pdf_pks/PKS_Manggarai.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>PKS Penyelenggaraan Pelayanan Tera dan Tera Ulang UTTP Metrologi Legal di Kabupaten Sumba Timur</td>
+          <td>Sumba Timur</td>
+          <td>9 September 2025</td>
+          <td>9 September 2030</td>
+          <td>1.505 hari</td>
+          <td><a class="dl-link" href="pdf_pks/PKS_Sumba_Timur.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">3</td>
+          <td>PKS Penyelenggaraan Pelayanan Tera dan Tera Ulang UTTP Metrologi Legal</td>
+          <td>Sikka</td>
+          <td>31 Oktober 2025</td>
+          <td>31 Oktober 2030</td>
+          <td>1.557 hari</td>
+          <td><a class="dl-link" href="pdf_pks/PKS_Sikka.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">4</td>
+          <td>PKS Penyelenggaraan Pelayanan Tera dan Tera Ulang UTTP Metrologi Legal</td>
+          <td>Sabu Raijua</td>
+          <td>21 Agustus 2025</td>
+          <td>21 Agustus 2030</td>
+          <td>1.486 hari</td>
+          <td><a class="dl-link" href="pdf_pks/PKS_Sabu_Raijua.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">5</td>
+          <td>PKS Penyelenggaraan Pelayanan Tera, Tera Ulang dan Pengawasan Metrologi Legal</td>
+          <td>Kupang</td>
+          <td>1 Juli 2022</td>
+          <td>1 Juli 2027</td>
+          <td>339 hari</td>
+          <td><a class="dl-link" href="pdf_pks/PKS_Kupang.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="dokumenLainnyaView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backBtn13" class="back">← Kembali ke Layanan Pendukung</a>
+    <div class="eyebrow">Layanan Pendukung</div>
+    <h1>Surat <span>Keputusan</span></h1>
+    <p class="subtitle">Daftar Surat Keputusan (SK) Bidang Kemetrologian.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr>
+          <th class="col-no">No</th>
+          <th>Nama SK</th>
+          <th>Nomor SK</th>
+          <th>Tanggal Ditandatangani</th>
+          <th>Tanggal Berlaku</th>
+          <th>Sisa Hari</th>
+          <th>Unduhan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>SK Penetapan Penanggung Jawab Puncak, Mutu, Teknik, Administrasi dan Pengawasan Bidang Kemetrologian</td>
+          <td>Disperindag KK 500.2/73/I/2026</td>
+          <td>14 Januari 2026</td>
+          <td>31 Desember 2026</td>
+          <td>152 hari</td>
+          <td><a class="dl-link" href="pdf_sk/SK_PENETAPAN_PENANGGUNG_JAWAB.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>SK Penetapan Tim Pengelola Cap Tanda Tera Bidang Kemetrologian</td>
+          <td>Disperindag KK.500.2/125/I/2026</td>
+          <td>22 Januari 2026</td>
+          <td>31 Desember 2026</td>
+          <td>152 hari</td>
+          <td><a class="dl-link" href="pdf_sk/SK_TIM_PENGELOLA_CTT.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">3</td>
+          <td>SK Tim Audit Internal</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>Belum tersedia</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<script>
+  const homeView = document.getElementById('homeView');
+  const adminView = document.getElementById('adminView');
+  const supportView = document.getElementById('supportView');
+  const aturanBaruView = document.getElementById('aturanBaruView');
+  const syaratTeknisView = document.getElementById('syaratTeknisView'); // dipakai untuk "ST UTTP"
+  const stSumlView = document.getElementById('stSumlView'); // dipakai untuk "ST SUML"
+  const sopView = document.getElementById('sopView');
+  const cerapanView = document.getElementById('cerapanView'); // dipakai untuk "Cerapan Elektronik" / "Format Cerapan"
+  const skhpView = document.getElementById('skhpView'); // dipakai untuk "SKHP Elektronik" / "Format SKHP"
+  const agendaSuratView = document.getElementById('agendaSuratView');
+  const statusLayananView = document.getElementById('statusLayananView');
+  const dokumenElektronikView = document.getElementById('dokumenElektronikView');
+  const arsipView = document.getElementById('arsipView');
+  const ksoView = document.getElementById('ksoView');
+  const pksView = document.getElementById('pksView');
+  const dokumenLainnyaView = document.getElementById('dokumenLainnyaView');
+  const laporanTugasView = document.getElementById('laporanTugasView');
+  const laporanTeraView = document.getElementById('laporanTeraView');
+  const laporanStuView = document.getElementById('laporanStuView');
+  const laporanPendampinganView = document.getElementById('laporanPendampinganView');
+  const laporanPengawasanView = document.getElementById('laporanPengawasanView');
+  const laporanLainnyaView = document.getElementById('laporanLainnyaView');
+
+  const allViews = [
+    homeView, adminView, supportView, aturanBaruView, syaratTeknisView, stSumlView, sopView, cerapanView, skhpView,
+    agendaSuratView, statusLayananView, dokumenElektronikView, arsipView,
+    ksoView, pksView, dokumenLainnyaView,
+    laporanTugasView, laporanTeraView, laporanStuView, laporanPendampinganView, laporanPengawasanView, laporanLainnyaView
+  ];
+
+  function showView(view){
+    allViews.forEach(v => v.classList.add('hidden'));
+    view.classList.remove('hidden');
+    window.scrollTo(0,0);
+  }
+
+  // Cerapan & SKHP bisa diakses dari Admin Panel maupun Layanan Pendukung,
+  // sehingga tombol kembali perlu mengingat panel asalnya.
+  let cerapanReturnView = adminView;
+  let skhpReturnView = adminView;
+
+  document.getElementById('loginBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(adminView);
+  });
+  document.getElementById('backBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(homeView);
+  });
+
+  document.getElementById('supportBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(supportView);
+  });
+  document.getElementById('backBtn2').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(homeView);
+  });
+
+  document.getElementById('aturanBaruBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(aturanBaruView);
+  });
+  document.getElementById('backBtn14').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(supportView);
+  });
+
+  document.getElementById('aturanBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(syaratTeknisView);
+  });
+  document.getElementById('backBtn3').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(supportView);
+  });
+
+  document.getElementById('stSumlBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(stSumlView);
+  });
+  document.getElementById('backBtn15').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(supportView);
+  });
+
+  document.getElementById('sopBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(sopView);
+  });
+  document.getElementById('backBtn6').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(supportView);
+  });
+
+  // Cerapan Elektronik (Admin Panel) & Format Cerapan (Layanan Pendukung)
+  // menampilkan halaman yang sama, tombol kembali menyesuaikan asal panel.
+  document.getElementById('cerapanBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    window.open('https://sipanik-bidmetkk.web.app', '_blank', 'noopener');
+  });
+  document.getElementById('formatCerapanBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    cerapanReturnView = supportView;
+    showView(cerapanView);
+  });
+  document.getElementById('backBtn4').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(cerapanReturnView);
+  });
+
+  // Format SKHP (Layanan Pendukung) — tombol SKHP Elektronik pada Admin Panel sudah dihapus.
+  document.getElementById('formatSkhpBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    skhpReturnView = supportView;
+    showView(skhpView);
+  });
+  document.getElementById('backBtn5').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(skhpReturnView);
+  });
+
+  // Halaman baru (masih placeholder / dalam pengembangan)
+  document.getElementById('agendaSuratBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    window.open('agenda-surat-kemetrologian.html', '_blank', 'noopener');
+  });
+  document.getElementById('statusLayananBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    window.open('https://permohonan-tera-ulang.web.app', '_blank', 'noopener');
+  });
+  document.getElementById('suratTugasBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    window.open('surat-tugas.html', '_blank', 'noopener');
+  });
+  document.getElementById('ksoBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(ksoView);
+  });
+  document.getElementById('pksBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(pksView);
+  });
+  document.getElementById('dokumenLainnyaBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(dokumenLainnyaView);
+  });
+
+  // LAPORAN TUGAS (Admin Panel) -> LAPORAN-LAPORAN TUGAS (5 laporan)
+  document.getElementById('laporanTugasBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanTugasView);
+  });
+  document.getElementById('backBtn16').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(adminView);
+  });
+
+  document.getElementById('laporanTeraBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanTeraView);
+  });
+  document.getElementById('backBtn17').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanTugasView);
+  });
+
+  document.getElementById('laporanStuBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanStuView);
+  });
+  document.getElementById('backBtn18').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanTugasView);
+  });
+
+  document.getElementById('laporanPendampinganBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanPendampinganView);
+  });
+  document.getElementById('backBtn19').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanTugasView);
+  });
+
+  document.getElementById('laporanPengawasanBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanPengawasanView);
+  });
+  document.getElementById('backBtn20').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanTugasView);
+  });
+
+  document.getElementById('laporanLainnyaBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanLainnyaView);
+  });
+  document.getElementById('backBtn21').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(laporanTugasView);
+  });
+
+  document.getElementById('backBtn7').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(adminView);
+  });
+  document.getElementById('backBtn8').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(adminView);
+  });
+  document.getElementById('backBtn9').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(adminView);
+  });
+  document.getElementById('backBtn10').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(adminView);
+  });
+  document.getElementById('backBtn11').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(supportView);
+  });
+  document.getElementById('backBtn12').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(supportView);
+  });
+  document.getElementById('backBtn13').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(supportView);
+  });
+
+
+  // Rotasi foto Tim Administrasi 2026 (silih berganti dengan efek fade)
+  (function(){
+    const box = document.getElementById('fotoAdminBox');
+    if(!box) return;
+    const photos = box.querySelectorAll('img');
+    if(photos.length < 2) return;
+    let current = 0;
+    setInterval(function(){
+      photos[current].classList.remove('active');
+      current = (current + 1) % photos.length;
+      photos[current].classList.add('active');
+    }, 3500);
+  })();
+</script>
+
+
+
+</body>
+</html>
+
