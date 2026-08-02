@@ -319,7 +319,6 @@
     page-break-inside:avoid;
     break-inside:avoid;
   }
-  .saksi-title{ font-weight:bold; margin-bottom:8px; }
   .ttd-cols{
     display:flex;
     gap:10px;
@@ -329,15 +328,18 @@
     flex:1;
     min-width:150px;
   }
-  .ttd-col .role{ min-height:18px; }
-  .saksi-entry{ margin-bottom:38px; }
-  .saksi-entry .idx{ font-weight:normal; }
-  .saksi-name{ font-weight:bold; text-decoration:underline; margin-top:34px; }
-  .saksi-nip{ margin-top:2px; }
+  .ttd-col .role{ min-height:18px; font-weight:bold; }
   .ttd-single{ margin-top:8px; }
   .ttd-single .role{ min-height:18px; }
   .ttd-single .space{ height:60px; }
   .ttd-single .name{ font-weight:bold; text-decoration:underline; }
+  .saksi-entry{ margin-bottom:14px; }
+  .saksi-entry:last-child{ margin-bottom:0; }
+  .saksi-entry .saksi-name{ font-weight:bold; text-decoration:underline; }
+  .saksi-entry .saksi-nip{ margin-top:2px; }
+  .saksi-space{ height:32px; }
+  .ttd-col.pemilik-col{ text-align:center; }
+  .ttd-col.pemilik-col .role{ text-align:left; }
 
   @media print{
     body{ background:#fff !important; }
@@ -520,7 +522,7 @@
 
 <script>
 // Master data petugas (dari data_petugas.xlsx, sama dengan Surat Tugas)
-const MASTER_PETUGAS = [{"nama": "Djami Maxin Wila Huky, S.E., M.Si.", "nip": "19740307 200012 1 004", "jabatan": "Kepala Bidang Kemetrologian", "pangkat": "Pembina / IV/a"}, {"nama": "Tommy Charles Sinlaeloe, S.T.", "nip": "19791015 200903 1 004", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Margareta Seno, S.Si.", "nip": "19840330 200903 2 006", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Nyongky Gabriel Susak, S.Si.", "nip": "19851103 201001 1 012", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Vinsensius Arkian Paokuma, S.T.", "nip": "19830726 201001 1 018", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Joce Clemens Sekoni, S.Si.", "nip": "19820714 201001 1 014", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Nick Dwi Nugroho, S.T.", "nip": "19830912 201001 1 016", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Markus Yerry Ely Manafe, S.Si.", "nip": "19870121 201001 1 008", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Astrid Ivonny Ottu, S.T.", "nip": "19830609 201001 2 020", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Voni Sairlay, S.Si.", "nip": "19910904 201502 2 003", "jabatan": "Penera Ahli Muda", "pangkat": "Penata / III/c"}, {"nama": "Willem Jorhans Bentura", "nip": "19690903 199203 1 008", "jabatan": "Penera Penyelia", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Christian Pisther Mone", "nip": "19691107 199503 1 003", "jabatan": "Penera Penyelia", "pangkat": "Penata / III/c"}, {"nama": "Dan Lukas Sprianus Langkola, S.Si.", "nip": "19850916 201502 1 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Maria Desynovini Dule, S.Si.", "nip": "19861204 201502 2 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Nawang Bayu Sasongko, S.Si.", "nip": "19870828 202203 1 005", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Regina Seran, S.Si., M.Si.", "nip": "19890118 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Martha Veronika Christina Soru, S.Si.", "nip": "19910328 202203 2 011", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Ikka Dinamika Otta Lado, S.Si.", "nip": "19920514 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Mohammad Tryadi Djahilape, S.Si.", "nip": "19960624 202203 1 008", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Sance Thersia Olla, S.Si.", "nip": "19970904 202203 2 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Say Grace Mbeo, S.Si.", "nip": "19970924 202203 1 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Lukas Lia Donny Mukin, S.Si.", "nip": "19980228 202203 1 007", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Dominikus Do Lalu", "nip": "19830313 200801 1 010", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Rusly Abdullah Alkatiri", "nip": "19840114 200801 1 002", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Nikson Talan, A.Md.", "nip": "19860715 202203 1 002", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Felisitus Penama Lengari, A.Md.", "nip": "19870307 202203 1 003", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Yohanes Wolang Wada, A.Md.", "nip": "19880615 202203 1 007", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Mark Gideon Bire, A.Md.", "nip": "19891126 202203 1 001", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Irene Frisilia, A.Md.", "nip": "19931117 202203 2 011", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Yuda Pambudi, A.Md.T.", "nip": "19970714 202203 1 009", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Lorena Ohar, S.STP.", "nip": "19800508 200003 2 001", "jabatan": "Analis SDM Aparatur Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Djefri Wety Hadjo", "nip": "19820306 200901 1 012", "jabatan": "Pengadministrasi", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Denros Squart Milko Ludji", "nip": "19800909 202521 1 032", "jabatan": "Pengadministrasi", "pangkat": "-"}, {"nama": "Beci Karolina Lada", "nip": "19800112 202521 2 014", "jabatan": "Pengadministrasi", "pangkat": "-"}, {"nama": "Melky Erly Lazarino Seubelan", "nip": "19780708 202521 1 019", "jabatan": "Pengadministrasi", "pangkat": "-"}];
+const MASTER_PETUGAS = [{"nama": "Djami Maxin Wila Huky, S.E., M.Si.", "nip": "19740307 200012 1 004", "jabatan": "Kepala Bidang Kemetrologian", "pangkat": "Pembina / IV/a", "sk": "-"}, {"nama": "Tommy Charles Sinlaeloe, S.T.", "nip": "19791015 200903 1 004", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor 2661 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Margareta Seno, S.Si.", "nip": "19840330 200903 2 006", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Nyongky Gabriel Susak, S.Si.", "nip": "19851103 201001 1 012", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Vinsensius Arkian Paokuma, S.T.", "nip": "19830726 201001 1 018", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Joce Clemens Sekoni, S.Si.", "nip": "19820714 201001 1 014", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Nick Dwi Nugroho, S.T.", "nip": "19830912 201001 1 016", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Markus Yerry Ely Manafe, S.Si.", "nip": "19870121 201001 1 008", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Astrid Ivonny Ottu, S.T.", "nip": "19830609 201001 2 020", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor ... Tahun ... Tanggal 8 Januari 2026"}, {"nama": "Voni Sairlay, S.Si.", "nip": "19910904 201502 2 003", "jabatan": "Penera Ahli Muda", "pangkat": "Penata / III/c", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Willem Jorhans Bentura", "nip": "19690903 199203 1 008", "jabatan": "Penera Penyelia", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Christian Pisther Mone", "nip": "19691107 199503 1 003", "jabatan": "Penera Penyelia", "pangkat": "Penata / III/c", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Dan Lukas Sprianus Langkola, S.Si.", "nip": "19850916 201502 1 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor ... Tahun ... Tanggal 8 Januari 2026"}, {"nama": "Maria Desynovini Dule, S.Si.", "nip": "19861204 201502 2 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor ... Tahun ... Tanggal 8 Januari 2026"}, {"nama": "Nawang Bayu Sasongko, S.Si.", "nip": "19870828 202203 1 005", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Regina Seran, S.Si., M.Si.", "nip": "19890118 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Martha Veronika Christina Soru, S.Si.", "nip": "19910328 202203 2 011", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Ikka Dinamika Otta Lado, S.Si.", "nip": "19920514 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Mohammad Tryadi Djahilape, S.Si.", "nip": "19960624 202203 1 008", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Sance Thersia Olla, S.Si.", "nip": "19970904 202203 2 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Say Grace Mbeo, S.Si.", "nip": "19970924 202203 1 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor ... Tahun ... Tanggal 18 Februari 2026"}, {"nama": "Lukas Lia Donny Mukin, S.Si.", "nip": "19980228 202203 1 007", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Dominikus Do Lalu", "nip": "19830313 200801 1 010", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Rusly Abdullah Alkatiri", "nip": "19840114 200801 1 002", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor ... Tahun ... Tanggal 8 Januari 2026"}, {"nama": "Nikson Talan, A.Md.", "nip": "19860715 202203 1 002", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Felisitus Penama Lengari, A.Md.", "nip": "19870307 202203 1 003", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Yohanes Wolang Wada, A.Md.", "nip": "19880615 202203 1 007", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Mark Gideon Bire, A.Md.", "nip": "19891126 202203 1 001", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Irene Frisilia, A.Md.", "nip": "19931117 202203 2 011", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Yuda Pambudi, A.Md.T.", "nip": "19970714 202203 1 009", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Lorena Ohar, S.STP.", "nip": "19800508 200003 2 001", "jabatan": "Analis SDM Aparatur Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "-"}, {"nama": "Djefri Wety Hadjo", "nip": "19820306 200901 1 012", "jabatan": "Pengadministrasi", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Denros Squart Milko Ludji", "nip": "19800909 202521 1 032", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}, {"nama": "Beci Karolina Lada", "nip": "19800112 202521 2 014", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}, {"nama": "Melky Erly Lazarino Seubelan", "nip": "19780708 202521 1 019", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}];
 
 function escapeAttr(str){
   return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -545,6 +547,8 @@ function onPbNameChange(selectEl){
   const pangkatEl = document.getElementById('pbPangkat');
   const nipEl = document.getElementById('pbNip');
   const jabatanEl = document.getElementById('pbJabatan');
+  const dasarEl = document.getElementById('pbDasar');
+  const DASAR_PREFIX = 'selaku Pegawai Berhak berdasarkan Keputusan Direktur Jenderal Perlindungan Konsumen dan Tertib Niaga';
   const val = selectEl.value;
   if(val === '__manual__'){
     manualInput.style.display = 'block';
@@ -562,6 +566,8 @@ function onPbNameChange(selectEl){
         pangkatEl.value = m.pangkat;
         nipEl.value = m.nip;
         jabatanEl.value = m.jabatan;
+        const skKnown = m.sk && m.sk !== '-' && !m.sk.includes('...');
+        dasarEl.value = skKnown ? `${DASAR_PREFIX} ${m.sk}` : `${DASAR_PREFIX} `;
       }
     } else {
       pangkatEl.value = '';
@@ -780,10 +786,11 @@ function renderSurat(){
 
   let saksiHtml = '';
   saksiData.forEach((s, i) => {
+    const spacer = i > 0 ? '<div class="saksi-space"></div>' : '';
     saksiHtml += `
+      ${spacer}
       <div class="saksi-entry">
-        <div class="saksi-entry-num">${i+1}.</div>
-        <div class="saksi-name">${escapeHtml(s.nama)}</div>
+        <div class="saksi-name">${i+1}. ${escapeHtml(s.nama)}</div>
         <div class="saksi-nip">NIP. ${escapeHtml(s.nip)}</div>
       </div>`;
   });
@@ -846,12 +853,15 @@ function renderSurat(){
     </div>
 
     <div class="ttd-area">
-      <div class="saksi-title">Saksi-Saksi:</div>
       <div class="ttd-cols">
         <div class="ttd-col">
-          ${saksiHtml}
+          <div class="role">Saksi-Saksi:</div>
+          <div class="ttd-single">
+            <div class="space"></div>
+            ${saksiHtml}
+          </div>
         </div>
-        <div class="ttd-col">
+        <div class="ttd-col pemilik-col">
           <div class="role">Pemilik UTTP/Pengawas,</div>
           <div class="ttd-single">
             <div class="space"></div>
