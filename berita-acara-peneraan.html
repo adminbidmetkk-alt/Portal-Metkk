@@ -198,6 +198,82 @@
     color:var(--paper);
     border:1px solid var(--gold-light);
   }
+  .btn-cerapan{
+    background:var(--secondary);
+    color:#fff;
+    font-size:12px;
+    padding:6px 12px;
+    margin-top:10px;
+  }
+  .btn-cerapan:hover{ background:var(--secondary-light); }
+
+  /* ===== Modal Ambil Data Cerapan ===== */
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.6);
+    z-index:1000;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background:var(--brown-deep);
+    border:1px solid var(--gold);
+    border-radius:14px;
+    max-width:820px;
+    width:100%;
+    max-height:85vh;
+    display:flex;
+    flex-direction:column;
+    color:var(--paper);
+  }
+  .modal-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px;
+    border-bottom:1px solid rgba(232,216,174,0.3);
+  }
+  .modal-head h3{
+    font-family:Georgia, 'Times New Roman', serif;
+    color:var(--gold-light);
+    font-size:18px; margin:0;
+  }
+  .modal-close{
+    background:none; border:none; color:var(--paper);
+    font-size:20px; cursor:pointer; padding:0 6px;
+  }
+  .modal-body{
+    padding:16px 20px;
+    overflow-y:auto;
+  }
+  .modal-search{
+    width:100%;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid rgba(232,216,174,0.4);
+    background:rgba(251,243,222,0.08);
+    color:var(--paper);
+    font-size:14px;
+    margin-bottom:14px;
+  }
+  .cerapan-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  .cerapan-table th, .cerapan-table td{
+    border:1px solid rgba(232,216,174,0.25);
+    padding:8px 10px;
+    text-align:left;
+  }
+  .cerapan-table th{ color:var(--gold-light); }
+  .cerapan-table tr:hover td{ background:rgba(245,168,0,0.12); cursor:pointer; }
+  .cerapan-status{
+    font-size:13px;
+    color:var(--gold-light);
+    padding:10px 0;
+  }
   .actions{
     display:flex;
     gap:12px;
@@ -520,9 +596,51 @@
   </div>
 </main>
 
+<div id="modalCerapan" class="modal-overlay no-print">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Ambil Data Cerapan</h3>
+      <button type="button" class="modal-close" onclick="closeCerapanModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="cerapanModalBody"></div>
+  </div>
+</div>
+
 <script>
 // Master data petugas (dari data_petugas.xlsx, sama dengan Surat Tugas)
-const MASTER_PETUGAS = [{"nama": "Djami Maxin Wila Huky, S.E., M.Si.", "nip": "19740307 200012 1 004", "jabatan": "Kepala Bidang Kemetrologian", "pangkat": "Pembina / IV/a", "sk": "-"}, {"nama": "Tommy Charles Sinlaeloe, S.T.", "nip": "19791015 200903 1 004", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor 2661 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Margareta Seno, S.Si.", "nip": "19840330 200903 2 006", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Nyongky Gabriel Susak, S.Si.", "nip": "19851103 201001 1 012", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Vinsensius Arkian Paokuma, S.T.", "nip": "19830726 201001 1 018", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Joce Clemens Sekoni, S.Si.", "nip": "19820714 201001 1 014", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Nick Dwi Nugroho, S.T.", "nip": "19830912 201001 1 016", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Markus Yerry Ely Manafe, S.Si.", "nip": "19870121 201001 1 008", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Astrid Ivonny Ottu, S.T.", "nip": "19830609 201001 2 020", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor ... Tahun ... Tanggal 8 Januari 2026"}, {"nama": "Voni Sairlay, S.Si.", "nip": "19910904 201502 2 003", "jabatan": "Penera Ahli Muda", "pangkat": "Penata / III/c", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Willem Jorhans Bentura", "nip": "19690903 199203 1 008", "jabatan": "Penera Penyelia", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Christian Pisther Mone", "nip": "19691107 199503 1 003", "jabatan": "Penera Penyelia", "pangkat": "Penata / III/c", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Dan Lukas Sprianus Langkola, S.Si.", "nip": "19850916 201502 1 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor ... Tahun ... Tanggal 8 Januari 2026"}, {"nama": "Maria Desynovini Dule, S.Si.", "nip": "19861204 201502 2 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor ... Tahun ... Tanggal 8 Januari 2026"}, {"nama": "Nawang Bayu Sasongko, S.Si.", "nip": "19870828 202203 1 005", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Regina Seran, S.Si., M.Si.", "nip": "19890118 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Martha Veronika Christina Soru, S.Si.", "nip": "19910328 202203 2 011", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Ikka Dinamika Otta Lado, S.Si.", "nip": "19920514 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Mohammad Tryadi Djahilape, S.Si.", "nip": "19960624 202203 1 008", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Sance Thersia Olla, S.Si.", "nip": "19970904 202203 2 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Say Grace Mbeo, S.Si.", "nip": "19970924 202203 1 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor ... Tahun ... Tanggal 18 Februari 2026"}, {"nama": "Lukas Lia Donny Mukin, S.Si.", "nip": "19980228 202203 1 007", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Dominikus Do Lalu", "nip": "19830313 200801 1 010", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Rusly Abdullah Alkatiri", "nip": "19840114 200801 1 002", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor ... Tahun ... Tanggal 8 Januari 2026"}, {"nama": "Nikson Talan, A.Md.", "nip": "19860715 202203 1 002", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Felisitus Penama Lengari, A.Md.", "nip": "19870307 202203 1 003", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Yohanes Wolang Wada, A.Md.", "nip": "19880615 202203 1 007", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Mark Gideon Bire, A.Md.", "nip": "19891126 202203 1 001", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Irene Frisilia, A.Md.", "nip": "19931117 202203 2 011", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Yuda Pambudi, A.Md.T.", "nip": "19970714 202203 1 009", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "Nomor ... Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Lorena Ohar, S.STP.", "nip": "19800508 200003 2 001", "jabatan": "Analis SDM Aparatur Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "-"}, {"nama": "Djefri Wety Hadjo", "nip": "19820306 200901 1 012", "jabatan": "Pengadministrasi", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Denros Squart Milko Ludji", "nip": "19800909 202521 1 032", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}, {"nama": "Beci Karolina Lada", "nip": "19800112 202521 2 014", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}, {"nama": "Melky Erly Lazarino Seubelan", "nip": "19780708 202521 1 019", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}];
+const MASTER_PETUGAS = [{"nama": "Djami Maxin Wila Huky, S.E., M.Si.", "nip": "19740307 200012 1 004", "jabatan": "Kepala Bidang Kemetrologian", "pangkat": "Pembina / IV/a", "sk": "-"}, {"nama": "Tommy Charles Sinlaeloe, S.T.", "nip": "19791015 200903 1 004", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor 2661 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Margareta Seno, S.Si.", "nip": "19840330 200903 2 006", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor 2669 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Nyongky Gabriel Susak, S.Si.", "nip": "19851103 201001 1 012", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor 2655 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Vinsensius Arkian Paokuma, S.T.", "nip": "19830726 201001 1 018", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor 2660 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Joce Clemens Sekoni, S.Si.", "nip": "19820714 201001 1 014", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor 2663 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Nick Dwi Nugroho, S.T.", "nip": "19830912 201001 1 016", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor 2668 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Markus Yerry Ely Manafe, S.Si.", "nip": "19870121 201001 1 008", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor 2666 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Astrid Ivonny Ottu, S.T.", "nip": "19830609 201001 2 020", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor 24 Tahun 2026 Tanggal 8 Januari 2026"}, {"nama": "Voni Sairlay, S.Si.", "nip": "19910904 201502 2 003", "jabatan": "Penera Ahli Muda", "pangkat": "Penata / III/c", "sk": "Nomor 2656 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Willem Jorhans Bentura", "nip": "19690903 199203 1 008", "jabatan": "Penera Penyelia", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor 2670 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Christian Pisther Mone", "nip": "19691107 199503 1 003", "jabatan": "Penera Penyelia", "pangkat": "Penata / III/c", "sk": "Nomor 2674 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Dan Lukas Sprianus Langkola, S.Si.", "nip": "19850916 201502 1 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor 25 Tahun 2026 Tanggal 8 Januari 2026"}, {"nama": "Maria Desynovini Dule, S.Si.", "nip": "19861204 201502 2 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor 26 Tahun 2026 Tanggal 8 Januari 2026"}, {"nama": "Nawang Bayu Sasongko, S.Si.", "nip": "19870828 202203 1 005", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Regina Seran, S.Si., M.Si.", "nip": "19890118 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Martha Veronika Christina Soru, S.Si.", "nip": "19910328 202203 2 011", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Ikka Dinamika Otta Lado, S.Si.", "nip": "19920514 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Mohammad Tryadi Djahilape, S.Si.", "nip": "19960624 202203 1 008", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Sance Thersia Olla, S.Si.", "nip": "19970904 202203 2 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Say Grace Mbeo, S.Si.", "nip": "19970924 202203 1 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor 132 Tahun 2026 Tanggal 18 Februari 2026"}, {"nama": "Lukas Lia Donny Mukin, S.Si.", "nip": "19980228 202203 1 007", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Dominikus Do Lalu", "nip": "19830313 200801 1 010", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor 2664 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Rusly Abdullah Alkatiri", "nip": "19840114 200801 1 002", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor 27 Tahun 2026 Tanggal 8 Januari 2026"}, {"nama": "Nikson Talan, A.Md.", "nip": "19860715 202203 1 002", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Felisitus Penama Lengari, A.Md.", "nip": "19870307 202203 1 003", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Yohanes Wolang Wada, A.Md.", "nip": "19880615 202203 1 007", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Mark Gideon Bire, A.Md.", "nip": "19891126 202203 1 001", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Irene Frisilia, A.Md.", "nip": "19931117 202203 2 011", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Yuda Pambudi, A.Md.T.", "nip": "19970714 202203 1 009", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "Nomor 2630 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Lorena Ohar, S.STP.", "nip": "19800508 200003 2 001", "jabatan": "Analis SDM Aparatur Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "-"}, {"nama": "Djefri Wety Hadjo", "nip": "19820306 200901 1 012", "jabatan": "Pengadministrasi", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Denros Squart Milko Ludji", "nip": "19800909 202521 1 032", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}, {"nama": "Beci Karolina Lada", "nip": "19800112 202521 2 014", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}, {"nama": "Melky Erly Lazarino Seubelan, S.E.", "nip": "19780708 202521 1 019", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}];
+
+// Daftar jenis UTTP sesuai master data aplikasi Sistem Wajib Tera (index.html)
+const JENIS_UTTP_LIST = [
+  'Meter Kayu','Meter Parkir','ATG','Takaran Basah','Tangki Ukur Mobil',
+  'Tangki Ukur Tetap Silinder Tegak','Tangki Ukur Tetap Bentuk Bola','Pompa Ukur BBM',
+  'Meter Arus BBM','Meter Air','Timbangan Ban Berjalan','Timbangan Jembatan',
+  'Timbangan AMP','Timbangan Batching Plant','Timbangan Elektronik','Timbangan Meja',
+  'Timbangan Pegas','Timbangan Cepat','Timbangan Triple Beam','Timbangan Sentisimal',
+  'Timbangan Bobot Ingsut','Timbangan Dacin Logam','Neraca Emas','Neraca Obat','Neraca',
+  'Anak Timbangan Biasa','Anak Timbangan Halus'
+];
+
+// ===== Konfigurasi sumber "Data Cerapan" (Google Spreadsheet, dibaca via CSV publik) =====
+// Setiap Jenis UTTP dipetakan ke { sheetId, sheetName } tempat data cerapannya disimpan.
+// Spreadsheet HARUS di-share "Siapa saja yang memiliki link" (Anyone with the link) agar bisa dibaca.
+// Kalau Anda punya spreadsheet cerapan lain untuk jenis UTTP lain, tinggal tambah baris baru di sini.
+const CERAPAN_CONFIG = {
+  'Timbangan Elektronik':     { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'TIMB. ELEKTRONIK' },
+  'Neraca Emas':              { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'TIMB. ELEKTRONIK PERHIASAN' },
+  'Timbangan Jembatan':       { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'TIMBANGAN JEMBATAN (TJE)' },
+  'Anak Timbangan Biasa':     { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'ANAK TIMBANGAN' },
+  'Anak Timbangan Halus':     { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'ANAK TIMBANGAN' },
+};
+
+function jenisUttpOptionsHtml(selected){
+  let opts = '<option value="">-- Pilih Jenis UTTP --</option>';
+  JENIS_UTTP_LIST.forEach(j => {
+    opts += `<option value="${escapeAttr(j)}"${j===selected?' selected':''}>${escapeAttr(j)}</option>`;
+  });
+  opts += `<option value="__manual__"${selected==='__manual__'?' selected':''}>&#9998; Isi Manual (jenis lain)</option>`;
+  return opts;
+}
 
 function escapeAttr(str){
   return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -591,7 +709,8 @@ function addUttp(prefill){
     <div class="row">
       <div>
         <label>Jenis UTTP</label>
-        <input type="text" id="utJenis-${id}" placeholder="POMPA UKUR BBM / NERACA / TIMBANGAN ...">
+        <select id="utJenis-${id}" class="uttp-jenis-select" onchange="onUttpJenisChange(${id})">${jenisUttpOptionsHtml()}</select>
+        <input type="text" id="utJenisManual-${id}" placeholder="Ketik jenis UTTP lain" style="display:none; margin-top:6px;">
       </div>
       <div>
         <label>Merek/Tipe</label>
@@ -614,6 +733,7 @@ function addUttp(prefill){
     <input type="text" id="utPemilik-${id}" placeholder="Nama pemilik / badan usaha">
     <label>Alamat</label>
     <input type="text" id="utAlamat-${id}" placeholder="Alamat pemilik / lokasi UTTP">
+    <button type="button" class="btn-cerapan" onclick="openCerapanPicker(${id})">&#8681; Ambil Data Cerapan</button>
   `;
   document.getElementById('uttpList').appendChild(wrap);
   renumberUttp();
@@ -627,13 +747,30 @@ function renumberUttp(){
   const cards = document.querySelectorAll('#uttpList .item-card');
   cards.forEach((c, i) => { c.querySelector('.num').textContent = 'UTTP ' + (i+1); });
 }
+function onUttpJenisChange(id){
+  const sel = document.getElementById('utJenis-'+id);
+  const manual = document.getElementById('utJenisManual-'+id);
+  if(sel.value === '__manual__'){
+    manual.style.display = 'block';
+    manual.value = '';
+    manual.focus();
+  } else {
+    manual.style.display = 'none';
+    manual.value = '';
+  }
+}
+function getUttpJenisValue(id){
+  const sel = document.getElementById('utJenis-'+id);
+  if(sel.value === '__manual__') return document.getElementById('utJenisManual-'+id).value;
+  return sel.value;
+}
 function collectUttp(){
   const cards = document.querySelectorAll('#uttpList .item-card');
   const data = [];
   cards.forEach(c => {
     const id = c.id.replace('uttp-', '');
     data.push({
-      jenis: document.getElementById('utJenis-'+id).value,
+      jenis: getUttpJenisValue(id),
       merek: document.getElementById('utMerek-'+id).value,
       kapasitas: document.getElementById('utKapasitas-'+id).value,
       seri: document.getElementById('utSeri-'+id).value,
@@ -643,6 +780,137 @@ function collectUttp(){
     });
   });
   return data;
+}
+
+// ===== Ambil Data Cerapan (dari Google Spreadsheet publik) =====
+let cerapanTargetId = null;
+let cerapanRows = []; // hasil parse baris data cerapan yang sedang ditampilkan
+
+function parseCsvText(text){
+  // Parser CSV sederhana yang menangani field ber-tanda kutip (bisa memuat koma/petik/baris baru)
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i = 0; i < text.length; i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field = ''; }
+      else if(c === '\r'){ /* skip */ }
+      else if(c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+
+function openCerapanPicker(uttpId){
+  cerapanTargetId = uttpId;
+  const jenis = getUttpJenisValue(uttpId);
+  const overlay = document.getElementById('modalCerapan');
+  const body = document.getElementById('cerapanModalBody');
+  overlay.classList.add('show');
+
+  if(!jenis){
+    body.innerHTML = '<div class="cerapan-status">Pilih Jenis UTTP dahulu pada kartu UTTP ini sebelum mengambil data cerapan.</div>';
+    return;
+  }
+  const cfg = CERAPAN_CONFIG[jenis];
+  if(!cfg){
+    body.innerHTML = `<div class="cerapan-status">Belum ada sumber data cerapan yang dikonfigurasi untuk jenis "<b>${escapeHtml(jenis)}</b>".<br><br>Tambahkan pemetaannya pada konstanta <code>CERAPAN_CONFIG</code> di dalam kode halaman ini (sheetId + nama sheet/tab).</div>`;
+    return;
+  }
+  body.innerHTML = '<div class="cerapan-status">Memuat data cerapan...</div>';
+  const url = `https://docs.google.com/spreadsheets/d/${cfg.sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(cfg.sheetName)}`;
+
+  fetch(url).then(r => {
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  }).then(text => {
+    const rows = parseCsvText(text).filter(r => r.length > 1 && r.some(v => (v||'').trim() !== ''));
+    // baris pertama = header (Nomor, Waktu Simpan, Nama Pemilik, Tanggal Pengujian, Lokasi Pengujian, Data JSON)
+    const dataRows = rows.slice(1).filter(r => (r[0]||'').trim() !== '');
+    cerapanRows = dataRows.map(r => {
+      let parsed = null;
+      try { parsed = JSON.parse(r[5] || '{}'); } catch(e) { parsed = null; }
+      return {
+        nomor: r[0] || '',
+        waktuSimpan: r[1] || '',
+        namaPemilik: r[2] || '',
+        tglPengujian: r[3] || '',
+        lokasiPengujian: r[4] || '',
+        json: parsed
+      };
+    });
+    renderCerapanModal(jenis, cfg);
+  }).catch(err => {
+    body.innerHTML = `<div class="cerapan-status">Gagal mengambil data cerapan (${escapeHtml(err.message)}).<br><br>
+      Pastikan spreadsheet cerapan di-share dengan akses "Siapa saja yang memiliki link" (Anyone with the link) sebagai Viewer, dan nama sheet/tab sudah benar ("${escapeHtml(cfg.sheetName)}").</div>`;
+  });
+}
+
+function renderCerapanModal(jenis, cfg){
+  const body = document.getElementById('cerapanModalBody');
+  const searchVal = (document.getElementById('cerapanSearch')?.value || '').toLowerCase();
+  const filtered = cerapanRows.filter(row => {
+    if(!searchVal) return true;
+    return [row.nomor, row.namaPemilik, row.tglPengujian, row.lokasiPengujian]
+      .join(' ').toLowerCase().includes(searchVal);
+  });
+
+  const tableRows = filtered.map((row, idx) => {
+    const realIdx = cerapanRows.indexOf(row);
+    const merekTipe = row.json ? [row.json.merek, row.json.tipe].filter(Boolean).join(' / ') : '';
+    return `<tr onclick="selectCerapanRow(${realIdx})">
+      <td>${escapeHtml(row.nomor)}</td>
+      <td>${escapeHtml(row.namaPemilik || (row.json?.nama_pemilik||''))}</td>
+      <td>${escapeHtml(row.tglPengujian || (row.json?.tanggal_pengujian||''))}</td>
+      <td>${escapeHtml(row.lokasiPengujian || (row.json?.lokasi_pengujian||''))}</td>
+      <td>${escapeHtml(merekTipe)}</td>
+      <td>${escapeHtml(row.json?.no_seri||'')}</td>
+    </tr>`;
+  }).join('');
+
+  body.innerHTML = `
+    <input type="text" id="cerapanSearch" class="modal-search" placeholder="Cari nama pemilik / tanggal / lokasi..." value="${escapeAttr(document.getElementById('cerapanSearch')?.value || '')}" oninput="renderCerapanModal('${escapeAttr(jenis)}', CERAPAN_CONFIG['${escapeAttr(jenis)}'])">
+    <div class="cerapan-status">Sheet: <b>${escapeHtml(cfg.sheetName)}</b> &middot; ${filtered.length} data ditemukan. Klik salah satu baris untuk mengambil datanya.</div>
+    <table class="cerapan-table">
+      <thead><tr><th>Nomor</th><th>Nama Pemilik</th><th>Tgl Pengujian</th><th>Lokasi</th><th>Merek/Tipe</th><th>No. Seri</th></tr></thead>
+      <tbody>${tableRows || '<tr><td colspan="6">Tidak ada data cocok.</td></tr>'}</tbody>
+    </table>
+  `;
+  const searchInput = document.getElementById('cerapanSearch');
+  if(searchInput){
+    searchInput.focus();
+    const v = searchInput.value; searchInput.value=''; searchInput.value = v; // taruh kursor di akhir
+  }
+}
+
+function selectCerapanRow(idx){
+  const row = cerapanRows[idx];
+  const id = cerapanTargetId;
+  if(!row || !id) return;
+  const j = row.json || {};
+  const merekTipe = [j.merek, j.tipe].filter(Boolean).join(' / ');
+  if(merekTipe) document.getElementById('utMerek-'+id).value = merekTipe;
+  if(j.kapasitas_maks) document.getElementById('utKapasitas-'+id).value = j.kapasitas_maks;
+  if(j.no_seri) document.getElementById('utSeri-'+id).value = j.no_seri;
+  const lokasi = j.lokasi_pengujian || row.lokasiPengujian;
+  if(lokasi) document.getElementById('utLokasi-'+id).value = lokasi;
+  const pemilik = j.nama_pemilik || row.namaPemilik;
+  if(pemilik) document.getElementById('utPemilik-'+id).value = pemilik;
+  if(j.alamat_pemilik) document.getElementById('utAlamat-'+id).value = j.alamat_pemilik;
+  closeCerapanModal();
+}
+
+function closeCerapanModal(){
+  document.getElementById('modalCerapan').classList.remove('show');
+  cerapanTargetId = null;
 }
 
 // ===== Saksi-saksi (dynamic list) =====
