@@ -810,6 +810,45 @@ let cerapanTargetId = null;
 let cerapanRows = []; // hasil parse baris data cerapan yang sedang ditampilkan
 let cerapanCurrentCfg = null; // konfigurasi (termasuk mapping fields) dari sheet yang sedang dibuka
 
+// Pemetaan label kolom (header sheet) -> key field asli, harus SAMA dengan
+// FIELD_LABELS pada apps-script-cerapan.gs. Sheet dengan skema BARU (field
+// "pengujian"/"timbangan" dipecah jadi kolom tersendiri) memakai label-label
+// ini sebagai judul kolom, bukan lagi key mentah di dalam JSON.
+const CERAPAN_LABEL_TO_KEY = {
+  'Rangka Pengujian': 'rangka',
+  'Nama Pemilik': 'nama_pemilik',
+  'Alamat Pemilik': 'alamat_pemilik',
+  'Lokasi Pengujian': 'lokasi_pengujian',
+  'Tanggal Pengujian': 'tanggal_pengujian',
+  'Petugas 1 - Nama': 'petugas1_nama',
+  'Petugas 1 - NIP': 'petugas1_nip',
+  'Petugas 2 - Nama': 'petugas2_nama',
+  'Petugas 2 - NIP': 'petugas2_nip',
+  'Petugas 3 - Nama': 'petugas3_nama',
+  'Petugas 3 - NIP': 'petugas3_nip',
+  'No. Tanda Kesesuaian Tipe': 'tkt',
+  'Merek / Buatan': 'merek',
+  'Tipe': 'tipe',
+  'No. Seri': 'no_seri',
+  'Kapasitas Maksimum': 'kapasitas_maks',
+  'Nilai d': 'nilai_d',
+  'Kondisi d & e': 'kondisi_de_dasar',
+  'Nilai e': 'nilai_e',
+  'Kelas': 'kelas',
+  'Kapasitas Minimum': 'kapasitas_min'
+};
+
+// Untuk kolom yang label-nya tidak ada di atas (field dari formulir lain),
+// tebak key-nya dari label secara generik (kebalikan dari labelFor_ pada
+// apps-script-cerapan.gs: "Nama Contoh" -> "nama_contoh").
+function guessKeyFromLabel_(label) {
+  return String(label || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
 function parseCsvText(text){
   // Parser CSV sederhana yang menangani field ber-tanda kutip (bisa memuat koma/petik/baris baru)
   const rows = [];
@@ -858,17 +897,35 @@ function openCerapanPicker(uttpId){
     return r.text();
   }).then(text => {
     const rows = parseCsvText(text).filter(r => r.length > 1 && r.some(v => (v||'').trim() !== ''));
-    // baris pertama = header (Nomor, Waktu Simpan, Nama Pemilik, Tanggal Pengujian, Lokasi Pengujian, Data JSON)
+    const header = rows[0] || [];
     const dataRows = rows.slice(1).filter(r => (r[0]||'').trim() !== '');
+
+    // Kolom JSON SELALU kolom terakhir, baik pada skema lama (6 kolom tetap:
+    // Nomor, Waktu Simpan, Nama Pemilik, Tanggal Pengujian, Lokasi Pengujian,
+    // Data JSON) maupun skema baru (header dinamis + "Data Lainnya (JSON)").
+    const jsonColIdx = header.length - 1;
+    const namaIdx = header.indexOf('Nama Pemilik');
+    const tglIdx = header.indexOf('Tanggal Pengujian');
+    const lokasiIdx = header.indexOf('Lokasi Pengujian');
+
     cerapanRows = dataRows.map(r => {
-      let parsed = null;
-      try { parsed = JSON.parse(r[5] || '{}'); } catch(e) { parsed = null; }
+      let parsed = {};
+      try { parsed = JSON.parse(r[jsonColIdx] || '{}'); } catch(e) { parsed = {}; }
+      // Gabungkan kolom-kolom tambahan (skema baru: pengujian/timbangan
+      // dipecah jadi kolom sendiri) kembali ke dalam objek data, memakai
+      // key field aslinya (bukan judul kolomnya).
+      for (let i = 2; i < jsonColIdx; i++) {
+        const label = (header[i] || '').trim();
+        if (!label) continue;
+        const key = CERAPAN_LABEL_TO_KEY[label] || guessKeyFromLabel_(label);
+        if (r[i] !== undefined && r[i] !== '') parsed[key] = r[i];
+      }
       return {
         nomor: r[0] || '',
         waktuSimpan: r[1] || '',
-        namaPemilik: r[2] || '',
-        tglPengujian: r[3] || '',
-        lokasiPengujian: r[4] || '',
+        namaPemilik: namaIdx > -1 ? (r[namaIdx] || '') : '',
+        tglPengujian: tglIdx > -1 ? (r[tglIdx] || '') : '',
+        lokasiPengujian: lokasiIdx > -1 ? (r[lokasiIdx] || '') : '',
         json: parsed
       };
     });
