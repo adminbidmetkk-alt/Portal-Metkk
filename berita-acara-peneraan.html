@@ -625,10 +625,33 @@ const JENIS_UTTP_LIST = [
 // Setiap Jenis UTTP dipetakan ke { sheetId, sheetName } tempat data cerapannya disimpan.
 // Spreadsheet HARUS di-share "Siapa saja yang memiliki link" (Anyone with the link) agar bisa dibaca.
 // Kalau Anda punya spreadsheet cerapan lain untuk jenis UTTP lain, tinggal tambah baris baru di sini.
+// Pemetaan default nama field JSON -> field form UTTP.
+// Dipakai untuk Jenis UTTP yang belum punya mapping "fields" khusus di bawah.
+const CERAPAN_DEFAULT_FIELDS = {
+  merek:     'merek',
+  tipe:      'tipe',
+  kapasitas: 'kapasitas_maks',
+  seri:      'no_seri',
+  lokasi:    'lokasi_pengujian',
+  pemilik:   'nama_pemilik',
+  alamat:    'alamat_pemilik'
+};
+
 const CERAPAN_CONFIG = {
   'Timbangan Elektronik':     { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'TIMB. ELEKTRONIK' },
   'Neraca Emas':              { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'TIMB. ELEKTRONIK PERHIASAN' },
-  'Timbangan Jembatan':       { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'TIMBANGAN JEMBATAN (TJE)' },
+  'Timbangan Jembatan':       { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'TIMBANGAN JEMBATAN (TJE)',
+    // Skema JSON Timbangan Jembatan berbeda dari default, jadi dipetakan khusus di sini.
+    fields: {
+      merek:     'merek',
+      tipe:      'tipe_model',
+      kapasitas: 'kap_maks',
+      seri:      'no_seri',
+      lokasi:    'lokasi_timbangan',
+      pemilik:   'nama_pemilik',
+      alamat:    'alamat_pemilik'
+    }
+  },
   'Anak Timbangan Biasa':     { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'ANAK TIMBANGAN' },
   'Anak Timbangan Halus':     { sheetId: '1RgCHxIaiVCAyjNvmARLKo2RGyncUwBdndNhYVB7CTPo', sheetName: 'ANAK TIMBANGAN' },
 };
@@ -785,6 +808,7 @@ function collectUttp(){
 // ===== Ambil Data Cerapan (dari Google Spreadsheet publik) =====
 let cerapanTargetId = null;
 let cerapanRows = []; // hasil parse baris data cerapan yang sedang ditampilkan
+let cerapanCurrentCfg = null; // konfigurasi (termasuk mapping fields) dari sheet yang sedang dibuka
 
 function parseCsvText(text){
   // Parser CSV sederhana yang menangani field ber-tanda kutip (bisa memuat koma/petik/baris baru)
@@ -825,6 +849,7 @@ function openCerapanPicker(uttpId){
     body.innerHTML = `<div class="cerapan-status">Belum ada sumber data cerapan yang dikonfigurasi untuk jenis "<b>${escapeHtml(jenis)}</b>".<br><br>Tambahkan pemetaannya pada konstanta <code>CERAPAN_CONFIG</code> di dalam kode halaman ini (sheetId + nama sheet/tab).</div>`;
     return;
   }
+  cerapanCurrentCfg = cfg;
   body.innerHTML = '<div class="cerapan-status">Memuat data cerapan...</div>';
   const url = `https://docs.google.com/spreadsheets/d/${cfg.sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(cfg.sheetName)}`;
 
@@ -856,6 +881,7 @@ function openCerapanPicker(uttpId){
 
 function renderCerapanModal(jenis, cfg){
   const body = document.getElementById('cerapanModalBody');
+  const fields = (cfg && cfg.fields) || CERAPAN_DEFAULT_FIELDS;
   const searchVal = (document.getElementById('cerapanSearch')?.value || '').toLowerCase();
   const filtered = cerapanRows.filter(row => {
     if(!searchVal) return true;
@@ -865,14 +891,18 @@ function renderCerapanModal(jenis, cfg){
 
   const tableRows = filtered.map((row, idx) => {
     const realIdx = cerapanRows.indexOf(row);
-    const merekTipe = row.json ? [row.json.merek, row.json.tipe].filter(Boolean).join(' / ') : '';
+    const j = row.json || {};
+    const merekTipe = [j[fields.merek], j[fields.tipe]].filter(Boolean).join(' / ');
+    const pemilik = row.namaPemilik || j[fields.pemilik] || '';
+    const tglUji = row.tglPengujian || j.tanggal_pengujian || '';
+    const lokasi = row.lokasiPengujian || j[fields.lokasi] || '';
     return `<tr onclick="selectCerapanRow(${realIdx})">
       <td>${escapeHtml(row.nomor)}</td>
-      <td>${escapeHtml(row.namaPemilik || (row.json?.nama_pemilik||''))}</td>
-      <td>${escapeHtml(row.tglPengujian || (row.json?.tanggal_pengujian||''))}</td>
-      <td>${escapeHtml(row.lokasiPengujian || (row.json?.lokasi_pengujian||''))}</td>
+      <td>${escapeHtml(pemilik)}</td>
+      <td>${escapeHtml(tglUji)}</td>
+      <td>${escapeHtml(lokasi)}</td>
       <td>${escapeHtml(merekTipe)}</td>
-      <td>${escapeHtml(row.json?.no_seri||'')}</td>
+      <td>${escapeHtml(j[fields.seri]||'')}</td>
     </tr>`;
   }).join('');
 
@@ -896,15 +926,26 @@ function selectCerapanRow(idx){
   const id = cerapanTargetId;
   if(!row || !id) return;
   const j = row.json || {};
-  const merekTipe = [j.merek, j.tipe].filter(Boolean).join(' / ');
+  const fields = (cerapanCurrentCfg && cerapanCurrentCfg.fields) || CERAPAN_DEFAULT_FIELDS;
+
+  const merekTipe = [j[fields.merek], j[fields.tipe]].filter(Boolean).join(' / ');
   if(merekTipe) document.getElementById('utMerek-'+id).value = merekTipe;
-  if(j.kapasitas_maks) document.getElementById('utKapasitas-'+id).value = j.kapasitas_maks;
-  if(j.no_seri) document.getElementById('utSeri-'+id).value = j.no_seri;
-  const lokasi = j.lokasi_pengujian || row.lokasiPengujian;
+
+  const kapasitas = j[fields.kapasitas];
+  if(kapasitas) document.getElementById('utKapasitas-'+id).value = kapasitas;
+
+  const seri = j[fields.seri];
+  if(seri) document.getElementById('utSeri-'+id).value = seri;
+
+  const lokasi = j[fields.lokasi] || row.lokasiPengujian;
   if(lokasi) document.getElementById('utLokasi-'+id).value = lokasi;
-  const pemilik = j.nama_pemilik || row.namaPemilik;
+
+  const pemilik = j[fields.pemilik] || row.namaPemilik;
   if(pemilik) document.getElementById('utPemilik-'+id).value = pemilik;
-  if(j.alamat_pemilik) document.getElementById('utAlamat-'+id).value = j.alamat_pemilik;
+
+  const alamat = j[fields.alamat];
+  if(alamat) document.getElementById('utAlamat-'+id).value = alamat;
+
   closeCerapanModal();
 }
 
