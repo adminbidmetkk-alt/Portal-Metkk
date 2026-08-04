@@ -388,7 +388,7 @@
         <input type="file" id="bukuTemplateFile" accept=".xlsx" style="display:none;" class="no-print">
         <button class="btn btn-green btn-sm" id="exportInfografisBtn">Kirim ke Infografis</button>
         <button class="btn btn-green btn-sm" id="exportSimpelBtn">Kirim ke Simpel</button>
-        <button class="btn btn-ghost btn-sm" id="settingsBtn">&#9881; Pengaturan Infografis</button>
+        <input type="file" id="simpelTemplateFile" accept=".xlsx" style="display:none;" class="no-print">
         <button class="btn btn-ghost btn-sm" id="printBtn">Cetak</button>
       </div>
     </div>
@@ -1188,55 +1188,80 @@
   });
 
   // ---------- export: Register Infografis (pivot per pemilik) ----------
+  // PENTING: daftar & urutan di bawah ini HARUS PERSIS sama dengan kolom J..AH pada sheet
+  // "Register bidmet" (Infografis Pelayanan Kemetrologian BidMet KK). Jangan diubah urutannya
+  // tanpa mengecek ulang header asli di Google Sheet -- karena Apps Script penerima menulis
+  // berdasarkan URUTAN kolom (posisi), bukan berdasarkan nama header.
+  // key = null artinya kolom itu di sheet TIDAK punya jenis UTTP yang cocok di form ini,
+  // jadi akan selalu dikirim kosong (tetap tidak apa-apa, cuma kolom itu tidak pernah keisi).
+  const INFOGRAFIS_JENIS_COLS = [
+    { label:'Meter Kayu',            key:'Meter Kayu' },
+    { label:'Alat Ukur Tinggi Orang', key:null }, // tidak ada jenis yang cocok di form
+    { label:'Float Level Gauge',     key:'Automatic Level Gauge' },
+    { label:'Timbangan Meja',        key:'Timbangan Meja Beranger' },
+    { label:'Timbangan Pegas',       key:'Timbangan Pegas' },
+    { label:'Dacin Logam',           key:'Dacin' },
+    { label:'Timbangan Sentisimal',  key:'Timbangan Sentisimal' },
+    { label:'Timbangan Cepat',       key:'Timbangan Cepat' },
+    { label:'Timbangan Bobot',       key:'Timbangan Bobot Ingsut' },
+    { label:'Neraca',                key:'Neraca' },
+    { label:'Timbangan Pengecek',    key:'Timbangan Pengecek dan Penyortir' },
+    { label:'Timbangan Elektronik',  key:'Timbangan Elektronik untuk Kelas II, Kelas III, dan Kelas IIII' },
+    { label:'Timbangan Jembatan',    key:'Timbangan Jembatan Elektronik' },
+    { label:'Weight In Motion',      key:'Weighing in Motion' },
+    { label:'Anak Timbangan',        key:'Alat Perlengkapan' },
+    { label:'Takaran Basah',         key:'Takaran Basah' },
+    { label:'Bejana Ukur',           key:null }, // tidak ada jenis yang cocok di form
+    { label:'Tanki Ukur Mobil',      key:'Tangki Ukur Mobil Bahan Bakar Minyak' },
+    { label:'Tutsit BBM',            key:'Tangki Ukur Tetap Silinder Tegak Minyak Bumi dan Produk Terkait' },
+    { label:'Tutbo',                 key:'Tangki Ukur Tetap Bentuk Bola' },
+    { label:'Meter Arus Induk',      key:'Meter Arus Minyak Bumi dan Produk Terkait - Positive Displacement Meter' },
+    { label:'Meter Arus Kerja',      key:'Meter Arus Minyak Bumi dan Produk Terkait - Turbine Flow Meter' },
+    { label:'Meter Air Induk',       key:null }, // form cuma 1 jenis Meter Air, semua diarahkan ke Meter Air Kerja
+    { label:'Meter Air Kerja',       key:'Meter Air - Diameter Nominal (DN) <= 50 mm' },
+    { label:'Pompa Ukur BBM',        key:'Pompa Ukur Bahan Bakar Minyak' }
+  ];
+
   $('exportInfografisBtn').addEventListener('click', ()=>{
     const filtered = getFiltered();
     if(!filtered.length){ showToast('Tidak ada data untuk diekspor.'); return; }
 
     // Kelompokkan berdasarkan pemilik (Nama Wajib Tera + Nama Tempat Usaha)
     const groups = {};
-    const jenisOrder = []; // urutan kemunculan jenis UTTP, mengikuti UTTP_LIST lalu jenis custom (Lainnya)
-    UTTP_LIST.filter(j=>j!=='Lainnya').forEach(j=> jenisOrder.push(j));
-    const extraJenis = [];
 
     filtered.forEach(en=>{
       const ownerKey = (en.namaWajibTera||'(Tanpa Nama)') + '||' + (en.namaTempatUsaha||'');
       if(!groups[ownerKey]){
         groups[ownerKey] = {
+          tanggal: en.tanggal || '',
           namaWajibTera: en.namaWajibTera || '',
           namaTempatUsaha: en.namaTempatUsaha || '',
           jalan: en.jalan || '',
           kelurahan: en.kelurahan || '',
           kecamatan: en.kecamatan || '',
-          pasar: en.pasar || '',
           counts: {}
         };
       }
       const g = groups[ownerKey];
-      // pakai alamat terisi pertama kali dijumpai bila sebelumnya kosong
-      ['jalan','kelurahan','kecamatan','pasar'].forEach(f=>{ if(!g[f] && en[f]) g[f] = en[f]; });
+      // pakai tanggal/alamat terisi pertama kali dijumpai bila sebelumnya kosong
+      ['tanggal','jalan','kelurahan','kecamatan'].forEach(f=>{ if(!g[f] && en[f]) g[f] = en[f]; });
 
       const jenisName = en.jenisUTTP || 'Lainnya';
-      if(!jenisOrder.includes(jenisName) && !extraJenis.includes(jenisName)) extraJenis.push(jenisName);
       const jumlah = parseInt(en.jumlah)||0;
       g.counts[jenisName] = (g.counts[jenisName]||0) + jumlah;
     });
 
-    // kolom jenis UTTP yang dipakai: hanya jenis yang benar-benar muncul di data, urut sesuai UTTP_LIST lalu jenis custom
-    const usedJenis = jenisOrder.filter(j => Object.values(groups).some(g => g.counts[j]));
-    extraJenis.sort();
-    const allJenisCols = usedJenis.concat(extraJenis);
-
-    const header = ['No','Nama Wajib Tera','Nama Tempat Usaha','Jalan','Kelurahan','Kecamatan','Pasar', ...allJenisCols, 'Total Unit'];
+    // Header PERSIS sesuai sheet asli (tanpa kolom "No" -- sheet aslinya mulai langsung dari "Tanggal" di kolom A)
+    const header = ['Tanggal','Wilayah','Lokasi','Koordinat','Wajib Tera','Tempat Usaha','Jalan','Kelurahan','Kecamatan',
+      ...INFOGRAFIS_JENIS_COLS.map(c=>c.label), 'Jumlah UTTP'];
     const ownerList = Object.values(groups).sort((a,b)=> (a.namaWajibTera||'').localeCompare(b.namaWajibTera||''));
 
-    const rows = ownerList.map((g,i)=>{
-      let total = 0;
-      const jenisVals = allJenisCols.map(j=>{
-        const v = g.counts[j] || 0;
-        total += v;
-        return v || '';
-      });
-      return [i+1, g.namaWajibTera, g.namaTempatUsaha, g.jalan, g.kelurahan, g.kecamatan, g.pasar, ...jenisVals, total];
+    const rows = ownerList.map((g)=>{
+      // Jumlah UTTP = total SEMUA jenis milik pemilik ini, termasuk jenis yang tidak punya kolom sendiri di sheet
+      const total = Object.values(g.counts).reduce((a,b)=> a+b, 0);
+      const jenisVals = INFOGRAFIS_JENIS_COLS.map(c => c.key ? (g.counts[c.key] || '') : '');
+      // Wilayah, Lokasi, Koordinat sengaja dibiarkan kosong (belum ada field-nya di form ini)
+      return [fmtDate(g.tanggal), '', '', '', g.namaWajibTera, g.namaTempatUsaha, g.jalan, g.kelurahan, g.kecamatan, ...jenisVals, total];
     });
 
     const title = `REGISTER TERA/TERA ULANG UTTP TAHUN 2026 - INFOGRAFIS - BIDANG KEMETROLOGIAN KOTA KUPANG`;
@@ -1282,30 +1307,163 @@
     }
   }
 
-  // ---------- export: Kirim ke Simpel (data mentah, excel) ----------
+  // ---------- export: Kirim ke Simpel (tulis langsung ke file Excel yang sudah ada) ----------
+  // Kolom PERSIS sesuai sheet "Simpel": bulan, kecamatan, Jenis_Lokasi, nama_lokasi, jenis_uttp, jumlah_uttp
+  // (urutan/nama header dicocokkan dari baris 1 sheet -- bukan hard-code posisi kolom, supaya tahan
+  // kalau urutan kolom di file Simpel berbeda-beda).
+  const SIMPEL_HEADERS = ['bulan','kecamatan','Jenis_Lokasi','nama_lokasi','jenis_uttp','jumlah_uttp'];
+
+  // Ambil teks sebuah cell dengan aman (termasuk cell rich-text/formula) untuk dibandingkan
+  function cellText(ws, row, col){
+    const v = ws.getCell(row, col).value;
+    if(v === undefined || v === null) return '';
+    if(typeof v === 'object'){
+      if(v.text) return String(v.text).trim();
+      if(v.result !== undefined) return String(v.result).trim();
+      return '';
+    }
+    return String(v).trim();
+  }
+
+  // Cari kolom-kolom yang dibutuhkan berdasarkan NAMA header di baris 1 (case-insensitive)
+  function findSimpelColumns(ws){
+    const map = {};
+    const headerRow = ws.getRow(1);
+    const lastCol = Math.max(headerRow.cellCount||0, headerRow.actualCellCount||0, 20);
+    for(let c=1; c<=lastCol; c++){
+      const name = cellText(ws, 1, c);
+      if(name) map[name.toLowerCase()] = c;
+    }
+    const cols = {};
+    const missing = [];
+    SIMPEL_HEADERS.forEach(h=>{
+      const c = map[h.toLowerCase()];
+      if(c) cols[h] = c; else missing.push(h);
+    });
+    if(missing.length){
+      const err = new Error(`Header sheet tidak lengkap, kolom berikut tidak ditemukan di baris 1: ${missing.join(', ')}.`);
+      err.code = 'NO_SIMPEL_HEADER';
+      throw err;
+    }
+    return cols;
+  }
+
+  // Tulis entri baru ke worksheet pertama pada workbook (in place), lewati baris yang datanya
+  // (bulan+kecamatan+Jenis_Lokasi+nama_lokasi+jenis_uttp+jumlah_uttp) sudah persis sama dengan yang ada.
+  function writeSimpelRows(wb, filtered){
+    const ws = wb.worksheets[0];
+    if(!ws){
+      const err = new Error('Berkas Excel ini tidak punya sheet sama sekali.');
+      err.code = 'NO_SIMPEL_HEADER';
+      throw err;
+    }
+    const cols = findSimpelColumns(ws);
+
+    // kumpulkan tanda-tangan baris yang sudah ada, sekaligus cari baris kosong pertama
+    // (kolom nama_lokasi dipakai sebagai penanda "masih ada data" -- sama prinsipnya dengan
+    // nextBukuDataRow, cuma di sini tidak dibatasi ukuran halaman)
+    const existing = new Set();
+    let r = 2;
+    while(cellText(ws, r, cols['nama_lokasi']) !== ''){
+      const sig = SIMPEL_HEADERS.map(h => cellText(ws, r, cols[h]).toLowerCase()).join('|');
+      existing.add(sig);
+      r++;
+    }
+    let nextRow = r;
+
+    let added = 0, skipped = 0;
+    filtered.forEach(en=>{
+      const mIdx = monthOf(en.tanggal);
+      const rowVals = {
+        bulan: mIdx ? BULAN_LIST[mIdx-1] : '',
+        kecamatan: en.kecamatan || '',
+        'Jenis_Lokasi': 'Lainnya', // belum ada field kategori lokasi di form ini
+        nama_lokasi: en.namaTempatUsaha || '',
+        jenis_uttp: en.jenisUTTP || '',
+        jumlah_uttp: parseInt(en.jumlah) || 0
+      };
+      const sig = SIMPEL_HEADERS.map(h => String(rowVals[h]).trim().toLowerCase()).join('|');
+      if(existing.has(sig)){ skipped++; return; }
+
+      SIMPEL_HEADERS.forEach(h => { ws.getCell(nextRow, cols[h]).value = rowVals[h]; });
+      existing.add(sig);
+      nextRow++;
+      added++;
+    });
+
+    return { added, skipped };
+  }
+
   $('exportSimpelBtn').addEventListener('click', async ()=>{
     const filtered = getFiltered();
     if(!filtered.length){ showToast('Tidak ada data untuk diekspor.'); return; }
 
-    const header = ['No','Tanggal','Nama Wajib Tera','Nama Tempat Usaha','Jalan','Kelurahan','Kecamatan','Pasar','Jenis UTTP','Merek','Tipe','No. Seri','Kapasitas','Jumlah','Keterangan'];
-    const rows = filtered.map((en,i)=> [
-      i+1, fmtDate(en.tanggal), en.namaWajibTera||'', en.namaTempatUsaha||'', en.jalan||'', en.kelurahan||'',
-      en.kecamatan||'', en.pasar||'', en.jenisUTTP||'', en.merek||'', en.tipe||'', en.noSeri||'',
-      en.kapasitas||'', parseInt(en.jumlah)||0, en.keterangan||''
-    ]);
+    if(supportsFileSystemAccess){
+      // Chrome/Edge: buka file Simpel yang sudah ada, tulis balik ke file yang sama persis
+      try{
+        const [handle] = await window.showOpenFilePicker({
+          types: [{
+            description: 'Berkas Excel',
+            accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] }
+          }],
+          excludeAcceptAllOption: false,
+          multiple: false
+        });
+        const perm = await handle.requestPermission({ mode:'readwrite' });
+        if(perm !== 'granted'){ showToast('Izin akses berkas ditolak, tidak jadi menyimpan.'); return; }
 
-    const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet('data_tera');
-    ws.columns = header.map(h => ({ header: h, width: Math.max(12, h.length+2) }));
-    ws.getRow(1).eachCell(cell=>{
-      cell.font = { bold:true };
-      cell.alignment = { horizontal:'center', vertical:'center', wrapText:true };
-    });
-    rows.forEach(r => ws.addRow(r));
+        const file = await handle.getFile();
+        showToast(`Membuka ${file.name} ...`);
+        const buf = await file.arrayBuffer();
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(buf);
 
-    const out = await wb.xlsx.writeBuffer();
-    downloadBlob(out, 'data_tera.xlsx');
-    showToast(`data_tera.xlsx berhasil diunduh (${filtered.length} baris).`);
+        const { added, skipped } = writeSimpelRows(wb, filtered);
+
+        if(added > 0){
+          const out = await wb.xlsx.writeBuffer();
+          const writable = await handle.createWritable();
+          await writable.write(out);
+          await writable.close();
+        }
+        showToast(`${added} baris ditambahkan, ${skipped} baris dilewati (sudah ada) & disimpan langsung ke ${file.name}.`);
+      }catch(err){
+        if(err && err.name === 'AbortError') return; // pengguna membatalkan dialog
+        if(err && err.code === 'NO_SIMPEL_HEADER'){ showToast(err.message); return; }
+        console.error(err);
+        showToast('Gagal menyimpan langsung ke berkas. Coba lagi.');
+      }
+      return;
+    }
+
+    // Fallback untuk browser yang tidak mendukung penulisan file langsung (mis. Firefox, Safari, HP)
+    $('simpelTemplateFile').value = '';
+    $('simpelTemplateFile').click();
+  });
+
+  $('simpelTemplateFile').addEventListener('change', async (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const filtered = getFiltered();
+    if(!filtered.length){ showToast('Tidak ada data untuk diekspor.'); return; }
+
+    try{
+      showToast(`Membuka ${file.name} ...`);
+      const buf = await file.arrayBuffer();
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.load(buf);
+
+      const { added, skipped } = writeSimpelRows(wb, filtered);
+
+      const outName = file.name; // nama sama seperti berkas asli
+      const out = await wb.xlsx.writeBuffer();
+      downloadBlob(out, outName);
+      showToast(`${added} baris ditambahkan, ${skipped} baris dilewati (sudah ada). Berkas terunduh sebagai "${outName}" -- timpa file lama dengan berkas ini secara manual (browser Anda tidak mendukung simpan langsung).`);
+    }catch(err){
+      console.error(err);
+      const msg = (err && err.code === 'NO_SIMPEL_HEADER') ? err.message : 'Gagal memproses berkas. Pastikan berkas .xlsx berisi header: bulan, kecamatan, Jenis_Lokasi, nama_lokasi, jenis_uttp, jumlah_uttp.';
+      showToast(msg);
+    }
   });
 
   // ---------- pengaturan: URL Web App Infografis ----------
@@ -1315,10 +1473,6 @@
       if(res && res.value) $('webAppUrl').value = res.value;
     }catch(e){ /* belum diatur */ }
   }
-  $('settingsBtn').addEventListener('click', ()=>{
-    $('settingsPanel').style.display = $('settingsPanel').style.display === 'none' ? 'block' : 'none';
-    if($('settingsPanel').style.display === 'block') $('settingsPanel').scrollIntoView({behavior:'smooth'});
-  });
   $('closeSettingsBtn').addEventListener('click', ()=>{ $('settingsPanel').style.display = 'none'; });
   $('saveSettingsBtn').addEventListener('click', async ()=>{
     try{
