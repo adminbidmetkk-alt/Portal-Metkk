@@ -2213,6 +2213,75 @@
   });
 
 
+  // Hitung ulang kolom "Sisa Hari" secara otomatis berdasarkan tanggal hari ini,
+  // supaya tidak perlu diedit manual setiap hari.
+  (function(){
+    const namaBulan = {
+      'januari':0,'februari':1,'maret':2,'april':3,'mei':4,'juni':5,
+      'juli':6,'agustus':7,'september':8,'oktober':9,'november':10,'desember':11
+    };
+
+    function parseTanggalIndo(str){
+      if(!str) return null;
+      const bagian = str.trim().toLowerCase().split(/\s+/);
+      if(bagian.length !== 3) return null;
+      const hari = parseInt(bagian[0], 10);
+      const bulan = namaBulan[bagian[1]];
+      const tahun = parseInt(bagian[2], 10);
+      if(isNaN(hari) || bulan === undefined || isNaN(tahun)) return null;
+      return new Date(tahun, bulan, hari);
+    }
+
+    function updateSisaHariTable(tableEl){
+      if(!tableEl) return;
+      const headerCells = tableEl.querySelectorAll('thead th');
+      let idxBerlaku = -1, idxSisa = -1;
+      headerCells.forEach(function(th, i){
+        const txt = th.textContent.trim().toLowerCase();
+        if(txt === 'tanggal berlaku') idxBerlaku = i;
+        if(txt === 'sisa hari') idxSisa = i;
+      });
+      if(idxBerlaku === -1 || idxSisa === -1) return;
+
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      tableEl.querySelectorAll('tbody tr').forEach(function(row){
+        const cells = row.querySelectorAll('td');
+        if(cells.length <= Math.max(idxBerlaku, idxSisa)) return;
+
+        const tglBerlakuStr = cells[idxBerlaku].textContent.trim();
+        const sisaCell = cells[idxSisa];
+        const tglBerlaku = parseTanggalIndo(tglBerlakuStr);
+        if(!tglBerlaku){
+          // Tidak ada tanggal berlaku (mis. "-"), biarkan apa adanya
+          return;
+        }
+
+        const selisihMs = tglBerlaku.getTime() - today.getTime();
+        const selisihHari = Math.ceil(selisihMs / 86400000);
+
+        if(selisihHari < 0){
+          sisaCell.textContent = 'Kedaluwarsa';
+          sisaCell.style.color = '#B22222';
+          sisaCell.style.fontWeight = '700';
+        } else {
+          sisaCell.textContent = selisihHari.toLocaleString('id-ID') + ' hari';
+          if(selisihHari <= 60){
+            sisaCell.style.color = '#B22222';
+            sisaCell.style.fontWeight = '700';
+          } else {
+            sisaCell.style.color = '';
+            sisaCell.style.fontWeight = '';
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll('#pksView .syarat-table, #dokumenLainnyaView .syarat-table')
+      .forEach(updateSisaHariTable);
+  })();
+
   // Rotasi foto Tim Administrasi 2026 (silih berganti dengan efek fade)
   (function(){
     const box = document.getElementById('fotoAdminBox');
