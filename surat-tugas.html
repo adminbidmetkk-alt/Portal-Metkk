@@ -241,6 +241,16 @@
     color:var(--paper);
     border:1px solid var(--gold-light);
   }
+  .btn-danger{
+    background:#a33;
+    color:#fff;
+    border:1px solid #a33;
+    border-radius:8px;
+    padding:10px 18px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+  }
   .actions{
     display:flex;
     gap:12px;
@@ -371,6 +381,36 @@
   }
   .paraf-table .phBox{
     width:60px;
+  }
+
+  .history-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    color:var(--paper);
+    margin-top:8px;
+  }
+  .history-table th, .history-table td{
+    border:1px solid rgba(251,243,222,0.25);
+    padding:6px 8px;
+    text-align:left;
+    vertical-align:top;
+  }
+  .history-table th{
+    background:rgba(0,0,0,0.15);
+    color:var(--gold-light);
+  }
+  .history-table td button{
+    font-size:12px;
+    padding:4px 8px;
+    margin-right:4px;
+    margin-bottom:4px;
+  }
+  .history-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
   }
 
   @media print{
@@ -607,9 +647,23 @@
     </p>
   </div>
 
+  <div class="panel no-print">
+    <h2>5. Riwayat Data Tersimpan</h2>
+    <p style="font-size:12px; color:#EBD8AE; margin:0 0 10px;">
+      Setiap kali tombol <strong>"Cetak / Simpan sebagai PDF"</strong> ditekan, data surat ini otomatis disimpan di perangkat Anda dan otomatis dikirim juga ke Google Sheet.
+    </p>
+    <div class="history-actions">
+      <button type="button" class="btn-outline" onclick="syncNowManual()">Sinkron Sekarang ke Google Sheet</button>
+      <button type="button" class="btn-outline" onclick="pullHistoryFromSheet()">Tarik Data dari Google Sheet</button>
+      <button type="button" class="btn-outline" onclick="renderHistoryTable()">Segarkan Daftar</button>
+      <button type="button" class="btn-danger" onclick="deleteAllHistory()">Hapus Semua Riwayat</button>
+    </div>
+    <div id="historyTableWrap"></div>
+  </div>
+
   <div class="actions no-print">
     <button class="btn-gold" onclick="renderSurat()">Buat Pratinjau Surat</button>
-    <button class="btn-print" onclick="window.print()">Cetak / Simpan sebagai PDF</button>
+    <button class="btn-print" onclick="cetakDanSimpan()">Cetak / Simpan sebagai PDF</button>
   </div>
 
   <div id="suratWrap">
@@ -619,7 +673,7 @@
 
 <script>
 // Master data petugas (dari data_petugas.xlsx)
-const MASTER_PETUGAS = [{"nama": "Djami Maxin Wila Huky, S.E., M.Si.", "nip": "19740307 200012 1 004", "jabatan": "Kepala Bidang Kemetrologian", "pangkat": "Pembina / IV/a"}, {"nama": "Tommy Charles Sinlaeloe, S.T.", "nip": "19791015 200903 1 004", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Margareta Seno, S.Si.", "nip": "19840330 200903 2 006", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Nyongky Gabriel Susak, S.Si.", "nip": "19851103 201001 1 012", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Vinsensius Arkian Paokuma, S.T.", "nip": "19830726 201001 1 018", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Joce Clemens Sekoni, S.Si.", "nip": "19820714 201001 1 014", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Nick Dwi Nugroho, S.T.", "nip": "19830912 201001 1 016", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Markus Yerry Ely Manafe, S.Si.", "nip": "19870121 201001 1 008", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Astrid Ivonny Ottu, S.T.", "nip": "19830609 201001 2 020", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Voni Sairlay, S.Si.", "nip": "19910904 201502 2 003", "jabatan": "Penera Ahli Muda", "pangkat": "Penata / III/c"}, {"nama": "Willem Jorhans Bentura", "nip": "19690903 199203 1 008", "jabatan": "Penera Penyelia", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Christian Pisther Mone", "nip": "19691107 199503 1 003", "jabatan": "Penera Penyelia", "pangkat": "Penata / III/c"}, {"nama": "Dan Lukas Sprianus Langkola, S.Si.", "nip": "19850916 201502 1 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Maria Desynovini Dule, S.Si.", "nip": "19861204 201502 2 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Nawang Bayu Sasongko, S.Si.", "nip": "19870828 202203 1 005", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Regina Seran, S.Si., M.Si.", "nip": "19890118 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Martha Veronika Christina Soru, S.Si.", "nip": "19910328 202203 2 011", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Ikka Dinamika Otta Lado, S.Si.", "nip": "19920514 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Mohammad Tryadi Djahilape, S.Si.", "nip": "19960624 202203 1 008", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Sance Thersia Olla, S.Si.", "nip": "19970904 202203 2 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Say Grace Mbeo, S.Si.", "nip": "19970924 202203 1 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Lukas Lia Donny Mukin, S.Si.", "nip": "19980228 202203 1 007", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Dominikus Do Lalu", "nip": "19830313 200801 1 010", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Rusly Abdullah Alkatiri", "nip": "19840114 200801 1 002", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Nikson Talan, A.Md.", "nip": "19860715 202203 1 002", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Felisitus Penama Lengari, A.Md.", "nip": "19870307 202203 1 003", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Yohanes Wolang Wada, A.Md.", "nip": "19880615 202203 1 007", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Mark Gideon Bire, A.Md.", "nip": "19891126 202203 1 001", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Irene Frisilia, A.Md.", "nip": "19931117 202203 2 011", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Yuda Pambudi, A.Md.T.", "nip": "19970714 202203 1 009", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Lorena Ohar, S.STP.", "nip": "19800508 200003 2 001", "jabatan": "Analis SDM Aparatur Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Djefri Wety Hadjo", "nip": "19820306 200901 1 012", "jabatan": "Pengadministrasi", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Denros Squart Milko Ludji", "nip": "19800909 202521 1 032", "jabatan": "Pengadministrasi", "pangkat": "-"}, {"nama": "Beci Karolina Lada", "nip": "19800112 202521 2 014", "jabatan": "Pengadministrasi", "pangkat": "-"}, {"nama": "Melky Erly Lazarino Seubelan", "nip": "19780708 202521 1 019", "jabatan": "Pengadministrasi", "pangkat": "-"}];
+const MASTER_PETUGAS = [{"nama": "Djami Maxin Wila Huky, S.E., M.Si.", "nip": "19740307 200012 1 004", "jabatan": "Kepala Bidang Kemetrologian", "pangkat": "Pembina / IV/a"}, {"nama": "Tommy Charles Sinlaeloe, S.T.", "nip": "19791015 200903 1 004", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Margareta Seno, S.Si.", "nip": "19840330 200903 2 006", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Nyongky Gabriel Susak, S.Si.", "nip": "19851103 201001 1 012", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Vinsensius Arkian Paokuma, S.T.", "nip": "19830726 201001 1 018", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a"}, {"nama": "Joce Clemens Sekoni, S.Si.", "nip": "19820714 201001 1 014", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Nick Dwi Nugroho, S.T.", "nip": "19830912 201001 1 016", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Markus Yerry Ely Manafe, S.Si.", "nip": "19870121 201001 1 008", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Astrid Ivonny Ottu, S.T.", "nip": "19830609 201001 2 020", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Voni Sairlay, S.Si.", "nip": "19910904 201502 2 003", "jabatan": "Penera Ahli Muda", "pangkat": "Penata / III/c"}, {"nama": "Willem Jorhans Bentura", "nip": "19690903 199203 1 008", "jabatan": "Penera Penyelia", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Christian Pisther Mone", "nip": "19691107 199503 1 003", "jabatan": "Penera Penyelia", "pangkat": "Penata / III/c"}, {"nama": "Dan Lukas Sprianus Langkola, S.Si.", "nip": "19850916 201502 1 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Maria Desynovini Dule, S.Si.", "nip": "19861204 201502 2 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Nawang Bayu Sasongko, S.Si.", "nip": "19870828 202203 1 005", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Regina Seran, S.Si., M.Si.", "nip": "19890118 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Martha Veronika Christina Soru, S.Si.", "nip": "19910328 202203 2 011", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Ikka Dinamika Otta Lado, S.Si.", "nip": "19920514 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Mohammad Tryadi Djahilape, S.Si.", "nip": "19960624 202203 1 008", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Sance Thersia Olla, S.Si.", "nip": "19970904 202203 2 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Say Grace Mbeo, S.Si.", "nip": "19970924 202203 1 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Lukas Lia Donny Mukin, S.Si.", "nip": "19980228 202203 1 007", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Dominikus Do Lalu", "nip": "19830313 200801 1 010", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Rusly Abdullah Alkatiri", "nip": "19840114 200801 1 002", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b"}, {"nama": "Nikson Talan, A.Md.", "nip": "19860715 202203 1 002", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Felisitus Penama Lengari, A.Md.", "nip": "19870307 202203 1 003", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Yohanes Wolang Wada, A.Md.", "nip": "19880615 202203 1 007", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Mark Gideon Bire, A.Md.", "nip": "19891126 202203 1 001", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Irene Frisilia, A.Md.", "nip": "19931117 202203 2 011", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Yuda Pambudi, A.Md.T.", "nip": "19970714 202203 1 009", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d"}, {"nama": "Lorena Ohar, S.STP.", "nip": "19800508 200003 2 001", "jabatan": "Analis SDM Aparatur Ahli Muda", "pangkat": "Penata Tingkat I / III/d"}, {"nama": "Djefri Wety Hadjo", "nip": "19820306 200901 1 012", "jabatan": "Pengadministrasi", "pangkat": "Penata Muda / III/a"}, {"nama": "Denros Squart Milko Ludji", "nip": "19800909 202521 1 032", "jabatan": "Pengadministrasi", "pangkat": "-"}, {"nama": "Beci Karolina Lada", "nip": "19800112 202521 2 014", "jabatan": "Pengadministrasi", "pangkat": "-"}, {"nama": "Melky Erly Lazarino Seubelan", "nip": "19780708 202521 1 019", "jabatan": "Pengadministrasi", "pangkat": "-"}];
 function escapeAttr(str){
   return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -905,6 +959,15 @@ function nl2br(str){
   return escapeHtml(str).replace(/\\n/g, '<br>');
 }
 
+function getOfficerNama(prefix, id){
+  const selectVal = document.getElementById(prefix + 'Nama-' + id).value;
+  if(selectVal === '__manual__'){
+    const manualEl = document.getElementById(prefix + 'NamaManual-' + id);
+    return manualEl ? manualEl.value : '';
+  }
+  return selectVal;
+}
+
 function renderSurat(){
   const noUrut = document.getElementById('noUrut').value || '\u00A0\u00A0\u00A0\u00A0\u00A0';
   const bulan = document.getElementById('bulanRomawi').value;
@@ -931,15 +994,6 @@ function renderSurat(){
           <div class="officer-field"><div class="flabel">Jabatan</div><div class="fcolon">:</div><div class="fval">${escapeHtml(jabatan)}</div></div>
         </div>
       </div>`;
-  }
-
-  function getOfficerNama(prefix, id){
-    const selectVal = document.getElementById(prefix + 'Nama-' + id).value;
-    if(selectVal === '__manual__'){
-      const manualEl = document.getElementById(prefix + 'NamaManual-' + id);
-      return manualEl ? manualEl.value : '';
-    }
-    return selectVal;
   }
 
   if(kepadaMode === 'team'){
@@ -1056,6 +1110,313 @@ function renderSurat(){
   document.getElementById('surat').innerHTML = html;
 }
 
+// ================= Penyimpanan Data (Riwayat + Excel) =================
+
+const HISTORY_KEY = 'suratTugasHistory';
+
+function getSimpleFieldIds(){
+  return [
+    'noUrut','bulanRomawi','tahunSurat','formatNomor',
+    'dasarTeraDari','dasarTeraNomor','dasarTeraTanggal','dasarTeraHal',
+    'dasar',
+    'untukTeraUttp','untukTeraJumlah','untukTeraPemilik','untukTeraLokasi','untukTeraNomorOrder','untukTeraLama','untukTeraTmt','untukTeraSelesai',
+    'untukPengawasanLokasi','untukPengawasanLama','untukPengawasanTmt',
+    'untuk',
+    'tempatTtd','tanggalTtd','ttdJabatanBlok','ttdNama','ttdPangkat','ttdNip'
+  ];
+}
+
+function snapshotForm(){
+  const data = {};
+  getSimpleFieldIds().forEach(id => {
+    const el = document.getElementById(id);
+    if(el) data[id] = el.value;
+  });
+  data.suratJenis = document.querySelector('input[name=suratJenis]:checked').value;
+  data.kepadaMode = document.querySelector('input[name=kepadaMode]:checked').value;
+  data.signer = document.querySelector('input[name=signer]:checked').value;
+  data.showParafHierarki = document.getElementById('showParafHierarki').checked;
+
+  data.officers = [];
+  document.querySelectorAll('#officerList .officer-card').forEach(card => {
+    const id = card.id.split('-')[1];
+    data.officers.push({
+      nama: getOfficerNama('of', id),
+      pangkat: document.getElementById('ofPangkat-' + id).value,
+      nip: document.getElementById('ofNip-' + id).value,
+      jabatan: document.getElementById('ofJabatan-' + id).value
+    });
+  });
+
+  data.teams = [];
+  document.querySelectorAll('#teamList .team-card').forEach(teamCard => {
+    const teamId = teamCard.id.split('-')[1];
+    const teamName = document.getElementById('teamName-' + teamId).value;
+    const members = [];
+    teamCard.querySelectorAll('.team-officer-list .officer-card').forEach(card => {
+      const oid = card.id.split('-')[1];
+      members.push({
+        nama: getOfficerNama('tof', oid),
+        pangkat: document.getElementById('tofPangkat-' + oid).value,
+        nip: document.getElementById('tofNip-' + oid).value,
+        jabatan: document.getElementById('tofJabatan-' + oid).value
+      });
+    });
+    data.teams.push({ teamName, members });
+  });
+
+  return data;
+}
+
+function setOfficerFieldValues(prefix, id, o){
+  const selectEl = document.getElementById(prefix + 'Nama-' + id);
+  const manualEl = document.getElementById(prefix + 'NamaManual-' + id);
+  const match = MASTER_PETUGAS.find(p => p.nama === o.nama);
+  if(match){
+    selectEl.value = o.nama;
+    manualEl.style.display = 'none';
+    manualEl.value = '';
+  } else {
+    selectEl.value = '__manual__';
+    manualEl.style.display = 'block';
+    manualEl.value = o.nama || '';
+  }
+  document.getElementById(prefix + 'Pangkat-' + id).value = o.pangkat || '';
+  document.getElementById(prefix + 'Nip-' + id).value = o.nip || '';
+  document.getElementById(prefix + 'Jabatan-' + id).value = o.jabatan || '';
+}
+
+function restoreForm(data){
+  getSimpleFieldIds().forEach(id => {
+    const el = document.getElementById(id);
+    if(el && data[id] !== undefined) el.value = data[id];
+  });
+
+  if(data.suratJenis){
+    const r = document.querySelector('input[name=suratJenis][value="' + data.suratJenis + '"]');
+    if(r) r.checked = true;
+  }
+  if(data.signer){
+    const r = document.querySelector('input[name=signer][value="' + data.signer + '"]');
+    if(r) r.checked = true;
+  }
+  document.getElementById('showParafHierarki').checked = !!data.showParafHierarki;
+
+  // reset officer/team lists
+  document.getElementById('officerList').innerHTML = '';
+  document.getElementById('teamList').innerHTML = '';
+  officerCount = 0;
+  teamCount = 0;
+  teamOfficerCounter = 0;
+
+  const officers = data.officers && data.officers.length ? data.officers : [{}];
+  officers.forEach(o => {
+    addOfficer();
+    setOfficerFieldValues('of', officerCount, o);
+  });
+
+  (data.teams || []).forEach(t => {
+    addTeam(); // auto-creates 2 member rows
+    const teamId = teamCount;
+    document.getElementById('teamName-' + teamId).value = t.teamName || ('Tim ' + teamId);
+    document.getElementById('teamOfficers-' + teamId).innerHTML = '';
+    const members = t.members && t.members.length ? t.members : [{}, {}];
+    members.forEach(m => {
+      addTeamOfficer(teamId);
+      setOfficerFieldValues('tof', teamOfficerCounter, m);
+    });
+  });
+
+  if(data.kepadaMode){
+    const r = document.querySelector('input[name=kepadaMode][value="' + data.kepadaMode + '"]');
+    if(r) r.checked = true;
+  }
+
+  switchKepadaMode();
+  switchSuratJenis();
+  refreshOfficerNameOptions();
+  renderSurat();
+}
+
+function buildNomorSuratForSnapshot(){
+  const noUrut = document.getElementById('noUrut').value || '';
+  const bulan = document.getElementById('bulanRomawi').value;
+  const tahun = document.getElementById('tahunSurat').value || '';
+  return document.getElementById('formatNomor').value
+    .replace('{noUrut}', noUrut)
+    .replace('{bulan}', bulan)
+    .replace('{tahun}', tahun);
+}
+
+function officersSummaryText(data){
+  if(data.kepadaMode === 'team'){
+    return data.teams.map(t => t.teamName + ': ' + t.members.map(m => m.nama || '(kosong)').join(', ')).join(' | ');
+  }
+  return data.officers.map(o => o.nama || '(kosong)').join(', ');
+}
+
+function getHistory(){
+  try{
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch(e){
+    return [];
+  }
+}
+
+function setHistory(arr){
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(arr));
+}
+
+function saveCurrentRecord(){
+  const data = snapshotForm();
+  const record = {
+    savedAt: new Date().toLocaleString('id-ID'),
+    nomorSurat: buildNomorSuratForSnapshot(),
+    jenis: data.suratJenis,
+    petugas: officersSummaryText(data),
+    tempat: document.getElementById('tempatTtd').value,
+    tanggal: fmtTanggal(document.getElementById('tanggalTtd').value),
+    penandatangan: document.getElementById('ttdNama').value,
+    formData: data
+  };
+  const history = getHistory();
+  history.push(record);
+  setHistory(history);
+  renderHistoryTable();
+  return history;
+}
+
+// ================= Sinkronisasi Google Sheet =================
+
+const GSHEET_URL = 'https://script.google.com/macros/s/AKfycbw92MtxR7lvHfdVBQSOKla5oV_1fdutCfgzwf4o-1X-TplHD9BGgAzlauMGX4UDmTI30g/exec';
+
+function getGSheetUrl(){
+  return GSHEET_URL;
+}
+
+async function testGSheetConnection(){
+  const url = getGSheetUrl();
+  try{
+    const res = await fetch(url, { method: 'GET' });
+    if(!res.ok) throw new Error('Status HTTP ' + res.status);
+    const data = await res.json();
+    alert('Koneksi berhasil! Google Sheet berisi ' + (Array.isArray(data) ? data.length : 0) + ' baris riwayat.');
+  } catch(err){
+    alert('Gagal terhubung ke Google Sheet: ' + err.message + '\\n\\nPastikan Web App sudah di-deploy dengan akses "Anyone".');
+  }
+}
+
+async function syncRecordToSheet(record){
+  const url = getGSheetUrl();
+  if(!url) return false;
+  try{
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(record)
+    });
+    return true;
+  } catch(err){
+    console.error('Gagal sinkron ke Google Sheet:', err);
+    return false;
+  }
+}
+
+async function syncNowManual(){
+  const url = getGSheetUrl();
+  if(!url){
+    alert('Isi dan simpan URL Web App Google Apps Script terlebih dahulu di panel "Sinkronisasi Google Sheet".');
+    return;
+  }
+  const history = getHistory();
+  if(!history.length){
+    alert('Belum ada data riwayat di perangkat ini untuk disinkronkan.');
+    return;
+  }
+  const last = history[history.length - 1];
+  const ok = await syncRecordToSheet(last);
+  alert(ok ? 'Data terakhir berhasil dikirim ke Google Sheet.' : 'Gagal mengirim data ke Google Sheet. Periksa URL dan koneksi internet.');
+}
+
+async function pullHistoryFromSheet(){
+  const url = getGSheetUrl();
+  if(!url){
+    alert('Isi dan simpan URL Web App Google Apps Script terlebih dahulu.');
+    return;
+  }
+  try{
+    const res = await fetch(url, { method: 'GET' });
+    if(!res.ok) throw new Error('Status HTTP ' + res.status);
+    const data = await res.json();
+    setHistory(Array.isArray(data) ? data : []);
+    renderHistoryTable();
+    alert('Berhasil menarik ' + (Array.isArray(data) ? data.length : 0) + ' data riwayat dari Google Sheet.');
+  } catch(err){
+    alert('Gagal mengambil data dari Google Sheet: ' + err.message);
+  }
+}
+
+async function cetakDanSimpan(){
+  renderSurat();
+  saveCurrentRecord();
+  const history = getHistory();
+  const lastRecord = history[history.length - 1];
+  if(getGSheetUrl()){
+    await syncRecordToSheet(lastRecord);
+  }
+  window.print();
+}
+
+function renderHistoryTable(){
+  const history = getHistory();
+  const wrap = document.getElementById('historyTableWrap');
+  if(!wrap) return;
+  if(!history.length){
+    wrap.innerHTML = '<p style="font-size:13px;color:#EBD8AE;">Belum ada data tersimpan. Data akan otomatis tercatat di sini setiap kali Anda menekan tombol "Cetak / Simpan sebagai PDF".</p>';
+    return;
+  }
+  let html = '<table class="history-table"><thead><tr>' +
+    '<th>#</th><th>Nomor Surat</th><th>Petugas/Tim</th><th>Tanggal</th><th>Disimpan</th><th>Aksi</th>' +
+    '</tr></thead><tbody>';
+  history.forEach((r, i) => {
+    html += '<tr>' +
+      '<td>' + (i + 1) + '</td>' +
+      '<td>' + escapeHtml(r.nomorSurat) + '</td>' +
+      '<td>' + escapeHtml(r.petugas) + '</td>' +
+      '<td>' + escapeHtml(r.tanggal) + '</td>' +
+      '<td>' + escapeHtml(r.savedAt) + '</td>' +
+      '<td>' +
+        '<button type="button" class="btn-outline" onclick="loadHistoryRecord(' + i + ')">Muat</button>' +
+        '<button type="button" class="btn-danger" onclick="deleteHistoryRecord(' + i + ')">Hapus</button>' +
+      '</td>' +
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function loadHistoryRecord(i){
+  const history = getHistory();
+  const r = history[i];
+  if(!r) return;
+  restoreForm(r.formData);
+  alert('Data surat tugas nomor "' + r.nomorSurat + '" berhasil dimuat kembali ke form.');
+}
+
+function deleteHistoryRecord(i){
+  if(!confirm('Hapus data riwayat ini?')) return;
+  const history = getHistory();
+  history.splice(i, 1);
+  setHistory(history);
+  renderHistoryTable();
+}
+
+function deleteAllHistory(){
+  if(!confirm('Hapus SEMUA riwayat data tersimpan di perangkat ini? Tindakan ini tidak dapat dibatalkan.')) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistoryTable();
+}
+
 // initialize with 1 officer row and today's date
 document.addEventListener('DOMContentLoaded', function(){
   addOfficer();
@@ -1064,6 +1425,7 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('tahunSurat').value = today.getFullYear();
   switchSuratJenis();
   renderSurat();
+  renderHistoryTable();
 });
 </script>
 
