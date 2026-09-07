@@ -326,13 +326,14 @@
   .kepada-row .colon{ width:14px; flex-shrink:0; }
   .kepada-row .content{ flex:1; }
   .officer-block{
-    display:flex;
+    display:table;
+    width:100%;
     margin-bottom:10px;
     page-break-inside:avoid;
     break-inside:avoid;
   }
-  .officer-block .idx{ width:22px; flex-shrink:0; }
-  .officer-block .fields{ flex:1; }
+  .officer-block .idx{ display:table-cell; width:22px; vertical-align:top; }
+  .officer-block .fields{ display:table-cell; }
   .officer-field{ display:flex; }
   .officer-field .flabel{ width:150px; flex-shrink:0; }
   .officer-field .fcolon{ width:14px; flex-shrink:0; }
