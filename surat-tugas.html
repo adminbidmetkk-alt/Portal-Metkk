@@ -18,7 +18,9 @@
   *{box-sizing:border-box;}
   @page{
     size: 215mm 330mm; /* Kertas F4 / Folio */
-    margin: 0;
+    /* margin ini otomatis berlaku di SETIAP halaman cetak (hal.1, hal.2, dst),
+       beda dengan padding di #surat yang cuma berlaku sekali di awal/akhir kotak */
+    margin: 20mm 16mm 14mm 16mm; /* atas 2cm, kanan 16mm, bawah 14mm, kiri 16mm */
   }
   body{
     margin:0;
@@ -323,7 +325,12 @@
   .kepada-row .label{ width:70px; flex-shrink:0; }
   .kepada-row .colon{ width:14px; flex-shrink:0; }
   .kepada-row .content{ flex:1; }
-  .officer-block{ display:flex; margin-bottom:10px; }
+  .officer-block{
+    display:flex;
+    margin-bottom:10px;
+    page-break-inside:avoid;
+    break-inside:avoid;
+  }
   .officer-block .idx{ width:22px; flex-shrink:0; }
   .officer-block .fields{ flex:1; }
   .officer-field{ display:flex; }
@@ -341,6 +348,11 @@
   .untuk-row .label{ width:70px; flex-shrink:0; }
   .untuk-row .colon{ width:14px; flex-shrink:0; }
   .untuk-row .content{ flex:1; text-align:justify; }
+
+  .untuk-ttd-group{
+    page-break-inside:avoid;
+    break-inside:avoid;
+  }
 
   .ttd-block{
     margin-top:24px;
@@ -424,7 +436,7 @@
       min-height:0;
       margin:0;
     }
-    #surat{ padding:14mm 16mm; }
+    #surat{ padding:0; } /* margin halaman sudah diambil alih oleh @page di atas, berlaku tiap halaman */
   }
 </style>
 </head>
@@ -1092,18 +1104,20 @@ function renderSurat(){
       <div class="content">${officersHtml}</div>
     </div>
 
-    <div class="untuk-row">
-      <div class="label">Untuk</div><div class="colon">:</div>
-      <div class="content">${nl2br(untuk)}</div>
-    </div>
+    <div class="untuk-ttd-group">
+      <div class="untuk-row">
+        <div class="label">Untuk</div><div class="colon">:</div>
+        <div class="content">${nl2br(untuk)}</div>
+      </div>
 
-    <div class="ttd-block">
-      <div class="ttd-place-date-plain">${escapeHtml(tempat)}, ${escapeHtml(tanggal)}</div>
-      <div class="ttd-title">${nl2br(jabatanBlok)}</div>
-      <div class="ttd-space"></div>
-      <div class="ttd-name">${escapeHtml(namaTtd)}</div>
-      <div>${escapeHtml(pangkatTtd)}</div>
-      <div>NIP. ${escapeHtml(nipTtd)}</div>
+      <div class="ttd-block">
+        <div class="ttd-place-date-plain">${escapeHtml(tempat)}, ${escapeHtml(tanggal)}</div>
+        <div class="ttd-title">${nl2br(jabatanBlok)}</div>
+        <div class="ttd-space"></div>
+        <div class="ttd-name">${escapeHtml(namaTtd)}</div>
+        <div>${escapeHtml(pangkatTtd)}</div>
+        <div>NIP. ${escapeHtml(nipTtd)}</div>
+      </div>
     </div>
     ${parafHtml}
   `;
