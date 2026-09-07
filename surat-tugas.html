@@ -935,6 +935,36 @@ function getDasarValue(){
   }
 }
 
+function angkaKeKata(n){
+  n = Math.floor(Math.abs(n));
+  if(n === 0) return 'nol';
+  const satuan = ['', 'satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan','sepuluh','sebelas'];
+  function convert(num){
+    if(num < 12) return satuan[num];
+    if(num < 20) return convert(num - 10) + ' belas';
+    if(num < 100) return convert(Math.floor(num/10)) + ' puluh' + (num % 10 !== 0 ? ' ' + convert(num % 10) : '');
+    if(num < 200) return 'seratus' + (num % 100 !== 0 ? ' ' + convert(num % 100) : '');
+    if(num < 1000) return convert(Math.floor(num/100)) + ' ratus' + (num % 100 !== 0 ? ' ' + convert(num % 100) : '');
+    if(num < 2000) return 'seribu' + (num % 1000 !== 0 ? ' ' + convert(num % 1000) : '');
+    if(num < 1000000) return convert(Math.floor(num/1000)) + ' ribu' + (num % 1000 !== 0 ? ' ' + convert(num % 1000) : '');
+    if(num < 1000000000) return convert(Math.floor(num/1000000)) + ' juta' + (num % 1000000 !== 0 ? ' ' + convert(num % 1000000) : '');
+    return convert(Math.floor(num/1000000000)) + ' miliar' + (num % 1000000000 !== 0 ? ' ' + convert(num % 1000000000) : '');
+  }
+  return convert(n).trim();
+}
+
+// Format nilai "selama": kalau isinya murni angka (boleh diikuti satuan, mis. "5" atau "5 hari"),
+// diubah jadi "5 (lima) hari". Kalau isinya sudah berupa teks bebas (bukan angka polos), dibiarkan apa adanya.
+function formatSelama(raw, defaultSatuan){
+  if(!raw) return raw;
+  const trimmed = String(raw).trim();
+  const m = trimmed.match(/^(\d+)(?:\s+(\S+))?$/);
+  if(!m) return raw;
+  const angka = parseInt(m[1], 10);
+  const satuan = m[2] || defaultSatuan;
+  return `${angka} (${angkaKeKata(angka)}) ${satuan}`;
+}
+
 function getUntukValue(){
   const jenis = document.querySelector('input[name=suratJenis]:checked').value;
   if(jenis === 'tera'){
@@ -943,13 +973,15 @@ function getUntukValue(){
     const pemilik = document.getElementById('untukTeraPemilik').value || '.....................';
     const lokasi = document.getElementById('untukTeraLokasi').value || '.....................';
     const nomorOrder = document.getElementById('untukTeraNomorOrder').value || '.....................';
-    const lama = document.getElementById('untukTeraLama').value || '...';
+    const lamaRaw = document.getElementById('untukTeraLama').value;
+    const lama = lamaRaw ? formatSelama(lamaRaw, 'hari') : '... hari';
     const tmt = fmtTanggal(document.getElementById('untukTeraTmt').value);
     const selesai = fmtTanggal(document.getElementById('untukTeraSelesai').value);
-    return `Melaksanakan Kegiatan Tera/Tera Ulang ${uttp} sebanyak ${jumlah} unit milik ${pemilik} di ${lokasi}, Nomor Order: ${nomorOrder}, selama ${lama} hari, TMT ${tmt} s.d. ${selesai}.`;
+    return `Melaksanakan Kegiatan Tera/Tera Ulang ${uttp} sebanyak ${jumlah} unit milik ${pemilik} di ${lokasi}, Nomor Order: ${nomorOrder}, selama ${lama}, TMT ${tmt} s.d. ${selesai}.`;
   } else if(jenis === 'pengawasan'){
     const lokasi = document.getElementById('untukPengawasanLokasi').value || '.....................';
-    const lama = document.getElementById('untukPengawasanLama').value || '...................';
+    const lamaRaw2 = document.getElementById('untukPengawasanLama').value;
+    const lama = lamaRaw2 ? formatSelama(lamaRaw2, 'hari') : '...................';
     const tmt = fmtTanggal(document.getElementById('untukPengawasanTmt').value);
     return `Melaksanakan Kegiatan Pendataan dan Pemantauan Alat Ukur, Alat Takar, Alat Timbang, dan Alat Perlengkapan di ${lokasi}, selama ${lama}, TMT ${tmt}.`;
   } else {
