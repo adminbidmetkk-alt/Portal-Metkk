@@ -1160,6 +1160,17 @@ function renderSurat(){
 // ================= Penyimpanan Data (Riwayat + Excel) =================
 
 const HISTORY_KEY = 'suratTugasHistory';
+// Menyimpan index record riwayat yang sedang "aktif" (baru dimuat / baru disimpan),
+// supaya penyimpanan berikutnya meng-update record ini, bukan menambah data baru (dobel).
+let currentRecordIndex = null;
+
+function isSameFormData(a, b){
+  try{
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch(e){
+    return false;
+  }
+}
 
 function getSimpleFieldIds(){
   return [
@@ -1327,7 +1338,25 @@ function saveCurrentRecord(){
     formData: data
   };
   const history = getHistory();
-  history.push(record);
+
+  // Tentukan apakah data ini harus meng-update record yang sudah ada
+  // (karena baru saja dimuat lewat "Muat", atau isinya persis sama dengan
+  // salah satu record yang sudah tersimpan) atau menjadi record baru.
+  let targetIndex = -1;
+  if(currentRecordIndex !== null && currentRecordIndex >= 0 && currentRecordIndex < history.length){
+    targetIndex = currentRecordIndex;
+  } else {
+    targetIndex = history.findIndex(r => isSameFormData(r.formData, data));
+  }
+
+  if(targetIndex >= 0){
+    history[targetIndex] = record;
+    currentRecordIndex = targetIndex;
+  } else {
+    history.push(record);
+    currentRecordIndex = history.length - 1;
+  }
+
   setHistory(history);
   renderHistoryTable();
   return history;
@@ -1447,6 +1476,7 @@ function loadHistoryRecord(i){
   const r = history[i];
   if(!r) return;
   restoreForm(r.formData);
+  currentRecordIndex = i;
   alert('Data surat tugas nomor "' + r.nomorSurat + '" berhasil dimuat kembali ke form.');
 }
 
@@ -1455,12 +1485,18 @@ function deleteHistoryRecord(i){
   const history = getHistory();
   history.splice(i, 1);
   setHistory(history);
+  if(currentRecordIndex === i){
+    currentRecordIndex = null;
+  } else if(currentRecordIndex !== null && currentRecordIndex > i){
+    currentRecordIndex--;
+  }
   renderHistoryTable();
 }
 
 function deleteAllHistory(){
   if(!confirm('Hapus SEMUA riwayat data tersimpan di perangkat ini? Tindakan ini tidak dapat dibatalkan.')) return;
   localStorage.removeItem(HISTORY_KEY);
+  currentRecordIndex = null;
   renderHistoryTable();
 }
 
