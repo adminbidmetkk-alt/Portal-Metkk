@@ -379,7 +379,7 @@
   .uttp-block{
     margin-top:10px;
     page-break-inside:avoid;
-    break-inside:avoid;
+    break-inside:avoid-page;
   }
   .uttp-title{ font-weight:bold; margin-bottom:2px; }
   .uttp-row{ display:flex; }
@@ -387,7 +387,12 @@
   .uttp-row .fcolon{ width:14px; flex-shrink:0; }
   .uttp-row .fval{ flex:1; }
 
-  .kesimpulan{ margin-top:16px; text-align:justify; }
+  .kesimpulan{
+    margin-top:2cm;
+    text-align:justify;
+    page-break-before:always;
+    break-before:page;
+  }
   .penutup{ margin-top:14px; text-align:justify; }
 
   .ttd-area{
@@ -588,6 +593,8 @@
 
   <div class="actions no-print">
     <button class="btn-gold" onclick="renderSurat()">Buat Pratinjau Berita Acara</button>
+    <button class="btn-outline" onclick="openRiwayatPicker()">&#8681; Muat dari Riwayat (Google Sheet)</button>
+    <button class="btn-outline" id="btnSimpanRiwayat" onclick="simpanRiwayat()">Simpan ke Riwayat (Google Sheet)</button>
     <button class="btn-print" onclick="window.print()">Cetak / Simpan sebagai PDF</button>
   </div>
 
@@ -606,7 +613,27 @@
   </div>
 </div>
 
+<div id="modalRiwayat" class="modal-overlay no-print">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Muat dari Riwayat Berita Acara</h3>
+      <button type="button" class="modal-close" onclick="closeRiwayatModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="riwayatModalBody"></div>
+  </div>
+</div>
+
 <script>
+// ===== Konfigurasi "Simpan ke Riwayat" (Google Sheet: Riwayat Berita Acara) =====
+// Spreadsheet "Riwayat Berita Acara":
+// https://docs.google.com/spreadsheets/d/1BFQrsJG63LEJyhFFwDawgE8LbVijQj1QCcAD2XXvTBA/edit
+// Ditulis lewat Google Apps Script Web App (doPost) yang sudah di-deploy:
+const RIWAYAT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyPVvahqJr9j_XBkCY7rkDvs2itXXgWLiPR_TECU2T8wnQQFY3zC_NId4Qa0D-d8ptu/exec';
+// Dibaca kembali lewat CSV publik sheet (sama seperti pola "Data Cerapan"),
+// jadi sheet HARUS di-share "Siapa saja yang memiliki link" (Anyone with the link) sebagai Viewer.
+const RIWAYAT_SHEET_ID = '1BFQrsJG63LEJyhFFwDawgE8LbVijQj1QCcAD2XXvTBA';
+const RIWAYAT_SHEET_GID = 0; // tab/sheet pertama
+
 // Master data petugas (dari data_petugas.xlsx, sama dengan Surat Tugas)
 const MASTER_PETUGAS = [{"nama": "Djami Maxin Wila Huky, S.E., M.Si.", "nip": "19740307 200012 1 004", "jabatan": "Kepala Bidang Kemetrologian", "pangkat": "Pembina / IV/a", "sk": "-"}, {"nama": "Tommy Charles Sinlaeloe, S.T.", "nip": "19791015 200903 1 004", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor 2661 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Margareta Seno, S.Si.", "nip": "19840330 200903 2 006", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor 2669 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Nyongky Gabriel Susak, S.Si.", "nip": "19851103 201001 1 012", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor 2655 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Vinsensius Arkian Paokuma, S.T.", "nip": "19830726 201001 1 018", "jabatan": "Penera Ahli Madya", "pangkat": "Pembina / IV/a", "sk": "Nomor 2660 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Joce Clemens Sekoni, S.Si.", "nip": "19820714 201001 1 014", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor 2663 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Nick Dwi Nugroho, S.T.", "nip": "19830912 201001 1 016", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor 2668 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Markus Yerry Ely Manafe, S.Si.", "nip": "19870121 201001 1 008", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor 2666 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Astrid Ivonny Ottu, S.T.", "nip": "19830609 201001 2 020", "jabatan": "Penera Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor 24 Tahun 2026 Tanggal 8 Januari 2026"}, {"nama": "Voni Sairlay, S.Si.", "nip": "19910904 201502 2 003", "jabatan": "Penera Ahli Muda", "pangkat": "Penata / III/c", "sk": "Nomor 2656 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Willem Jorhans Bentura", "nip": "19690903 199203 1 008", "jabatan": "Penera Penyelia", "pangkat": "Penata Tingkat I / III/d", "sk": "Nomor 2670 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Christian Pisther Mone", "nip": "19691107 199503 1 003", "jabatan": "Penera Penyelia", "pangkat": "Penata / III/c", "sk": "Nomor 2674 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Dan Lukas Sprianus Langkola, S.Si.", "nip": "19850916 201502 1 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor 25 Tahun 2026 Tanggal 8 Januari 2026"}, {"nama": "Maria Desynovini Dule, S.Si.", "nip": "19861204 201502 2 001", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor 26 Tahun 2026 Tanggal 8 Januari 2026"}, {"nama": "Nawang Bayu Sasongko, S.Si.", "nip": "19870828 202203 1 005", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Regina Seran, S.Si., M.Si.", "nip": "19890118 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Martha Veronika Christina Soru, S.Si.", "nip": "19910328 202203 2 011", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Ikka Dinamika Otta Lado, S.Si.", "nip": "19920514 202203 2 006", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Mohammad Tryadi Djahilape, S.Si.", "nip": "19960624 202203 1 008", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Sance Thersia Olla, S.Si.", "nip": "19970904 202203 2 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Say Grace Mbeo, S.Si.", "nip": "19970924 202203 1 013", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor 132 Tahun 2026 Tanggal 18 Februari 2026"}, {"nama": "Lukas Lia Donny Mukin, S.Si.", "nip": "19980228 202203 1 007", "jabatan": "Penera Ahli Pertama", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "-"}, {"nama": "Dominikus Do Lalu", "nip": "19830313 200801 1 010", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor 2664 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Rusly Abdullah Alkatiri", "nip": "19840114 200801 1 002", "jabatan": "Penera Mahir", "pangkat": "Penata Muda Tingkat I / III/b", "sk": "Nomor 27 Tahun 2026 Tanggal 8 Januari 2026"}, {"nama": "Nikson Talan, A.Md.", "nip": "19860715 202203 1 002", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Felisitus Penama Lengari, A.Md.", "nip": "19870307 202203 1 003", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Yohanes Wolang Wada, A.Md.", "nip": "19880615 202203 1 007", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Mark Gideon Bire, A.Md.", "nip": "19891126 202203 1 001", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Irene Frisilia, A.Md.", "nip": "19931117 202203 2 011", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Yuda Pambudi, A.Md.T.", "nip": "19970714 202203 1 009", "jabatan": "Penera Terampil", "pangkat": "Pengatur Tingkat I / II/d", "sk": "Nomor 2630 Tahun 2025 Tanggal 30 Oktober 2025"}, {"nama": "Lorena Ohar, S.STP.", "nip": "19800508 200003 2 001", "jabatan": "Analis SDM Aparatur Ahli Muda", "pangkat": "Penata Tingkat I / III/d", "sk": "-"}, {"nama": "Djefri Wety Hadjo", "nip": "19820306 200901 1 012", "jabatan": "Pengadministrasi", "pangkat": "Pengatur Tingkat I / II/d", "sk": "-"}, {"nama": "Denros Squart Milko Ludji", "nip": "19800909 202521 1 032", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}, {"nama": "Beci Karolina Lada", "nip": "19800112 202521 2 014", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}, {"nama": "Melky Erly Lazarino Seubelan, S.E.", "nip": "19780708 202521 1 019", "jabatan": "Pengadministrasi", "pangkat": "-", "sk": "-"}];
 
@@ -723,6 +750,10 @@ let uttpCount = 0;
 function addUttp(prefill){
   uttpCount++;
   const id = uttpCount;
+  const p = prefill || {};
+  const knownJenis = p.jenis && JENIS_UTTP_LIST.includes(p.jenis);
+  const jenisSelVal = p.jenis ? (knownJenis ? p.jenis : '__manual__') : '';
+  const jenisManualVal = (p.jenis && !knownJenis) ? p.jenis : '';
   const wrap = document.createElement('div');
   wrap.className = 'item-card';
   wrap.id = 'uttp-' + id;
@@ -732,30 +763,30 @@ function addUttp(prefill){
     <div class="row">
       <div>
         <label>Jenis UTTP</label>
-        <select id="utJenis-${id}" class="uttp-jenis-select" onchange="onUttpJenisChange(${id})">${jenisUttpOptionsHtml()}</select>
-        <input type="text" id="utJenisManual-${id}" placeholder="Ketik jenis UTTP lain" style="display:none; margin-top:6px;">
+        <select id="utJenis-${id}" class="uttp-jenis-select" onchange="onUttpJenisChange(${id})">${jenisUttpOptionsHtml(jenisSelVal)}</select>
+        <input type="text" id="utJenisManual-${id}" placeholder="Ketik jenis UTTP lain" style="display:${jenisSelVal==='__manual__'?'block':'none'}; margin-top:6px;" value="${escapeAttr(jenisManualVal)}">
       </div>
       <div>
         <label>Merek/Tipe</label>
-        <input type="text" id="utMerek-${id}" placeholder="Merek / Tipe">
+        <input type="text" id="utMerek-${id}" placeholder="Merek / Tipe" value="${escapeAttr(p.merek||'')}">
       </div>
     </div>
     <div class="row">
       <div>
         <label>Kapasitas</label>
-        <input type="text" id="utKapasitas-${id}" placeholder="Kapasitas alat">
+        <input type="text" id="utKapasitas-${id}" placeholder="Kapasitas alat" value="${escapeAttr(p.kapasitas||'')}">
       </div>
       <div>
         <label>Nomor Seri</label>
-        <input type="text" id="utSeri-${id}" placeholder="Nomor seri alat">
+        <input type="text" id="utSeri-${id}" placeholder="Nomor seri alat" value="${escapeAttr(p.seri||'')}">
       </div>
     </div>
     <label>Lokasi</label>
-    <input type="text" id="utLokasi-${id}" placeholder="SPBU 54.865.02, dsb.">
+    <input type="text" id="utLokasi-${id}" placeholder="SPBU 54.865.02, dsb." value="${escapeAttr(p.lokasi||'')}">
     <label>Pemilik</label>
-    <input type="text" id="utPemilik-${id}" placeholder="Nama pemilik / badan usaha">
+    <input type="text" id="utPemilik-${id}" placeholder="Nama pemilik / badan usaha" value="${escapeAttr(p.pemilik||'')}">
     <label>Alamat</label>
-    <input type="text" id="utAlamat-${id}" placeholder="Alamat pemilik / lokasi UTTP">
+    <input type="text" id="utAlamat-${id}" placeholder="Alamat pemilik / lokasi UTTP" value="${escapeAttr(p.alamat||'')}">
     <button type="button" class="btn-cerapan" onclick="openCerapanPicker(${id})">&#8681; Ambil Data Cerapan</button>
   `;
   document.getElementById('uttpList').appendChild(wrap);
@@ -1013,9 +1044,13 @@ function closeCerapanModal(){
 
 // ===== Saksi-saksi (dynamic list) =====
 let saksiCount = 0;
-function addSaksi(prefillName){
+function addSaksi(prefill){
   saksiCount++;
   const id = saksiCount;
+  const p = typeof prefill === 'string' ? { nama: prefill } : (prefill || {});
+  const knownNama = p.nama && MASTER_PETUGAS.some(m => m.nama === p.nama);
+  const namaSelVal = p.nama ? (knownNama ? p.nama : '__manual__') : '';
+  const namaManualVal = (p.nama && !knownNama) ? p.nama : '';
   const wrap = document.createElement('div');
   wrap.className = 'item-card';
   wrap.id = 'saksi-' + id;
@@ -1023,10 +1058,15 @@ function addSaksi(prefillName){
     <div class="num">Saksi ${id}</div>
     <button type="button" class="remove-btn" onclick="removeSaksi(${id})">Hapus</button>
     <label>Nama</label>
-    <select id="skNama-${id}" class="officer-name-select" onchange="onSaksiNameChange(this, ${id})">${officerNameOptionsHtml()}</select>
-    <input type="text" id="skNamaManual-${id}" placeholder="Ketik nama, gelar" style="display:none; margin-top:6px;">
+    <select id="skNama-${id}" class="officer-name-select" onchange="onSaksiNameChange(this, ${id})">${(function(){
+      let opts = '<option value="">-- Pilih Petugas --</option>';
+      MASTER_PETUGAS.forEach(m => { opts += `<option value="${escapeAttr(m.nama)}"${m.nama===namaSelVal?' selected':''}>${escapeAttr(m.nama)}</option>`; });
+      opts += `<option value="__manual__"${namaSelVal==='__manual__'?' selected':''}>&#9998; Isi Manual (nama tidak ada di daftar)</option>`;
+      return opts;
+    })()}</select>
+    <input type="text" id="skNamaManual-${id}" placeholder="Ketik nama, gelar" style="display:${namaSelVal==='__manual__'?'block':'none'}; margin-top:6px;" value="${escapeAttr(namaManualVal)}">
     <label>NIP</label>
-    <input type="text" id="skNip-${id}" placeholder="19XXXXXX XXXXXX X XXX">
+    <input type="text" id="skNip-${id}" placeholder="19XXXXXX XXXXXX X XXX" value="${escapeAttr(p.nip||'')}">
   `;
   document.getElementById('saksiList').appendChild(wrap);
   renumberSaksi();
@@ -1246,6 +1286,239 @@ function renderSurat(){
     </div>
   `;
   document.getElementById('surat').innerHTML = html;
+}
+
+// ===== Simpan ke Riwayat (Google Sheet) =====
+let isSavingRiwayat = false;
+let lastRiwayatSnapshot = null; // string JSON data terakhir yang berhasil disimpan
+let lastRiwayatTime = 0;
+
+function simpanRiwayat(){
+  if(isSavingRiwayat) return; // cegah klik ganda saat masih proses kirim
+
+  renderSurat(); // pastikan pratinjau & data terbaru ter-sinkron
+
+  if(!RIWAYAT_WEBHOOK_URL){
+    alert('Belum diatur.\n\nUntuk mengaktifkan "Simpan ke Riwayat", isi dulu RIWAYAT_WEBHOOK_URL di dalam kode HTML ini dengan URL Web App Google Apps Script yang terhubung ke Google Sheet "Riwayat Berita Acara".');
+    return;
+  }
+
+  const noOrder = document.getElementById('noOrder').value;
+  const tglOrder = document.getElementById('tglOrder').value;
+  const noSPT = document.getElementById('noSPT').value;
+  const tglSPT = document.getElementById('tglSPT').value;
+  const hari = document.getElementById('hari').value;
+  const tglAngka = document.getElementById('tglAngka').value;
+  const bulan = document.getElementById('bulan').value;
+  const tahunAngka = document.getElementById('tahunAngka').value;
+  const pukul = document.getElementById('pukul').value;
+
+  let pbNamaSel = document.getElementById('pbNama').value;
+  if(pbNamaSel === '__manual__') pbNamaSel = document.getElementById('pbNamaManual').value;
+  const pbNip = document.getElementById('pbNip').value;
+  const pbPangkat = document.getElementById('pbPangkat').value;
+  const pbJabatan = document.getElementById('pbJabatan').value;
+  const pbKantor = document.getElementById('pbKantor').value;
+  const pbAlamat = document.getElementById('pbAlamat').value;
+
+  const uttpData = collectUttp();
+  const uttpDetail = uttpData.map((u, i) =>
+    `${i+1}) ${u.jenis} | ${u.merek} | ${u.kapasitas} | SN:${u.seri} | ${u.lokasi} | Pemilik:${u.pemilik} (${u.alamat})`
+  ).join('  ||  ');
+
+  const dasarHukum = document.getElementById('dasarHukum').value;
+  const hasil = document.querySelector('input[name=hasil]:checked').value;
+  const hasilText = hasil === 'sah' ? 'SAH' : 'BATAL';
+  const tahunSah = document.getElementById('tahunSah').value;
+  const pemilikSaksi = document.getElementById('pemilikSaksi').value;
+
+  const saksiData = collectSaksi();
+  const saksiDetail = saksiData.map((s, i) => `${i+1}) ${s.nama} (NIP. ${s.nip})`).join('  ||  ');
+
+  // Snapshot lengkap (dipakai juga untuk fitur "Muat dari Riwayat")
+  const snapshot = {
+    noOrder, tglOrder, noSPT, tglSPT,
+    hari, tglAngka, bulan, tahunAngka, pukul,
+    pbNamaSel, pbNip, pbPangkat, pbJabatan, pbKantor, pbAlamat,
+    uttpData,
+    dasarHukum, hasil, tahunSah, pemilikSaksi,
+    saksiData
+  };
+  const snapshotJson = JSON.stringify(snapshot);
+
+  // ----- Cegah pendobelan: data identik yang baru saja tersimpan -----
+  const sameAsLast = snapshotJson === lastRiwayatSnapshot && (Date.now() - lastRiwayatTime) < 5 * 60 * 1000;
+  if(sameAsLast){
+    const lanjut = confirm('Data ini sama persis dengan yang baru saja disimpan ke Riwayat beberapa saat lalu.\n\nSimpan lagi sebagai entri baru?');
+    if(!lanjut) return;
+  }
+
+  const row = [
+    new Date().toISOString(),
+    noOrder, tglOrder, noSPT, tglSPT,
+    hari, tglAngka, bulan, tahunAngka, pukul,
+    pbNamaSel, pbNip, pbPangkat, pbJabatan, pbKantor, pbAlamat,
+    uttpData.length, uttpDetail,
+    dasarHukum, hasilText, tahunSah,
+    pemilikSaksi, saksiDetail,
+    snapshotJson
+  ];
+
+  const btn = document.getElementById('btnSimpanRiwayat');
+  const btnLabelAsal = btn ? btn.textContent : '';
+  isSavingRiwayat = true;
+  if(btn){ btn.disabled = true; btn.textContent = 'Menyimpan...'; }
+
+  // Dikirim sebagai text/plain agar tidak memicu CORS preflight ke Apps Script.
+  fetch(RIWAYAT_WEBHOOK_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ row })
+  }).then(() => {
+    lastRiwayatSnapshot = snapshotJson;
+    lastRiwayatTime = Date.now();
+    alert('Data Berita Acara berhasil dikirim ke Riwayat (Google Sheet).');
+  }).catch((err) => {
+    console.error(err);
+    alert('Gagal mengirim ke Google Sheet. Periksa koneksi internet dan URL RIWAYAT_WEBHOOK_URL.');
+  }).finally(() => {
+    isSavingRiwayat = false;
+    if(btn){ btn.disabled = false; btn.textContent = btnLabelAsal; }
+  });
+}
+
+// ===== Muat dari Riwayat (Google Sheet: Riwayat Berita Acara) =====
+let riwayatRows = []; // hasil parse baris riwayat yang sedang ditampilkan
+
+function openRiwayatPicker(){
+  const overlay = document.getElementById('modalRiwayat');
+  const body = document.getElementById('riwayatModalBody');
+  overlay.classList.add('show');
+  body.innerHTML = '<div class="cerapan-status">Memuat riwayat...</div>';
+
+  const url = `https://docs.google.com/spreadsheets/d/${RIWAYAT_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${RIWAYAT_SHEET_GID}`;
+
+  fetch(url).then(r => {
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  }).then(text => {
+    const rows = parseCsvText(text).filter(r => r.length > 1 && r.some(v => (v||'').trim() !== ''));
+    const dataRows = rows.slice(1).filter(r => (r[0]||'').trim() !== ''); // lewati baris header
+
+    riwayatRows = dataRows.map(r => {
+      let snapshot = null;
+      try { snapshot = JSON.parse(r[r.length-1] || 'null'); } catch(e) { snapshot = null; }
+      return {
+        waktuSimpan: r[0] || '',
+        noOrder: r[1] || '',
+        noSPT: r[3] || '',
+        pbNama: r[10] || '',
+        jumlahUttp: r[16] || '',
+        hasil: r[19] || '',
+        snapshot
+      };
+    }).reverse(); // terbaru di atas
+    renderRiwayatModal();
+  }).catch(err => {
+    body.innerHTML = `<div class="cerapan-status">Gagal mengambil data riwayat (${escapeHtml(err.message)}).<br><br>
+      Pastikan spreadsheet "Riwayat Berita Acara" di-share dengan akses "Siapa saja yang memiliki link" (Anyone with the link) sebagai Viewer.</div>`;
+  });
+}
+
+function renderRiwayatModal(){
+  const body = document.getElementById('riwayatModalBody');
+  const searchVal = (document.getElementById('riwayatSearch')?.value || '').toLowerCase();
+  const filtered = riwayatRows.filter(row => {
+    if(!searchVal) return true;
+    return [row.noOrder, row.noSPT, row.pbNama, row.hasil].join(' ').toLowerCase().includes(searchVal);
+  });
+
+  const formatWaktu = (iso) => {
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return iso;
+    return d.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+  };
+
+  const tableRows = filtered.map((row) => {
+    const realIdx = riwayatRows.indexOf(row);
+    return `<tr onclick="selectRiwayatRow(${realIdx})">
+      <td>${escapeHtml(formatWaktu(row.waktuSimpan))}</td>
+      <td>${escapeHtml(row.noOrder)}</td>
+      <td>${escapeHtml(row.noSPT)}</td>
+      <td>${escapeHtml(row.pbNama)}</td>
+      <td>${escapeHtml(row.jumlahUttp)}</td>
+      <td>${escapeHtml(row.hasil)}</td>
+    </tr>`;
+  }).join('');
+
+  body.innerHTML = `
+    <input type="text" id="riwayatSearch" class="modal-search" placeholder="Cari No. Order / No. SPT / nama petugas / hasil..." value="${escapeAttr(document.getElementById('riwayatSearch')?.value || '')}" oninput="renderRiwayatModal()">
+    <div class="cerapan-status">${filtered.length} data ditemukan. Klik salah satu baris untuk memuat datanya ke formulir.</div>
+    <table class="cerapan-table">
+      <thead><tr><th>Waktu Simpan</th><th>No. Order</th><th>No. SPT</th><th>Pegawai Berhak</th><th>Jml UTTP</th><th>Hasil</th></tr></thead>
+      <tbody>${tableRows || '<tr><td colspan="6">Tidak ada data cocok.</td></tr>'}</tbody>
+    </table>
+  `;
+  const searchInput = document.getElementById('riwayatSearch');
+  if(searchInput){
+    searchInput.focus();
+    const v = searchInput.value; searchInput.value=''; searchInput.value = v; // taruh kursor di akhir
+  }
+}
+
+function selectRiwayatRow(idx){
+  const row = riwayatRows[idx];
+  if(!row || !row.snapshot){
+    alert('Data riwayat ini tidak lengkap / tidak bisa dimuat otomatis.');
+    return;
+  }
+  const s = row.snapshot;
+
+  document.getElementById('noOrder').value = s.noOrder || '';
+  document.getElementById('tglOrder').value = s.tglOrder || '';
+  document.getElementById('noSPT').value = s.noSPT || '';
+  document.getElementById('tglSPT').value = s.tglSPT || '';
+  document.getElementById('hari').value = s.hari || '';
+  document.getElementById('tglAngka').value = s.tglAngka || '';
+  document.getElementById('bulan').value = s.bulan || '';
+  document.getElementById('tahunAngka').value = s.tahunAngka || '';
+  document.getElementById('pukul').value = s.pukul || '';
+
+  const pbNamaSel = document.getElementById('pbNama');
+  const pbNamaManual = document.getElementById('pbNamaManual');
+  const knownPbNama = s.pbNamaSel && MASTER_PETUGAS.some(m => m.nama === s.pbNamaSel);
+  pbNamaSel.value = knownPbNama ? s.pbNamaSel : (s.pbNamaSel ? '__manual__' : '');
+  pbNamaManual.style.display = (!knownPbNama && s.pbNamaSel) ? 'block' : 'none';
+  pbNamaManual.value = (!knownPbNama && s.pbNamaSel) ? s.pbNamaSel : '';
+  document.getElementById('pbNip').value = s.pbNip || '';
+  document.getElementById('pbPangkat').value = s.pbPangkat || '';
+  document.getElementById('pbJabatan').value = s.pbJabatan || '';
+  document.getElementById('pbKantor').value = s.pbKantor || '';
+  document.getElementById('pbAlamat').value = s.pbAlamat || '';
+
+  document.getElementById('dasarHukum').value = s.dasarHukum || '';
+  const hasilRadio = document.querySelector(`input[name=hasil][value="${s.hasil==='batal'?'batal':'sah'}"]`);
+  if(hasilRadio) hasilRadio.checked = true;
+  document.getElementById('tahunSah').value = s.tahunSah || '';
+  document.getElementById('pemilikSaksi').value = s.pemilikSaksi || '';
+
+  document.getElementById('uttpList').innerHTML = '';
+  uttpCount = 0;
+  (s.uttpData || []).forEach(u => addUttp(u));
+  if(!(s.uttpData || []).length) addUttp();
+
+  document.getElementById('saksiList').innerHTML = '';
+  saksiCount = 0;
+  (s.saksiData || []).forEach(sk => addSaksi(sk));
+  if(!(s.saksiData || []).length) addSaksi();
+
+  closeRiwayatModal();
+  renderSurat();
+}
+
+function closeRiwayatModal(){
+  document.getElementById('modalRiwayat').classList.remove('show');
 }
 
 // initialize
