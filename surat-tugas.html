@@ -1028,10 +1028,11 @@ function renderSurat(){
   const kepadaMode = document.querySelector('input[name=kepadaMode]:checked').value;
   let officersHtml = '';
 
-  function officerFieldsHtml(i, nama, pangkat, nip, jabatan){
+  function officerFieldsHtml(i, nama, pangkat, nip, jabatan, total){
+    const idxHtml = (total > 1) ? `<div class="idx">${i + 1}.</div>` : '';
     return `
       <div class="officer-block">
-        <div class="idx">${i + 1}.</div>
+        ${idxHtml}
         <div class="fields">
           <div class="officer-field"><div class="flabel">Nama</div><div class="fcolon">:</div><div class="fval">${escapeHtml(nama)}</div></div>
           <div class="officer-field"><div class="flabel">Pangkat/golongan</div><div class="fcolon">:</div><div class="fval">${escapeHtml(pangkat)}</div></div>
@@ -1054,7 +1055,7 @@ function renderSurat(){
         const pangkat = document.getElementById('tofPangkat-' + oid).value;
         const nip = document.getElementById('tofNip-' + oid).value;
         const jabatan = document.getElementById('tofJabatan-' + oid).value;
-        membersHtml += officerFieldsHtml(i, nama, pangkat, nip, jabatan);
+        membersHtml += officerFieldsHtml(i, nama, pangkat, nip, jabatan, memberCards.length);
       });
       if(!membersHtml){
         membersHtml = '<div style="color:#a33;">Belum ada anggota ditambahkan.</div>';
@@ -1077,7 +1078,7 @@ function renderSurat(){
       const pangkat = document.getElementById('ofPangkat-' + id).value;
       const nip = document.getElementById('ofNip-' + id).value;
       const jabatan = document.getElementById('ofJabatan-' + id).value;
-      officersHtml += officerFieldsHtml(i, nama, pangkat, nip, jabatan);
+      officersHtml += officerFieldsHtml(i, nama, pangkat, nip, jabatan, officerCards.length);
     });
     if(!officersHtml){
       officersHtml = '<div style="color:#a33;">Belum ada petugas ditambahkan.</div>';
