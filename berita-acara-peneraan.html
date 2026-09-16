@@ -596,7 +596,7 @@
     <button class="btn-gold" onclick="renderSurat()">Buat Pratinjau Berita Acara</button>
     <button class="btn-outline" onclick="openRiwayatPicker()">&#8681; Muat dari Riwayat (Google Sheet)</button>
     <button class="btn-outline" id="btnSimpanRiwayat" onclick="simpanRiwayat()">Simpan ke Riwayat (Google Sheet)</button>
-    <button class="btn-print" onclick="window.print()">Cetak / Simpan sebagai PDF</button>
+    <button class="btn-print" onclick="cetakDanSimpan()">Cetak / Simpan sebagai PDF</button>
   </div>
 
   <div id="suratWrap">
@@ -1387,6 +1387,12 @@ function simpanRiwayat(){
     isSavingRiwayat = false;
     if(btn){ btn.disabled = false; btn.textContent = btnLabelAsal; }
   });
+}
+
+// ===== Tombol Cetak: sekaligus simpan ke Riwayat (Google Sheet) =====
+function cetakDanSimpan(){
+  simpanRiwayat(); // kirim data ke Google Sheet (berjalan di latar belakang)
+  window.print();  // langsung buka dialog cetak/simpan PDF
 }
 
 // ===== Muat dari Riwayat (Google Sheet: Riwayat Berita Acara) =====
