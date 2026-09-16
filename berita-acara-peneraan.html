@@ -409,9 +409,9 @@
     flex:1;
     min-width:150px;
   }
-  .ttd-col .role{ min-height:18px; font-weight:bold; }
+  .ttd-col .role{ min-height:40px; font-weight:bold; }
   .ttd-single{ margin-top:8px; }
-  .ttd-single .role{ min-height:18px; }
+  .ttd-single .role{ min-height:40px; }
   .ttd-single .space{ height:60px; }
   .ttd-single .name{ font-weight:bold; text-decoration:underline; }
   .saksi-entry{ margin-bottom:14px; }
@@ -421,6 +421,7 @@
   .saksi-space{ height:32px; }
   .ttd-col.pemilik-col{ text-align:center; }
   .ttd-col.pemilik-col .role{ text-align:left; }
+
 
   @media print{
     body{ background:#fff !important; }
@@ -1234,7 +1235,7 @@ function renderSurat(){
     </div>
 
     <div class="pembuka">
-      Pada hari ini ${escapeHtml(hari)}, tanggal ${tglKata} bulan ${escapeHtml(bulan)} tahun ${tahunKata} pukul ${escapeHtml(pukul)} waktu Indonesia Tengah.
+      Pada hari ini ${escapeHtml(hari)}, tanggal ${tglKata} bulan ${escapeHtml(bulan)} tahun ${tahunKata} pukul ${escapeHtml(pukul)} Waktu Indonesia Tengah.
     </div>
 
     <div class="info-row"><div class="label">Saya bernama</div><div class="colon">:</div><div class="content">${escapeHtml(pbNamaSel)}, ${escapeHtml(pbDasar)}</div></div>
