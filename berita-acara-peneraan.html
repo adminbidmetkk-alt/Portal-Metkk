@@ -452,6 +452,16 @@
     .ttd-single .space{ height:40px; }
     .saksi-entry{ margin-bottom:6px; }
     .saksi-space{ height:12px; }
+
+    /* Isi halaman sampai penuh: blok UTTP & kesimpulan boleh lanjut ke halaman
+       berikutnya (tidak dilempar utuh). Tiap baris tetap utuh, judul tidak
+       ditinggal sendirian, dan blok tanda tangan tetap satu kesatuan. */
+    .uttp-block{ break-inside:auto; page-break-inside:auto; }
+    .uttp-title{ break-after:avoid; page-break-after:avoid; }
+    .uttp-row{ break-inside:avoid; }
+    .uttp-title + .uttp-row + .uttp-row{ break-before:avoid; page-break-before:avoid; }
+    .uttp-row:last-child{ break-before:avoid; page-break-before:avoid; }
+    .kesimpulan{ break-inside:auto; page-break-inside:auto; orphans:2; widows:2; }
   }
 </style>
 </head>
