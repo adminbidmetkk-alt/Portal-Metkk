@@ -718,6 +718,10 @@
       <div class="circle">👥</div>
       <div class="label">SDM KEMETROLOGIAN</div>
     </a>
+    <a href="#" id="formAuditBtn" class="admin-node" title="FORM AUDIT INTERNAL">
+      <div class="circle">🔍</div>
+      <div class="label">FORM AUDIT INTERNAL</div>
+    </a>
     <a href="#" id="formatCerapanBtn" class="admin-node" title="FORM CERAPAN">
       <div class="circle">📝</div>
       <div class="label">FORM CERAPAN</div>
@@ -909,6 +913,99 @@
 
   <div class="table-wrap">
     <p style="padding:24px; text-align:center;">Fitur Laporan Kegiatan Lainnya sedang dalam pengembangan.</p>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="auditView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backAudit" class="back">← Kembali ke Layanan Pendukung</a>
+    <div class="eyebrow">Layanan Pendukung</div>
+    <h1>Form Audit <span>Internal</span></h1>
+  </div>
+
+  <div class="admin-grid">
+    <a href="#" id="auditItem1" class="admin-node" title="Audit Internal - Administrasi">
+      <div class="circle">🗃️</div>
+      <div class="label">Audit Internal - Administrasi</div>
+    </a>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="auditAdminView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backAudit1" class="back">← Kembali ke Form Audit Internal</a>
+    <div class="eyebrow">Form Audit Internal</div>
+    <h1>Audit Internal <span>Administrasi</span></h1>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr><th class="col-no">No</th><th>Judul Dokumen</th><th>Kode Formulir</th><th>Unduhan</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>Daftar Pertanyaan Audit Internal</td>
+          <td>-</td>
+          <td><a class="dl-link" href="pdf_audit/Daftar_Pertanyaan_Audit_Internal.docx" download>📄 Unduh Word</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>Struktur Organisasi dan Tata Kerja (SOTK) Dinas Perindag Kota Kupang</td>
+          <td>A.1</td>
+          <td><a class="dl-link" href="pdf_audit/A1_SOTK_Disperindag_Kota_Kupang.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">3</td>
+          <td>Dokumen DIPA Tahun 2026</td>
+          <td>C.2.a</td>
+          <td><span class="dl-na">Belum tersedia</span></td>
+        </tr>
+        <tr>
+          <td class="col-no">4</td>
+          <td>Formulir Surat Permohonan Tera dan Tera Ulang</td>
+          <td>C.2.b.2</td>
+          <td><span class="dl-na">Belum tersedia</span></td>
+        </tr>
+        <tr>
+          <td class="col-no">5</td>
+          <td>Formulir Undangan Tera dan Tera Ulang</td>
+          <td>C.2.b.3</td>
+          <td><a class="dl-link" href="pdf_audit/F.C.2-02.3_Formulir_Surat_Panggilan_Tera_dan_Tera_Ulang.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">6</td>
+          <td>Buku Register</td>
+          <td>C.2.b.4</td>
+          <td><a class="dl-link" href="pdf_audit/Form_Pendaftaran_UTTP_F4.pdf" target="_blank" rel="noopener">📄 Buka PDF</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">7</td>
+          <td>Formulir Bukti Order</td>
+          <td>C.2.b.5</td>
+          <td><span class="dl-na">Belum tersedia</span></td>
+        </tr>
+        <tr>
+          <td class="col-no">8</td>
+          <td>Surat Perintah Tugas</td>
+          <td>C.2.b.7</td>
+          <td><span class="dl-na">Belum tersedia</span></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <footer>
@@ -2417,6 +2514,8 @@
   const adminView = document.getElementById('adminView');
   const supportView = document.getElementById('supportView');
   const sdmView = document.getElementById('sdmView');
+  const auditView = document.getElementById('auditView');
+  const auditAdminView = document.getElementById('auditAdminView');
   const sdmDataView = document.getElementById('sdmDataView');
   const sdmPengalamanView = document.getElementById('sdmPengalamanView');
   const sdmPelatihanView = document.getElementById('sdmPelatihanView');
@@ -2442,7 +2541,7 @@
   const laporanLainnyaView = document.getElementById('laporanLainnyaView');
 
   const allViews = [
-    homeView, adminView, supportView, sdmView, sdmDataView, sdmPengalamanView, sdmPelatihanView, sdmUraianView, aturanBaruView, syaratTeknisView, stSumlView, sopView, cerapanView, skhpView,
+    homeView, adminView, supportView, auditView, auditAdminView, sdmView, sdmDataView, sdmPengalamanView, sdmPelatihanView, sdmUraianView, aturanBaruView, syaratTeknisView, stSumlView, sopView, cerapanView, skhpView,
     agendaSuratView, statusLayananView, dokumenElektronikView, arsipView,
     ksoView, pksView, dokumenLainnyaView,
     laporanTugasView, laporanTeraView, laporanStuView, laporanPendampinganView, laporanPengawasanView, laporanLainnyaView
@@ -2475,6 +2574,23 @@
   document.getElementById('backBtn2').addEventListener('click', function(e){
     e.preventDefault();
     showView(homeView);
+  });
+
+  document.getElementById('formAuditBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(auditView);
+  });
+  document.getElementById('backAudit').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(supportView);
+  });
+  document.getElementById('auditItem1').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(auditAdminView);
+  });
+  document.getElementById('backAudit1').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(auditView);
   });
 
   document.getElementById('sdmBtn').addEventListener('click', function(e){
