@@ -932,9 +932,13 @@
   </div>
 
   <div class="admin-grid">
-    <a href="#" id="auditItem1" class="admin-node" title="Audit Internal">
+    <a href="#" id="auditItem1" class="admin-node" title="Audit Internal - Administrasi 2026">
       <div class="circle">🗃️</div>
-      <div class="label">Audit Internal</div>
+      <div class="label">Audit Internal - Administrasi 2026</div>
+    </a>
+    <a href="#" id="auditItem2" class="admin-node" title="Hasil Audit Internal">
+      <div class="circle">✅</div>
+      <div class="label">Hasil Audit Internal</div>
     </a>
   </div>
 
@@ -949,7 +953,7 @@
   <div class="admin-header">
     <a href="#" id="backAudit1" class="back">← Kembali ke Form Audit Internal</a>
     <div class="eyebrow">Form Audit Internal</div>
-    <h1>Audit <span>Internal</span></h1>
+    <h1>Audit Internal <span>- Administrasi 2026</span></h1>
   </div>
 
   <div class="table-wrap">
@@ -1149,6 +1153,40 @@
           <td>Melakukan Pelayanan TTU - Wajib Lapor melalui SIMPEL (Foto input SIMPEL)</td>
           <td>H.2</td>
           <td><a class="dl-link" href="foto_audit/Input_SIMPEL_TTU_Kios_Oktober_2026.jpeg" target="_blank" rel="noopener">🖼️ Buka Foto</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2026 Bidang Kemetrologian, Disperindag Kota Kupang — Portal MetKK
+  </footer>
+
+</div>
+
+<div id="auditHasilView" class="hidden">
+
+  <div class="admin-header">
+    <a href="#" id="backAudit2" class="back">← Kembali ke Form Audit Internal</a>
+    <div class="eyebrow">Form Audit Internal</div>
+    <h1>Hasil Audit Internal <span>Administrasi 2026</span></h1>
+  </div>
+
+  <div class="table-wrap">
+    <table class="syarat-table">
+      <thead>
+        <tr><th class="col-no">No</th><th>Nama Dokumen</th><th>Unduhan</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td>Daftar Hadir</td>
+          <td><a class="dl-link" href="pdf_audit/Daftar_Hadir_Audit_Internal_Administrasi_2026.pdf" target="_blank" rel="noopener">📄 Buka File</a></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td>Form Ketidaksesuaian</td>
+          <td><a class="dl-link" href="pdf_audit/Form_Ketidaksesuaian_Audit_Internal_Administrasi_2026.pdf" target="_blank" rel="noopener">📄 Buka File</a></td>
         </tr>
       </tbody>
     </table>
@@ -2674,6 +2712,7 @@
   const sdmView = document.getElementById('sdmView');
   const auditView = document.getElementById('auditView');
   const auditAdminView = document.getElementById('auditAdminView');
+  const auditHasilView = document.getElementById('auditHasilView');
   const sdmDataView = document.getElementById('sdmDataView');
   const sdmPengalamanView = document.getElementById('sdmPengalamanView');
   const sdmPelatihanView = document.getElementById('sdmPelatihanView');
@@ -2699,7 +2738,7 @@
   const laporanLainnyaView = document.getElementById('laporanLainnyaView');
 
   const allViews = [
-    homeView, adminView, supportView, auditView, auditAdminView, sdmView, sdmDataView, sdmPengalamanView, sdmPelatihanView, sdmUraianView, aturanBaruView, syaratTeknisView, stSumlView, sopView, cerapanView, skhpView,
+    homeView, adminView, supportView, auditView, auditAdminView, auditHasilView, sdmView, sdmDataView, sdmPengalamanView, sdmPelatihanView, sdmUraianView, aturanBaruView, syaratTeknisView, stSumlView, sopView, cerapanView, skhpView,
     agendaSuratView, statusLayananView, dokumenElektronikView, arsipView,
     ksoView, pksView, dokumenLainnyaView,
     laporanTugasView, laporanTeraView, laporanStuView, laporanPendampinganView, laporanPengawasanView, laporanLainnyaView
@@ -2747,6 +2786,14 @@
     showView(auditAdminView);
   });
   document.getElementById('backAudit1').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(auditView);
+  });
+  document.getElementById('auditItem2').addEventListener('click', function(e){
+    e.preventDefault();
+    showView(auditHasilView);
+  });
+  document.getElementById('backAudit2').addEventListener('click', function(e){
     e.preventDefault();
     showView(auditView);
   });
